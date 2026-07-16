@@ -10,6 +10,10 @@ This repository is the **open engine** (MIT). It is intentionally generic — yo
 bring the product (the game, the vote, the checklist, the light show) and build
 it on top.
 
+**Want to see it work in 2 minutes, with no credit card?** Open
+[`examples/snap-pair-lite.html`](./examples/) — a one-file tic-tac-toe two
+phones can play by scanning a QR code, running on the free Firebase Spark plan.
+
 ---
 
 ## For everyone (non-engineers)

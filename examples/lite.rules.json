@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['code'])",
+        "code": {
+          ".validate": "newData.isString() && newData.val().length <= 6"
+        },
+        "players": {
+          "$pid": {
+            "id": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "mark": { ".validate": "newData.isString() && newData.val().length <= 1" }
+          }
+        },
+        "$other": { ".validate": true }
+      }
+    }
+  }
+}

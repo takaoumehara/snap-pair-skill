@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>snap-pair Lite — Tic-Tac-Toe</title>
+<!--
+  snap-pair Lite — one-file, no-build, no-credit-card multi-device demo.
+
+  Two phones (or a phone + a laptop) join the same room by QR code or a
+  6-character code, then play tic-tac-toe in real time. Everything runs
+  directly against Firebase Realtime Database from the browser — NO Cloud
+  Functions — so it works on the FREE Firebase "Spark" plan with NO credit card.
+
+  ── HOW TO USE ──────────────────────────────────────────────────────────────
+  1. Create a free Firebase project (no card needed): https://console.firebase.google.com
+  2. In the project, enable Realtime Database (start in test mode for now).
+  3. Project settings → your web app → copy the config values.
+  4. Paste them into FIREBASE_CONFIG below.
+  5. Open this file in a browser (or host it on Vercel / Firebase Hosting).
+  That's it. Send the link (or QR) to a friend and play.
+
+  ── WORKSHOP MODE ────────────────────────────────────────────────────────────
+  A workshop host can pre-fill FIREBASE_CONFIG with their own Spark project so
+  kids just open the file and play — zero Firebase setup. The config values
+  (apiKey etc.) are meant to be public (they ship in every web app), so it is
+  safe to share them. The only limit: Spark allows 100 simultaneous
+  connections, shared across everyone using that project.
+
+  ── SECURITY (READ THIS) ─────────────────────────────────────────────────────
+  This is "Lite mode": the browser writes to the database directly and the
+  rules are wide open, so anyone who has a room code can change that room's
+  data. That is totally fine for tic-tac-toe, drawing, party games, and
+  learning. Do NOT use Lite mode for payments, private data, or large public
+  events. For that, use the server-assisted "Secure mode" in snap-pair-core.
+  ─────────────────────────────────────────────────────────────────────────────
+-->
+<style>
+  :root {
+    --bg: #0f1220; --card: #1a1f36; --ink: #f4f6ff; --muted: #9aa3c7;
+    --accent: #6c7bff; --o: #4ecdc4; --x: #ff6b6b; --line: #2a2f52;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 20px; min-height: 100%;
+  }
+  .wrap { width: 100%; max-width: 420px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+    padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .3px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; line-height: 1.5; }
+  button {
+    font: inherit; cursor: pointer; border: none; border-radius: 12px;
+    padding: 14px 18px; width: 100%; color: var(--ink); background: var(--accent);
+    font-weight: 600; transition: transform .05s ease, opacity .2s;
+  }
+  button:active { transform: scale(.98); }
+  button.secondary { background: #262c4d; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 10px; margin-top: 12px; }
+  .row > * { flex: 1; }
+  input {
+    font: inherit; width: 100%; padding: 14px; border-radius: 12px; text-align: center;
+    background: #10152e; border: 1px solid var(--line); color: var(--ink);
+    text-transform: uppercase; letter-spacing: 4px; font-size: 20px;
+  }
+  .code {
+    font-size: 34px; font-weight: 800; letter-spacing: 8px; text-align: center;
+    margin: 10px 0; color: var(--accent);
+  }
+  .qr { display: flex; justify-content: center; margin: 16px 0; }
+  .qr img { border-radius: 12px; background: #fff; padding: 10px; }
+  .status { text-align: center; color: var(--muted); font-size: 14px; margin: 14px 0; min-height: 20px; }
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .cell {
+    aspect-ratio: 1; border-radius: 14px; background: #10152e; border: 1px solid var(--line);
+    font-size: 46px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; user-select: none;
+  }
+  .cell.O { color: var(--o); } .cell.X { color: var(--x); }
+  .hidden { display: none !important; }
+  .center { text-align: center; }
+  .mark { font-weight: 800; }
+  .mark.O { color: var(--o); } .mark.X { color: var(--x); }
+  .warn { background:#2a1330; border:1px solid #5a2a4a; color:#ffc0e0; font-size:12px;
+          border-radius:10px; padding:10px 12px; margin-top:16px; line-height:1.5; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>snap-pair Lite · Tic-Tac-Toe</h1>
+    <p class="sub">Two devices, one room. Join by QR code or 6-character code and play in real time — no app, no server code, no credit card.</p>
+
+    <!-- CONFIG-MISSING notice -->
+    <div id="needsConfig" class="warn hidden">
+      ⚠️ Firebase is not configured yet. Open this file and paste your Firebase
+      config into <b>FIREBASE_CONFIG</b> (see the comment at the top). For local
+      testing without a project, run the Firebase Emulator and set
+      <b>USE_EMULATOR = true</b>.
+    </div>
+
+    <!-- HOME -->
+    <div id="home">
+      <button id="btnCreate">Create a room</button>
+      <div class="row">
+        <input id="joinCode" maxlength="6" placeholder="CODE" />
+        <button id="btnJoin" class="secondary" style="flex:0 0 40%">Join</button>
+      </div>
+    </div>
+
+    <!-- LOBBY (host waiting) -->
+    <div id="lobby" class="hidden center">
+      <div class="sub">Share this code or QR to invite one player:</div>
+      <div class="code" id="lobbyCode">------</div>
+      <div class="qr" id="qr"></div>
+      <div class="status" id="lobbyStatus">Waiting for another player…</div>
+      <button class="secondary" id="btnLeaveLobby">Cancel</button>
+    </div>
+
+    <!-- GAME -->
+    <div id="game" class="hidden">
+      <div class="status" id="gameStatus"></div>
+      <div class="board" id="board"></div>
+      <div class="row">
+        <button id="btnRematch" class="secondary hidden">Play again</button>
+        <button id="btnLeave" class="secondary">Leave</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase JS SDK via CDN (no build step) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import {
+  getDatabase, ref, get, set, update, onValue, onDisconnect,
+  serverTimestamp, connectDatabaseEmulator
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
+
+/* ─────────────────────────────────────────────────────────────
+   1. CONFIG — paste your Firebase project config here.
+   These values are safe to make public (they ship in every web app).
+   ───────────────────────────────────────────────────────────── */
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT.firebaseapp.com",
+  databaseURL: "https://PASTE_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "PASTE_PROJECT",
+  appId: "PASTE_APP_ID"
+};
+
+// For local testing with the Firebase Emulator (no project, no card): set true.
+const USE_EMULATOR = false;
+const EMULATOR_HOST = "127.0.0.1";
+const EMULATOR_PORT = 9000;
+
+/* ─────────────────────────────────────────────────────────────
+   2. Boot
+   ───────────────────────────────────────────────────────────── */
+const isConfigured = USE_EMULATOR || (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "PASTE_API_KEY");
+const $ = (id) => document.getElementById(id);
+
+let db = null;
+if (isConfigured) {
+  const app = initializeApp(FIREBASE_CONFIG);
+  db = getDatabase(app);
+  if (USE_EMULATOR) connectDatabaseEmulator(db, EMULATOR_HOST, EMULATOR_PORT);
+} else {
+  $("needsConfig").classList.remove("hidden");
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. Pairing helpers (client-direct RTDB — no Cloud Functions)
+   ───────────────────────────────────────────────────────────── */
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // font-safe, no 0/O/1/I
+const myId = "p_" + Math.random().toString(36).slice(2, 10);
+
+function generateCode() {
+  let c = "";
+  for (let i = 0; i < 6; i++) c += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+  return c;
+}
+const normalize = (s) => (s || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+const roomRef = (code) => ref(db, "rooms/" + code);
+
+let currentCode = null;
+let myMark = null;       // 'O' (host) or 'X' (guest)
+let unsub = null;        // onValue unsubscribe
+let latestRoom = null;
+
+/* ─────────────────────────────────────────────────────────────
+   4. Game (tic-tac-toe) pure logic
+   ───────────────────────────────────────────────────────────── */
+const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function winner(board) {
+  for (const [a,b,c] of LINES) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+  }
+  return board.every(Boolean) ? "draw" : null;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. Create / Join
+   ───────────────────────────────────────────────────────────── */
+async function createRoom() {
+  if (!db) return;
+  let code = generateCode();
+  // avoid collision
+  for (let tries = 0; tries < 5; tries++) {
+    const snap = await get(roomRef(code));
+    if (!snap.exists()) break;
+    code = generateCode();
+  }
+  const now = Date.now();
+  const room = {
+    code, status: "waiting", createdAt: now, updatedAt: now,
+    players: { [myId]: { id: myId, mark: "O", connected: true } },
+    board: Array(9).fill(""), turn: "O"
+  };
+  await set(roomRef(code), room);
+  myMark = "O";
+  enterRoom(code);
+  showLobby(code);
+}
+
+async function joinRoom(rawCode) {
+  if (!db) return;
+  const code = normalize(rawCode);
+  if (code.length !== 6) { setStatus("Enter a 6-character code.", "lobbyStatus"); return; }
+  const snap = await get(roomRef(code));
+  if (!snap.exists()) { alert("Room not found."); return; }
+  const room = snap.val();
+  const players = room.players || {};
+  const already = players[myId];
+  const count = Object.keys(players).length;
+
+  if (!already) {
+    if (count >= 2) { alert("This room is already full."); return; }
+    await update(roomRef(code), {
+      ["players/" + myId]: { id: myId, mark: "X", connected: true },
+      status: "playing",
+      updatedAt: serverTimestamp()
+    });
+    myMark = "X";
+  } else {
+    myMark = already.mark;
+    await update(roomRef(code), { ["players/" + myId + "/connected"]: true, updatedAt: serverTimestamp() });
+  }
+  enterRoom(code);
+}
+
+function enterRoom(code) {
+  currentCode = code;
+  // presence: mark me disconnected if the tab closes
+  const meConn = ref(db, "rooms/" + code + "/players/" + myId + "/connected");
+  onDisconnect(meConn).set(false);
+  // subscribe to room
+  if (unsub) unsub();
+  unsub = onValue(roomRef(code), (snap) => {
+    latestRoom = snap.val();
+    render();
+  });
+}
+
+async function leave() {
+  if (currentCode && db) {
+    try { await update(roomRef(currentCode), { ["players/" + myId + "/connected"]: false, updatedAt: serverTimestamp() }); } catch {}
+  }
+  if (unsub) { unsub(); unsub = null; }
+  currentCode = null; myMark = null; latestRoom = null;
+  showHome();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. Moves
+   ───────────────────────────────────────────────────────────── */
+async function playCell(i) {
+  const room = latestRoom;
+  if (!room || room.status === "finished") return;
+  const board = room.board || Array(9).fill("");
+  if (board[i]) return;                 // taken
+  if (room.turn !== myMark) return;     // not my turn
+  if (Object.keys(room.players || {}).length < 2) return; // wait for opponent
+
+  board[i] = myMark;
+  const w = winner(board);
+  await update(roomRef(currentCode), {
+    board,
+    turn: myMark === "O" ? "X" : "O",
+    status: w ? "finished" : "playing",
+    result: w || null,
+    updatedAt: serverTimestamp()
+  });
+}
+
+async function rematch() {
+  await update(roomRef(currentCode), {
+    board: Array(9).fill(""), turn: "O", status: "playing", result: null, updatedAt: serverTimestamp()
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. Rendering
+   ───────────────────────────────────────────────────────────── */
+function show(id) { ["home","lobby","game"].forEach(s => $(s).classList.toggle("hidden", s !== id)); }
+function showHome() { show("home"); $("joinCode").value = ""; }
+function showLobby(code) {
+  show("lobby");
+  $("lobbyCode").textContent = code;
+  const url = location.origin + location.pathname + "?room=" + code;
+  const api = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(url);
+  $("qr").innerHTML = '<img alt="QR to join" src="' + api + '" width="180" height="180" />';
+}
+function setStatus(text, id) { $(id).textContent = text; }
+
+function render() {
+  const room = latestRoom;
+  if (!room) return;
+  const count = Object.keys(room.players || {}).length;
+
+  // still waiting → lobby
+  if (room.status === "waiting" || count < 2) {
+    if (myMark === "O") { show("lobby"); setStatus("Waiting for another player…", "lobbyStatus"); }
+    return;
+  }
+
+  // playing / finished → game
+  show("game");
+  const board = room.board || Array(9).fill("");
+  const boardEl = $("board");
+  boardEl.innerHTML = "";
+  board.forEach((v, i) => {
+    const cell = document.createElement("div");
+    cell.className = "cell" + (v ? " " + v : "");
+    cell.textContent = v;
+    cell.onclick = () => playCell(i);
+    boardEl.appendChild(cell);
+  });
+
+  const youAre = '<span class="mark ' + myMark + '">' + myMark + '</span>';
+  if (room.status === "finished") {
+    let msg;
+    if (room.result === "draw") msg = "It's a draw.";
+    else msg = (room.result === myMark) ? "🎉 You win!" : "You lose.";
+    $("gameStatus").innerHTML = msg + " · You are " + youAre;
+    $("btnRematch").classList.remove("hidden");
+  } else {
+    const yourTurn = room.turn === myMark;
+    $("gameStatus").innerHTML = (yourTurn ? "Your turn" : "Opponent's turn") + " · You are " + youAre;
+    $("btnRematch").classList.add("hidden");
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. Wire up + deep-link (?room=CODE from a scanned QR)
+   ───────────────────────────────────────────────────────────── */
+$("btnCreate").onclick = createRoom;
+$("btnJoin").onclick = () => joinRoom($("joinCode").value);
+$("btnLeave").onclick = leave;
+$("btnLeaveLobby").onclick = leave;
+$("btnRematch").onclick = rematch;
+$("joinCode").addEventListener("keydown", (e) => { if (e.key === "Enter") joinRoom(e.target.value); });
+
+if (isConfigured) {
+  const params = new URLSearchParams(location.search);
+  const room = normalize(params.get("room"));
+  if (room.length === 6) joinRoom(room);
+}
+</script>
+</body>
+</html>
