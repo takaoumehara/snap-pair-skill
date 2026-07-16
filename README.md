@@ -1,36 +1,88 @@
 # snap-pair-core
 
-Pair browsers with a QR code or a six-character code, then share lightweight
-realtime state across every device in the room. React hook on the client,
-Firebase Auth + Cloud Functions + Realtime Database on the server.
+**English** · [日本語](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-core/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-core/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ko.md)
 
-- **No app install.** Guests open a link or scan a code in the browser.
-- **2–300 devices per room**, with presence and sub-second shared state.
-- **Server-assisted by default.** A short code locates a room; it is never an
-  authorization credential. Cloud Functions validate the code, enforce
-  capacity, and admit the participant before the client can subscribe.
+Pair phones and browsers with a QR code or a six-character code, then share
+live state across every device in the room. No app install. React hook on the
+client; Firebase Auth + Cloud Functions + Realtime Database on the server.
 
-This repository is the open engine. It is intentionally generic: you bring the
-product (the game, the vote, the checklist, the activation) on top of it.
+This repository is the **open engine** (MIT). It is intentionally generic — you
+bring the product (the game, the vote, the checklist, the light show) and build
+it on top.
 
-## Try it free — no credit card, fully local
+---
 
-You do **not** need a paid Firebase plan to learn or build with snap-pair.
-The Firebase Emulator Suite runs Auth, Realtime Database, and Cloud Functions
-entirely on your machine.
+## For everyone (non-engineers)
 
-```bash
-npm install
-npm --prefix functions install
-npm --prefix functions run build
-npx firebase-tools emulators:start --only auth,database,functions
-```
+**What is this?**
+A way to make many people's phones join one shared screen instantly. Everyone
+scans a QR code (or types a short code) in their normal browser — no app to
+download — and their phones become part of one live, synchronized experience.
 
-Everything runs locally; no billing account is involved. A paid (Blaze) plan is
-only required later, when you deploy Cloud Functions to the public internet for
-real users.
+**Who is it for?**
+- People who run **events, venues, classes, streams, showrooms, or exhibitions**
+  and want the audience to participate with their own phones.
+- The **engineers and AI builders** who make those experiences for them.
 
-## Architecture
+**What can you build with it?**
+- Live voting, polls, and quizzes on a big screen
+- Group checklists and "everyone's ready" confirmations
+- Audience reactions, prediction games, collaborative drawing
+- A synchronized phone light show across a whole room
+- Any "one shared screen + many phones + instant result" moment
+
+**How do you use it (with an AI coding tool)?**
+You do **not** have to write the code yourself. Using an AI coding assistant
+(Claude Code, Cursor, Codex, and similar):
+
+1. Give the AI this repository and the [`SKILL.md`](./SKILL.md) file.
+2. Ask it, for example: *"Read snap-pair-core and SKILL.md, and build a live
+   trivia game where guests join by QR code and answer on their phones."*
+3. The AI generates the app for you, following the safe, server-assisted
+   design in SKILL.md.
+
+**One important step: Firebase setup.**
+At some point the AI will need you to connect a **Firebase** project (Google's
+service that runs the realtime backend). There are three ways to do this, and
+the right one depends on whether you just want to **learn/build privately** or
+**let other people actually use it**:
+
+| Your goal | Use | Credit card? | Can others join by URL? |
+|---|---|---|---|
+| Learn, experiment, let a child build & test | **Firebase Emulator** (runs on your computer) | **No card needed** | No — local only |
+| Let real people join from their own phones | **Firebase Blaze plan** | **Yes, a credit card is required** | Yes |
+
+- **Learning / building privately → Emulator.** It runs entirely on your own
+  computer, for free, with **no credit card**. Perfect for trying things and
+  for kids learning to build with AI. The only limit: it's local, so you can't
+  send other people a link.
+- **Going live with real guests → Blaze plan.** To publish the backend
+  (Cloud Functions) to the internet, Firebase requires the **Blaze
+  (pay-as-you-go) plan, which needs a credit card on file.** The free
+  allowance is large (about 2 million function calls per month are free), so a
+  small event usually costs nothing — but **the card is required to turn it
+  on.** Always set a budget alert in the Firebase console.
+- **Why is a card needed at all?** For safety, snap-pair checks room creation
+  and joining on the server (Cloud Functions), not in the browser. Firebase
+  does not allow Cloud Functions to be published on the free (Spark) plan — only
+  on Blaze. That's a Firebase rule, not a snap-pair limitation. If you don't
+  want to add a card, you can still do everything except share a public link by
+  using the Emulator.
+
+---
+
+## For engineers
+
+`snap-pair-core` is a React/Firebase Realtime Database foundation for
+temporarily pairing browsers via a QR or six-character code, with presence and
+lightweight shared state for rooms of up to 300 participants.
+
+Production is server-assisted. Firebase Auth identifies each browser, Cloud
+Functions create rooms and admit participants, and RTDB security rules let only
+admitted room members subscribe or update narrowly scoped fields. A short
+pairing code locates a room; it is **not** an authorization credential.
+
+### Architecture
 
 - **React 18 hook** (`src/hooks/useSnapPair.ts`): auth readiness, room
   subscription, own presence, scoped state updates, and leave behavior.
@@ -44,7 +96,7 @@ Room creation and joining go through the Admin SDK paths in `functions/`.
 Browsers cannot read pairing-code records, create rooms directly, or write
 membership/capacity records.
 
-## React usage
+### React usage
 
 ```ts
 import { getAuth } from 'firebase/auth';
@@ -81,7 +133,7 @@ schema or guarantee payload-size and write-rate limits. Every product must add
 state validation, payload limits, and client/server throttling appropriate to
 its data and traffic before production deployment.
 
-## Data layout
+### Data layout
 
 ```text
 pairingCodes/{code}                 # Admin SDK only
@@ -93,7 +145,42 @@ rooms/{roomId}/state
 rooms/{roomId}/joinState            # Admin SDK only
 ```
 
-## Deploy to a real Firebase project
+---
+
+## Firebase setup: three paths
+
+Choose based on whether you need a shareable URL and whether you can add a card.
+
+### 1. Emulator — free, no credit card, local only (best for learning)
+
+The Firebase Emulator Suite runs Auth, Realtime Database, and Cloud Functions
+entirely on your machine. No billing account, no card.
+
+```bash
+npm install
+npm --prefix functions install
+npm --prefix functions run build
+npx firebase-tools emulators:start --only auth,database,functions
+```
+
+Everything runs locally. You cannot give other people a public link from the
+emulator — it is for development and learning.
+
+### 2. Spark (free) plan — what it can and cannot do
+
+The Spark plan needs **no credit card**, serves a public site via Firebase
+Hosting, and allows Realtime Database with a hard cap of **100 simultaneous
+connections**. **However, Spark cannot deploy Cloud Functions** — and snap-pair
+relies on Cloud Functions for secure room creation and joining. So Spark alone
+is not enough to run the full server-assisted design publicly.
+
+### 3. Blaze (pay-as-you-go) plan — required to go live (credit card needed)
+
+To deploy Cloud Functions to the public internet, the project must be on the
+**Blaze plan, which requires a credit card / billing account.** Blaze keeps the
+free quotas (about **2,000,000 function invocations/month** free; RTDB up to
+200,000 simultaneous connections) and only bills beyond them, so a small event
+often costs nothing — but the card must be on file to enable it.
 
 ```bash
 npm --prefix functions run build
@@ -102,10 +189,13 @@ firebase deploy --only functions
 firebase deploy --only database
 ```
 
-Both callables enforce Firebase App Check. Configure an App Check debug token
-for local development against a real project, and never disable enforcement in
-the deployed callable. Safe release order: Functions first, then database
-rules, then the client.
+Both callables enforce Firebase App Check; configure a debug token for local
+development against a real project, and never disable enforcement in the
+deployed callable. **Set a budget alert** in Firebase console → Usage and
+billing. (Budget alerts notify but do not hard-cap charges; a hard cutoff needs
+a custom billing function.)
+
+---
 
 ## Verification
 
@@ -119,10 +209,10 @@ npm run test:rules-emulator
 
 ## AI agent skill
 
-[`SKILL.md`](./SKILL.md) lets an AI coding agent (Claude Code, Cursor, Codex,
-and others) generate a correct, server-assisted snap-pair integration for a new
-product. Copy it into your agent's skills directory. For a private-input,
-aggregate-reveal, commitment-threshold pattern, see
+[`SKILL.md`](./SKILL.md) lets an AI coding agent generate a correct,
+server-assisted snap-pair integration for a new product. Copy it into your
+agent's skills directory. For a private-input, aggregate-reveal,
+commitment-threshold pattern, see
 [`references/one-room-one-decision.md`](./references/one-room-one-decision.md).
 
 ## Payments
