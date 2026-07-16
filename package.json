@@ -1,0 +1,31 @@
+{
+  "name": "snap-pair-core",
+  "version": "1.0.0",
+  "description": "React and Firebase foundation for temporary multi-device pairing and shared state",
+  "license": "MIT",
+  "author": "Takao Umehara",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takaoumehara/snap-pair-core"
+  },
+  "main": "src/hooks/useSnapPair.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:rules-emulator": "npx --yes firebase-tools@15.23.0 emulators:exec --only database --project demo-snap-pair-rules-test \"vitest run database.rules.emulator.test.ts\""
+  },
+  "dependencies": {
+    "firebase": "^12.16.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.3.7",
+    "jsdom": "^26.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  }
+}

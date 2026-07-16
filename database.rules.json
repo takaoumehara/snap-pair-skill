@@ -1,0 +1,82 @@
+{
+  "rules": {
+    "pairingCodes": {
+      ".indexOn": ["expiresAt"],
+      "$code": {
+        ".read": false,
+        ".write": false
+      }
+    },
+    "roomMembers": {
+      "$roomId": {
+        "$uid": {
+          ".read": false,
+          ".write": false
+        }
+      }
+    },
+    "roomCreationLimits": {
+      "$uid": {
+        ".read": false,
+        ".write": false
+      }
+    },
+    "rooms": {
+      ".indexOn": ["meta/updatedAt"],
+      "$roomId": {
+        ".read": false,
+        ".write": false,
+        "meta": {
+          ".read": "auth != null && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+          ".write": false,
+          "status": {
+            ".write": "auth != null && root.child('roomMembers').child($roomId).child(auth.uid).val() === true && root.child('rooms').child($roomId).child('meta').child('hostId').val() === auth.uid",
+            ".validate": "newData.isString() && newData.val().matches(/^(waiting|playing|finished|abandoned)$/)"
+          },
+          "updatedAt": {
+            ".write": "auth != null && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+            ".validate": "newData.isNumber() && newData.val() >= now - 60000 && newData.val() <= now + 60000"
+          }
+        },
+        "players": {
+          ".read": "auth != null && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+          "$uid": {
+            ".write": false,
+            "id": {
+              ".write": false
+            },
+            "role": {
+              ".write": false
+            },
+            "joinedAt": {
+              ".write": false
+            },
+            "name": {
+              ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+            },
+            "connected": {
+              ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+              ".validate": "newData.isBoolean()"
+            },
+            "lastSeenAt": {
+              ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+              ".validate": "newData.isNumber() && newData.val() >= now - 60000 && newData.val() <= now + 60000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "state": {
+          ".read": "auth != null && root.child('roomMembers').child($roomId).child(auth.uid).val() === true",
+          ".write": "auth != null && root.child('roomMembers').child($roomId).child(auth.uid).val() === true"
+        },
+        "joinState": {
+          ".read": false,
+          ".write": false
+        }
+      }
+    }
+  }
+}
