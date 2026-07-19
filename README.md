@@ -54,24 +54,61 @@ the right one depends on whether you just want to **learn/build privately** or
 | Your goal | Use | Credit card? | Can others join by URL? |
 |---|---|---|---|
 | Learn, experiment, let a child build & test | **Firebase Emulator** (runs on your computer) | **No card needed** | No — local only |
-| Let real people join from their own phones | **Firebase Blaze plan** | **Yes, a credit card is required** | Yes |
+| Let people join a casual/playful thing (game, poll, board), free | **Client-direct on the free Spark plan** | **No card needed** | **Yes** |
+| Let real people join a **secure** app (private rooms, moderation, anti-cheat) | **Server-assisted on the Blaze plan** | **Yes, a credit card is required** | Yes |
 
-- **Learning / building privately → Emulator.** It runs entirely on your own
-  computer, for free, with **no credit card**. Perfect for trying things and
-  for kids learning to build with AI. The only limit: it's local, so you can't
-  send other people a link.
-- **Going live with real guests → Blaze plan.** To publish the backend
-  (Cloud Functions) to the internet, Firebase requires the **Blaze
-  (pay-as-you-go) plan, which needs a credit card on file.** The free
-  allowance is large (about 2 million function calls per month are free), so a
-  small event usually costs nothing — but **the card is required to turn it
-  on.** Always set a budget alert in the Firebase console.
-- **Why is a card needed at all?** For safety, snap-pair checks room creation
-  and joining on the server (Cloud Functions), not in the browser. Firebase
-  does not allow Cloud Functions to be published on the free (Spark) plan — only
-  on Blaze. That's a Firebase rule, not a snap-pair limitation. If you don't
-  want to add a card, you can still do everything except share a public link by
-  using the Emulator.
+There are **two designs**, and they need different plans. This is the single
+most misunderstood point:
+
+- **Client-direct (simple, playful) → free Spark plan, no card, and others CAN
+  join by URL.** The browser talks to the Realtime Database directly, with
+  **no Cloud Functions**. Since the thing that forces Blaze is Cloud Functions,
+  and this design has none, it runs entirely on the **free Spark plan** — a
+  public link and all. This is the ["workshop" pattern](./examples/): great for
+  games, votes, drawing boards, quizzes, buzzers, prototypes, and small
+  installations. The trade-off is that the room data is open (anyone with the
+  code can read/write it), so don't put secrets or money in it.
+- **Server-assisted (secure) → Blaze plan, card required.** When you need
+  private input, membership-gated rooms, moderation, or anti-peek, snap-pair
+  validates every room creation and join on the server (Cloud Functions).
+  **Firebase only lets Cloud Functions deploy on the paid Blaze plan**, which
+  needs a card on file. That's a Firebase rule, not a snap-pair limitation. The
+  free allowance is large (about 2 million function calls/month), so a small
+  event usually costs nothing — but the card is required to turn it on. Always
+  set a budget alert.
+- **Learning / building privately → Emulator.** Runs entirely on your own
+  computer, free, no card — but local only, so you can't send others a link.
+
+### Spark vs Blaze — plain-language comparison
+
+| | **Spark (free)** | **Blaze (pay-as-you-go)** |
+|---|---|---|
+| Credit card | Not needed | Required |
+| If you hit a limit | The product just pauses until next month — **you are never charged** | Only the overage is billed (Spark allowances stay free) |
+| Devices connected at once (per project) | **100** | up to 200,000 |
+| Realtime Database | 1 GB stored + 10 GB/month download, **free** | **No free RTDB allowance** — billed from the first byte (~$5/GB stored, ~$1/GB downloaded) |
+| Cloud Functions | **Not available** | Available (free monthly allowance) |
+
+- **Spark is right for most people:** personal, family, classroom, a small
+  booth/showroom, prototypes, "I never want a bill," and up to 100 devices at
+  once — using the client-direct design.
+- **Blaze is clearly better when:** more than ~100 devices connect at the same
+  time; you need Cloud Functions or any server-side logic; you need the secure /
+  membership-gated design; Functions must reach the outside internet. New
+  accounts get $300 credit and keep every Spark free allowance — but the card is
+  required to switch it on.
+- **Honest nuance:** for pure Realtime-Database use, **Spark is actually more
+  generous than Blaze** (Spark gives 1 GB / 10 GB free; Blaze bills RTDB from
+  zero). You move to Blaze for Cloud Functions or the 100-connection ceiling,
+  not because RTDB is cheaper there.
+
+### You don't need to share anyone's backend
+
+You can make your **own** free Spark project once and reuse it across every
+client-direct tool you build — private to your project, no card, impossible to
+bill. Create a project (stay on Spark), enable Realtime Database, publish open
+rules for your path, copy the web config, and use it. See the workshop examples
+in [`examples/`](./examples/) for the exact rules and client pattern.
 
 ---
 
