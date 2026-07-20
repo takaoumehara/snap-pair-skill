@@ -45,6 +45,23 @@ You do **not** have to write the code yourself. Using an AI coding assistant
 3. The AI generates the app for you, following the safe, server-assisted
    design in SKILL.md.
 
+**Optional one-time setup: let the AI configure Firebase for you too.**
+If your AI tool supports MCP (Claude Code, Cursor, and similar), two commands
+let the AI create the project, enable what it needs, and wire up your `.env` —
+instead of you clicking through the Firebase console by hand:
+
+```bash
+claude mcp add firebase -- npx -y firebase-tools@latest mcp
+claude mcp add snap-pair-provisioner -- npx -y snap-pair-provisioner
+```
+
+Then just ask the AI to build your app (step 2 above) — when it needs a
+Firebase project, it will use these tools instead of asking you to do it
+manually. The one thing that still needs a human click: `firebase login`
+(one-time Google sign-in in your browser — this can't be automated). See
+[`SKILL.md`](./SKILL.md#firebase-setup-mcp-automation-vs-manual) for the full
+breakdown of what's automatic and what stays manual.
+
 **One important step: Firebase setup.**
 At some point the AI will need you to connect a **Firebase** project (Google's
 service that runs the realtime backend). There are three ways to do this, and

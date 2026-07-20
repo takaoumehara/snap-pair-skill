@@ -28,6 +28,46 @@ Generate these pieces for production use:
 
 Use a client-only implementation only for local demos. For 30-300 simultaneous joins, server-side join logic is required.
 
+## Firebase Setup (MCP automation vs manual)
+
+Provision the backend before generating code. **The automated path (Google login → the AI configures Firebase for you) is the recommended default** — prefer it over hand-setup in the console. Fall back to manual only for the few steps that genuinely cannot be automated.
+
+**Step 0 — ask which Google account to use (you cannot infer this).** Before any login, ask the user for the **Google email address** of the account that owns (or should own) the Firebase project. The AI has no way to know which account or project is intended, so always ask. Example: "Which Google account (email) should I use for Firebase?"
+
+**Step 1 — detect what is available:**
+
+- Check for the CLI: `firebase --version`. If missing, install: `npm install -g firebase-tools`.
+- Check for a configured Firebase MCP server (e.g. `claude mcp list`). If missing, add it:
+  `claude mcp add firebase -- npx -y firebase-tools@latest mcp` (the old `experimental:mcp` subcommand is gone as of firebase-tools 15.x; plain `mcp` is current).
+- Also add `snap-pair-provisioner`, a thin companion MCP published from this repo's `tools/snap-pair-provisioner/`:
+  `claude mcp add snap-pair-provisioner -- npx -y snap-pair-provisioner` (no clone or build needed).
+
+**Step 2 — Google login (one-time, user-driven).** Run `firebase login` (optionally `firebase login --account <email>` to target the address from Step 0). This opens a browser for a one-time Google OAuth the user must approve; it cannot be scripted. On success the CLI prints e.g. `✔ Success! Added account you@example.com` — confirm that the account matches what the user gave in Step 0 before continuing. After this, the AI can drive setup automatically.
+
+**Split of responsibility between the two MCP servers (live-verified 2026-07-20):**
+
+| Task | Server | Notes |
+|---|---|---|
+| Create/select project, set active project | official Firebase MCP (`firebase_create_project`) | |
+| Deploy `database.rules.json` | official Firebase MCP (`firebase_deploy`) | |
+| Retrieve Web SDK config | official Firebase MCP (`firebase_get_sdk_config`) or `snap-pair-provisioner`'s `inject_env_variables` | provisioner also merge-writes it into `.env` |
+| Create the **default** RTDB instance | `snap-pair-provisioner`'s `enable_snap_pair_services` | Do NOT use `firebase database:instances:create` for the default instance — that CLI command only provisions *additional* instances and fails on a project with none. The tool uses the Firebase Management API (`POST firebasedatabase.googleapis.com/v1beta/projects/{id}/locations/{loc}/instances?databaseId=…` with `{"type":"DEFAULT_DATABASE"}`), which works on free Spark. |
+| Enable Anonymous Authentication | `snap-pair-provisioner`'s `enable_snap_pair_services` | See the 4th hard gate below — works only after the project's Auth config exists. |
+| Deploy Cloud Functions and Hosting | official Firebase MCP (`firebase_deploy`) | requires Blaze, see below |
+
+**These stay MANUAL even with both MCP servers (console/one-time, by design — do not claim you can automate them):**
+
+1. **`firebase login`** — one-time browser OAuth by the user.
+2. **Blaze (pay-as-you-go) upgrade — requires a credit card.** Cloud Functions in production need Blaze. Only the account owner can add billing in the console. Anonymous Auth + the default RTDB instance do NOT need Blaze (Spark is enough).
+3. **reCAPTCHA v3 site key** for App Check — created in the Firebase console / Google Cloud, then pasted into the client config.
+4. **First-time Auth initialization on a brand-new project.** A project that has never had Authentication touched has no Auth config yet; the Anonymous-Auth enable call returns `404 CONFIGURATION_NOT_FOUND` until the config exists. Initializing it via API requires Blaze; the free path is one manual click of "Get started" on the project's **Authentication** page in the console. Projects that have used Auth before don't hit this — only brand-new ones. `snap-pair-provisioner`'s `enable_snap_pair_services` detects the 404 and returns this instruction instead of a raw error; re-running the tool after the click succeeds (live-verified).
+
+**When neither MCP server is connected (fully manual fallback):**
+
+- Do the above in the Firebase console (create project → RTDB → paste rules → set up App Check with reCAPTCHA v3), or drive it with plain CLI commands (`firebase deploy --only database`, `--only functions`, `--only hosting`).
+
+For a zero-setup path with no project, no Cloud Functions, and no credit card (demos, workshops, prototypes), use the `snap-pair-workshop` skill instead — it embeds a shared backend and skips all of the above.
+
 ## Data Model
 
 Prefer this shape:

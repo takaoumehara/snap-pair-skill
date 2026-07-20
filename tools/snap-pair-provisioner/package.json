@@ -1,0 +1,32 @@
+{
+  "name": "snap-pair-provisioner",
+  "version": "0.1.0",
+  "description": "Local MCP server that provisions the Firebase backend (Anonymous Auth + default Realtime Database, plus .env injection) for snap-pair-core, alongside the official Firebase MCP server.",
+  "license": "MIT",
+  "author": "Takao Umehara",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takaoumehara/snap-pair-core",
+    "directory": "tools/snap-pair-provisioner"
+  },
+  "keywords": ["mcp", "model-context-protocol", "firebase", "snap-pair"],
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "bin": { "snap-pair-provisioner": "dist/index.js" },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build && npm test",
+    "test": "vitest run",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
