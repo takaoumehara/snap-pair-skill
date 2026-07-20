@@ -6,14 +6,26 @@
   "author": "Takao Umehara",
   "repository": {
     "type": "git",
-    "url": "https://github.com/takaoumehara/snap-pair-core",
+    "url": "git+https://github.com/takaoumehara/snap-pair-core.git",
     "directory": "tools/snap-pair-provisioner"
   },
-  "keywords": ["mcp", "model-context-protocol", "firebase", "snap-pair"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "firebase",
+    "snap-pair"
+  ],
   "type": "module",
-  "engines": { "node": ">=22" },
-  "bin": { "snap-pair-provisioner": "dist/index.js" },
-  "files": ["dist", "README.md"],
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "snap-pair-provisioner": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepublishOnly": "npm run build && npm test",
