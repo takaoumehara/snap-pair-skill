@@ -10,10 +10,6 @@ This repository is the **open engine** (MIT). It is intentionally generic — yo
 bring the product (the game, the vote, the checklist, the light show) and build
 it on top.
 
-**Want to see it work in 2 minutes, with no credit card?** Open
-[`examples/snap-pair-lite.html`](./examples/) — a one-file tic-tac-toe two
-phones can play by scanning a QR code, running on the free Firebase Spark plan.
-
 ---
 
 ## For everyone (non-engineers)
@@ -35,38 +31,98 @@ download — and their phones become part of one live, synchronized experience.
 - A synchronized phone light show across a whole room
 - Any "one shared screen + many phones + instant result" moment
 
-**How do you use it (with an AI coding tool)?**
-You do **not** have to write the code yourself. Using an AI coding assistant
-(Claude Code, Cursor, Codex, and similar):
+### What do you want to do? Pick one
 
-1. Give the AI this repository and the [`SKILL.md`](./SKILL.md) file.
-2. Ask it, for example: *"Read snap-pair-core and SKILL.md, and build a live
-   trivia game where guests join by QR code and answer on their phones."*
-3. The AI generates the app for you, following the safe, server-assisted
-   design in SKILL.md.
+There are three different ways to use this repository. **Pick the one that
+matches what you actually want right now** — don't do more than one, they're
+not steps of the same process, they're separate paths.
 
-**Optional one-time setup: let the AI configure Firebase for you too.**
-If your AI tool supports MCP (Claude Code, Cursor, and similar), two commands
-let the AI create the project, enable what it needs, and wire up your `.env` —
-instead of you clicking through the Firebase console by hand:
+| | **A. Just see it work** | **B. Have an AI build my own app** | **C. Work with the source code** |
+|---|---|---|---|
+| **For** | "I want to see it running in 2 minutes" | "I want a custom app, but I don't want to write or manage code myself" | "I'm an engineer, I want to read/modify the actual source, or contribute" |
+| **What you install** | Nothing | One AI coding tool (you probably already have it) | One AI coding tool **and** Git/Node.js familiarity |
+| **What you download** | One HTML file | **Nothing** — the AI connects directly, no repo download | The whole repository (`git clone` or ZIP) |
+| **Credit card needed?** | No | Depends on what you build — see the Firebase table below | Depends on what you build |
+| **Can you share a link with others?** | Yes (same room, same Wi-Fi/network) | Yes, once deployed | Yes, once deployed |
+| **Jump to** | [Path A](#path-a-just-see-it-work-2-minutes-no-setup) | [Path B](#path-b-have-an-ai-build-your-own-app-no-download-needed) | [Path C — "For engineers"](#for-engineers) |
 
-```bash
-claude mcp add firebase -- npx -y firebase-tools@latest mcp
-claude mcp add snap-pair-provisioner -- npx -y snap-pair-provisioner
+---
+
+### Path A: Just see it work (2 minutes, no setup)
+
+1. Download this one file: [`examples/snap-pair-lite.html`](./examples/snap-pair-lite.html)
+2. Open it in your browser (double-click it).
+3. Scan the QR code with a second phone or browser.
+
+That's it — no install, no account, no credit card. This is a fixed demo (a
+tic-tac-toe two phones can play), not a custom app — for that, go to Path B.
+
+---
+
+### Path B: Have an AI build your own app (no download needed)
+
+**This is the important part people usually get confused about:** you do
+**not** need to download this repository, clone it, or unzip anything for
+this path. Connecting to two small tools (called MCP servers) is enough —
+exactly like connecting to any other MCP server. The one extra thing beyond a
+normal MCP setup is telling the AI to read this project's build instructions
+directly from the web, so it knows the correct, safe way to build a snap-pair
+app.
+
+**What you need first:** one AI coding tool that can run commands and fetch
+web pages for you — Claude Code, Cursor, Codex, Gemini CLI, or similar. If you
+don't have one yet, see ["I don't have an AI coding tool yet"](#i-dont-have-an-ai-coding-tool-yet)
+below.
+
+**Step 1 — open a chat in your AI tool**, in any project folder (a brand-new
+empty folder is fine — this will become your app).
+
+**Step 2 — type this into the chat, as-is:**
+
+```
+Fetch https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+and use it as your build instructions.
+
+Connect these two MCP servers if they aren't connected yet:
+- firebase: npx -y firebase-tools@latest mcp
+- snap-pair-provisioner: npx -y snap-pair-provisioner
+
+Then help me build: [describe what you want — e.g. "a live quiz game where
+guests join by QR code and answer on their phones"].
 ```
 
-Then just ask the AI to build your app (step 2 above) — when it needs a
-Firebase project, it will use these tools instead of asking you to do it
-manually. The one thing that still needs a human click: `firebase login`
-(one-time Google sign-in in your browser — this can't be automated). See
-[`SKILL.md`](./SKILL.md#firebase-setup-mcp-automation-vs-manual) for the full
-breakdown of what's automatic and what stays manual.
+**Step 3 — answer the AI's questions as they come up.** It will typically ask:
+which Google account to use for Firebase, and at some point it will show you
+a one-time browser link to click to sign in to Firebase (this single click is
+the only manual step in the whole process — it cannot be automated, by design,
+for your account's safety).
 
-**One important step: Firebase setup.**
-At some point the AI will need you to connect a **Firebase** project (Google's
-service that runs the realtime backend). There are three ways to do this, and
-the right one depends on whether you just want to **learn/build privately** or
-**let other people actually use it**:
+If your AI tool cannot fetch web pages, ask it to say so — then fall back to
+downloading just the one `SKILL.md` file from this repository and pasting its
+contents into the chat instead of the fetch instruction above.
+
+#### I don't have an AI coding tool yet
+
+Pick **one** (you only need one):
+- **[Cursor](https://cursor.com)** — the simplest option: a full code editor
+  with AI chat built in. Download and install like any other app.
+- **Claude Code** — install the extension from the VS Code marketplace if you
+  already use VS Code, or the standalone CLI from
+  [claude.com/code](https://claude.com/code).
+- **Codex** or **Gemini CLI** — if you already use OpenAI or Google's coding
+  tools.
+
+Once installed, open it, open (or create) a folder for your project, and go to
+Step 1 above.
+
+---
+
+### Firebase setup: what it means for Path B
+
+At some point in Path B, the AI will need to connect a **Firebase** project
+(Google's service that runs the realtime backend). Which option applies
+depends on whether you want to **learn/build privately** or **let other
+people actually use it**:
 
 | Your goal | Use | Credit card? | Can others join by URL? |
 |---|---|---|---|
@@ -89,6 +145,22 @@ the right one depends on whether you just want to **learn/build privately** or
   on Blaze. That's a Firebase rule, not a snap-pair limitation. If you don't
   want to add a card, you can still do everything except share a public link by
   using the Emulator.
+
+The two MCP servers from Step 2 above create the project, enable what's
+needed, and write your `.env` for you — you don't click through the Firebase
+console by hand. See
+[`SKILL.md`](./SKILL.md#firebase-setup-mcp-automation-vs-manual) for the full
+breakdown of what's automatic and what stays a manual, one-time step.
+
+---
+
+### Path C: Work with the source code (engineers)
+
+This is for reading, modifying, or contributing to the actual source — see
+the **["For engineers"](#for-engineers)** section below. This path does
+involve downloading the repository (`git clone` or "Download ZIP" from
+GitHub), because you're working with the code itself, not just asking an AI
+to generate a new app from instructions.
 
 ---
 

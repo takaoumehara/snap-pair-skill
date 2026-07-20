@@ -24,15 +24,72 @@ Una forma de hacer que los teléfonos de muchas personas se unan instantáneamen
 - Un espectáculo de luces sincronizado con los teléfonos de toda la sala
 - Cualquier momento del tipo "una pantalla compartida + muchos teléfonos + resultado instantáneo"
 
-**¿Cómo se usa (con una herramienta de codificación con IA)?**
-No necesitas escribir tú mismo el código. Usando un asistente de codificación con IA (Claude Code, Cursor, Codex y similares):
+### ¿Qué quieres hacer? Elige uno
 
-1. Dale a la IA este repositorio y el archivo [`SKILL.md`](./SKILL.md).
-2. Pídele, por ejemplo: "Lee snap-pair-core y SKILL.md, y crea un juego de trivia en vivo donde los invitados se unan mediante un código QR y respondan desde sus teléfonos."
-3. La IA genera la aplicación por ti, siguiendo el diseño seguro y asistido por servidor descrito en SKILL.md.
+Hay tres formas distintas de usar este repositorio. **Elige la que coincida con lo que realmente quieres hacer ahora** — no son pasos de un mismo proceso, sino caminos separados. No hace falta hacer los tres.
 
-**Un paso importante: la configuración de Firebase.**
-En algún momento, la IA te pedirá que conectes un proyecto de **Firebase** (el servicio de Google que ejecuta el backend en tiempo real). Hay tres formas de hacerlo, y la adecuada depende de si solo quieres **aprender/construir en privado** o **dejar que otras personas lo usen de verdad**:
+| | **A. Solo quiero verlo funcionar** | **B. Que una IA me construya mi propia app** | **C. Trabajar con el código fuente** |
+|---|---|---|---|
+| **Para** | "Quiero verlo funcionando en 2 minutos" | "Quiero una app personalizada, pero no quiero escribir ni gestionar código" | "Soy ingeniero/a, quiero leer/modificar el código fuente o contribuir" |
+| **Qué instalas** | Nada | Una herramienta de codificación con IA (probablemente ya la tienes) | Una herramienta de codificación con IA **y** conocimientos de Git/Node.js |
+| **Qué descargas** | Un archivo HTML | **Nada** — la IA se conecta directamente, sin descargar el repositorio | Todo el repositorio (`git clone` o ZIP) |
+| **¿Necesitas tarjeta de crédito?** | No | Depende de lo que construyas — ver la tabla de Firebase más abajo | Depende de lo que construyas |
+| **¿Puedes compartir un enlace con otros?** | Sí (misma sala, misma red/Wi-Fi) | Sí, una vez desplegado | Sí, una vez desplegado |
+| **Más detalles** | "Camino A" a continuación | "Camino B" a continuación | Sección "Para ingenieros" más abajo |
+
+---
+
+### Camino A: Solo quiero verlo funcionar (2 minutos, sin configuración)
+
+1. Descarga este único archivo: [`examples/snap-pair-lite.html`](./examples/snap-pair-lite.html)
+2. Ábrelo en tu navegador (doble clic).
+3. Escanea el código QR con un segundo teléfono o navegador.
+
+Eso es todo — sin instalación, sin cuenta, sin tarjeta de crédito. Esto es una demo fija (un tres en raya que pueden jugar dos teléfonos), no una app personalizada — para eso, ve al Camino B.
+
+---
+
+### Camino B: Que una IA me construya mi propia app (sin necesidad de descargar nada)
+
+**Este es el punto que suele generar más confusión:** para este camino **no** necesitas descargar este repositorio, clonarlo ni descomprimir nada. Basta con conectarte a dos herramientas pequeñas (llamadas servidores MCP) — exactamente igual que conectarte a cualquier otro servidor MCP. Lo único distinto respecto a una conexión MCP normal es pedirle a la IA que lea las instrucciones de construcción de este proyecto directamente desde la web, para que sepa la forma correcta y segura de construir una app con snap-pair.
+
+**Lo primero que necesitas:** una herramienta de codificación con IA que pueda ejecutar comandos y obtener páginas web — Claude Code, Cursor, Codex, Gemini CLI o similar. Si aún no tienes ninguna, consulta ["Todavía no tengo una herramienta de codificación con IA"](#todavía-no-tengo-una-herramienta-de-codificación-con-ia) más abajo.
+
+**Paso 1 — abre un chat en tu herramienta de IA**, en cualquier carpeta de proyecto (una carpeta nueva y vacía está bien — esta se convertirá en tu app).
+
+**Paso 2 — escribe esto en el chat, tal cual:**
+
+```
+Obtén https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+y úsalo como tus instrucciones de construcción.
+
+Conéctate a estos dos servidores MCP si aún no están conectados:
+- firebase: npx -y firebase-tools@latest mcp
+- snap-pair-provisioner: npx -y snap-pair-provisioner
+
+Después, ayúdame a construir: [describe lo que quieres — p. ej. "un juego de
+trivia en vivo donde los invitados se unan mediante un código QR y respondan
+desde sus teléfonos"].
+```
+
+**Paso 3 — responde a las preguntas de la IA a medida que surjan.** Normalmente preguntará qué cuenta de Google usar para Firebase, y en algún momento te mostrará un enlace de un solo uso para iniciar sesión en Firebase desde tu navegador (este único clic es el único paso manual de todo el proceso — no puede automatizarse, por diseño, para proteger tu cuenta).
+
+Si tu herramienta de IA no puede obtener páginas web, pídele que te lo indique — y como alternativa, descarga solo el archivo `SKILL.md` de este repositorio y pega su contenido en el chat en lugar de la instrucción de obtención anterior.
+
+#### Todavía no tengo una herramienta de codificación con IA
+
+Elige **una** (solo necesitas una):
+- **[Cursor](https://cursor.com)** — la opción más sencilla: un editor de código completo con chat de IA integrado. Descárgalo e instálalo como cualquier otra app.
+- **Claude Code** — instala la extensión desde el marketplace de VS Code si ya usas VS Code, o el CLI independiente desde [claude.com/code](https://claude.com/code).
+- **Codex** o **Gemini CLI** — si ya usas las herramientas de codificación de OpenAI o Google.
+
+Una vez instalada, ábrela, abre (o crea) una carpeta para tu proyecto, y continúa con el Paso 1 anterior.
+
+---
+
+### Configuración de Firebase: qué significa para el Camino B
+
+En algún momento del Camino B, la IA necesitará conectar un proyecto de **Firebase** (el servicio de Google que ejecuta el backend en tiempo real). La opción adecuada depende de si quieres **aprender/construir en privado** o **dejar que otras personas lo usen de verdad**:
 
 | Tu objetivo | Usa | ¿Tarjeta de crédito? | ¿Pueden otros unirse por URL? |
 |---|---|---|---|
@@ -42,6 +99,14 @@ En algún momento, la IA te pedirá que conectes un proyecto de **Firebase** (el
 - **Aprender / construir en privado → Emulator.** Se ejecuta completamente en tu propia computadora, de forma gratuita y **sin necesidad de tarjeta de crédito**. Es perfecto para probar ideas y para que los niños aprendan a construir con IA. La única limitación: es local, así que no puedes enviarle un enlace a otra persona.
 - **Salir en vivo con invitados reales → Plan Blaze.** Para publicar el backend (Cloud Functions) en internet, Firebase exige el **plan Blaze (pago por uso), que requiere tener una tarjeta de crédito registrada.** El nivel gratuito es amplio (alrededor de 2 millones de llamadas a funciones al mes son gratuitas), así que un evento pequeño normalmente no cuesta nada —pero **se requiere la tarjeta para poder activarlo.** Configura siempre una alerta de presupuesto en la consola de Firebase.
 - **¿Por qué se necesita una tarjeta en primer lugar?** Por seguridad, snap-pair verifica la creación y el ingreso a las salas en el servidor (Cloud Functions), no en el navegador. Firebase no permite publicar Cloud Functions en el plan gratuito (Spark) —solo en el plan Blaze. Esa es una regla de Firebase, no una limitación de snap-pair. Si no quieres añadir una tarjeta, aun así puedes hacer todo excepto compartir un enlace público usando el Emulator.
+
+Los dos servidores MCP del Paso 2 anterior crean el proyecto, activan lo necesario y escriben tu `.env` por ti — no tienes que hacer clic manualmente en la consola de Firebase. Consulta [`SKILL.md`](./SKILL.md#firebase-setup-mcp-automation-vs-manual) para ver el desglose completo de qué se automatiza y qué sigue siendo un paso manual único.
+
+---
+
+### Camino C: Trabajar con el código fuente (ingenieros)
+
+Este camino es para leer, modificar o contribuir al código fuente real — consulta la sección **"Para ingenieros"** más abajo. Este camino sí implica descargar el repositorio (`git clone` o "Download ZIP" en GitHub), porque estás trabajando con el propio código, no simplemente pidiéndole a una IA que genere una app nueva a partir de instrucciones.
 
 ---
 
