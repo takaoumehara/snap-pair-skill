@@ -11,7 +11,13 @@ export {
   ROOM_CODE_ALPHABET,
   withTimeout,
 } from './core/utils';
-export { useSnapPair, type UseSnapPairOptions } from './core/useSnapPair';
+export {
+  useSnapPair,
+  type SnapPairApi,
+  type SnapPairTransportSource,
+  type UseSnapPairOptions,
+  type UseSnapPairTransportOptions,
+} from './core/useSnapPair';
 
 // Transports
 export { Transport } from './transports/base';
@@ -59,8 +65,16 @@ export {
   RTC_SIGNAL_TYPE,
   WebRTCTransport,
   type RtcSignal,
+  type WebRTCReconnectOptions,
   type WebRTCTransportOptions,
 } from './transports/webrtc';
+export {
+  DEFAULT_MAX_MESSAGE_BYTES,
+  DEFAULT_MAX_REASSEMBLED_BYTES,
+  Reassembler,
+  splitMessage,
+  type ReassemblerOptions,
+} from './transports/chunking';
 
 // Pairing
 export {
@@ -112,7 +126,67 @@ export {
 } from './client/orientation';
 
 // Components
-export { HostHUD, defaultHostHUDLabels, type HostHUDLabels, type HostHUDProps } from './components/HostHUD';
+export {
+  HostHUD,
+  defaultHostHUDLabels,
+  getHostHUDLabels,
+  type HostHUDLabels,
+  type HostHUDProps,
+} from './components/HostHUD';
+
+export {
+  ControllerWrapper,
+  getControllerLabels,
+  type ControllerContext,
+  type ControllerWrapperLabels,
+  type ControllerWrapperProps,
+  type MotionPermissionState,
+  type StatusSource,
+} from './components/ControllerWrapper';
+export {
+  enterFullscreen,
+  exitFullscreen,
+  isFullscreen,
+  isFullscreenSupported,
+  onFullscreenChange,
+} from './client/fullscreen';
+
+// Presets
+export {
+  getPreset,
+  isPresetId,
+  pairingFor,
+  PRESET_IDS,
+  PRESETS,
+  presetName,
+  presetsForTransport,
+  presetText,
+  supportedTransports,
+  TRANSPORT_PAIRING,
+  type LocalizedText,
+  type PresetDescriptor,
+  type PresetId,
+  type PresetMessageShape,
+  type PresetRateLimit,
+} from './presets';
+
+// i18n
+export {
+  createTranslator,
+  DEFAULT_LOCALE,
+  detectLocale,
+  getMessages,
+  isLocale,
+  resolveLocale,
+  SUPPORTED_LOCALES,
+  t,
+  tList,
+  type DetectLocaleSources,
+  type Locale,
+  type Messages,
+  type TranslateParams,
+  type Translator,
+} from './i18n';
 export type { SnapPlayer, SnapRoom } from './types';
 export {
   createSnapPairServer,

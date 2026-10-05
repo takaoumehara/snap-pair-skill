@@ -1,3 +1,10 @@
-// Package entry point ("main"). The implementation lives in src/core/useSnapPair.ts;
-// this path is kept so existing `import { useSnapPair } from '.../hooks/useSnapPair'` keeps working.
-export { useSnapPair, withTimeout, type UseSnapPairOptions } from '../core/useSnapPair';
+// Compat entry point (`snap-pair-core/hooks/useSnapPair`, and the pre-1.1 deep import
+// `snap-pair-core/src/hooks/useSnapPair`). The implementation lives in src/core/useSnapPair.ts.
+export {
+  useSnapPair,
+  withTimeout,
+  type SnapPairApi,
+  type SnapPairTransportSource,
+  type UseSnapPairOptions,
+  type UseSnapPairTransportOptions,
+} from '../core/useSnapPair';

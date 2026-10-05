@@ -6,3 +6,5 @@ dist/
 .env.local
 .env.*.local
 .DS_Store
+# Copied from src/templates by `npm run build` (shipped in the npm package)
+/templates/

@@ -261,6 +261,21 @@ button.onclick = async () => {
 Numeric PINs work with the three transports above. The Firebase room server
 still issues six-character codes only.
 
+#### CLI: `snap-pair init`
+
+The package ships a setup wizard. It picks a UX preset, transport, and pairing
+method (by experience, architecture, stack, or a free-text description), and
+explains the pros, cons, and free-tier cost of each choice. Then it writes
+`snap-pair.config.json` and scaffolds a starter app. See
+[docs/plan-phase3.md](docs/plan-phase3.md).
+
+```bash
+npx snap-pair init                                            # interactive (English / 日本語)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz --json   # non-interactive
+npx snap-pair recommend "phones as gamepads for a party game"
+npx snap-pair --help
+```
+
 ### React usage
 
 ```ts

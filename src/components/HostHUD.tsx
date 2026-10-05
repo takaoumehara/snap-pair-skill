@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import type { ConnectionStatus, PairingInfo } from '../core/types';
+import { detectLocale, getMessages, type Locale } from '../i18n';
 
 export interface HostHUDLabels {
   waiting: string;
@@ -9,6 +10,8 @@ export interface HostHUDLabels {
   peers: string;
   copyLink: string;
   copied: string;
+  /** Accessible name of the HUD region. Default: `'Pairing'`. */
+  pairing?: string;
   status: Record<ConnectionStatus, string>;
 }
 
@@ -20,6 +23,7 @@ export const defaultHostHUDLabels: HostHUDLabels = {
   peers: 'Connected',
   copyLink: 'Copy link',
   copied: 'Copied',
+  pairing: 'Pairing',
   status: {
     idle: 'Idle',
     connecting: 'Connecting…',
@@ -47,12 +51,23 @@ export interface HostHUDProps {
   peerCount?: number;
   maxPeers?: number;
   status?: ConnectionStatus;
+  /**
+   * UI language for the built-in strings (`'en'`, `'ja'`, or `'auto'` to use
+   * `detectLocale()`). Default: English. `labels` still override single strings.
+   */
+  locale?: Locale | 'auto';
   /** Override any UI string (e.g. for localization). */
   labels?: Partial<Omit<HostHUDLabels, 'status'>> & { status?: Partial<HostHUDLabels['status']> };
   className?: string;
   style?: CSSProperties;
   /** Extra content rendered at the bottom of the HUD (e.g. a start button). */
   children?: ReactNode;
+}
+
+/** HUD labels from the bundled dictionaries (`src/i18n/locales`); `'auto'` uses `detectLocale()`. */
+export function getHostHUDLabels(locale: Locale | 'auto' = 'en'): HostHUDLabels {
+  const { hud } = getMessages(locale === 'auto' ? detectLocale() : locale);
+  return { ...hud, status: { ...hud.status } };
 }
 
 /** Splits a code into groups of three for legibility: `ABC234` -> `ABC 234`. */
@@ -88,15 +103,17 @@ export function HostHUD({
   peerCount,
   maxPeers,
   status,
+  locale,
   labels: labelOverrides,
   className,
   style,
   children,
 }: HostHUDProps) {
+  const base = locale ? getHostHUDLabels(locale) : defaultHostHUDLabels;
   const labels: HostHUDLabels = {
-    ...defaultHostHUDLabels,
+    ...base,
     ...labelOverrides,
-    status: { ...defaultHostHUDLabels.status, ...labelOverrides?.status },
+    status: { ...base.status, ...labelOverrides?.status },
   };
   const [copied, setCopied] = useState(false);
   const joinUrl = pairing?.joinUrl;
@@ -118,7 +135,7 @@ export function HostHUD({
   };
 
   return (
-    <section className={className} style={{ ...styles.root, ...style }} aria-label="Pairing" data-snap-pair-hud="">
+    <section className={className} style={{ ...styles.root, ...style }} aria-label={labels.pairing ?? defaultHostHUDLabels.pairing} data-snap-pair-hud="">
       {!pairing ? (
         <p role="status">{labels.waiting}</p>
       ) : (

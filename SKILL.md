@@ -1,15 +1,90 @@
 ---
 name: snap-pair
-description: Use when building React or Next.js apps that pair nearby devices by QR code or short code with Firebase Realtime Database, especially multi-device rooms, presence, temporary sessions, or participant-limited access.
+description: Use when building React or Next.js apps that pair nearby devices (phones, screens, tabs) by QR code, room code, or PIN — multi-device rooms, second-screen controllers, audience quizzes and polls, live drawing or reactions, motion controls, multi-monitor displays, presence, temporary sessions, or participant-limited access — over Firebase Realtime Database, PartyKit, WebRTC, or BroadcastChannel.
 ---
 
 # snap-pair
 
-Implement ad hoc multi-device pairing for React/Next.js with Firebase. The safe default is a server-assisted design: clients use Firebase Auth, Cloud Functions create and join rooms atomically, and Realtime Database handles scoped room subscriptions, presence, and lightweight shared state.
+Implement ad hoc multi-device pairing for React/Next.js with the `snap-pair-core` package. Pick the experience (one of seven presets) and the transport first; then follow the transport's rules below. For Firebase, the safe default is a server-assisted design: clients use Firebase Auth, Cloud Functions create and join rooms atomically, and Realtime Database handles scoped room subscriptions, presence, and lightweight shared state.
 
 ## Core Principle
 
-Treat a short code as a rendezvous handle, not as authorization. The server must validate the code, enforce capacity, add the participant, and then the client may subscribe to the room.
+Treat a short code as a rendezvous handle, not as authorization. The server must validate the code, enforce capacity, add the participant, and then the client may subscribe to the room. Relay transports (PartyKit, WebRTC, BroadcastChannel) have no server-side admission: the host browser is authoritative, so gate sensitive rooms with the `admit` option or use Firebase.
+
+## Choose preset, transport, and pairing first
+
+Decide in this order: **requirement → preset → transport → pairing**. When unsure, run the CLI (`npx snap-pair init`, or `npx snap-pair recommend "<idea>"` for a rule-based suggestion in English or Japanese) and follow its output.
+
+| Requirement | Preset | Transport | Pairing |
+| --- | --- | --- | --- |
+| Audience answers a question / votes, 10–300 phones | `room-quiz-poll` | `partykit` | `pin` (read aloud) or `qr` |
+| Live comments, Q&A wall, guestbook | `type-throw` | `partykit` | `qr` |
+| Crowd taps/swipes trigger effects (fireworks, cheers) | `particle-blast` | `partykit` | `qr` |
+| Phones draw onto a shared big screen | `stroke-stream` | `webrtc` (≤16 people), else `partykit` | `qr` |
+| Phones as gamepads for a game on the big screen (≤8) | `virtual-controller` | `webrtc` | `qr` |
+| Tilt/shake steering, motion installations | `motion-sensor` | `webrtc` | `qr` (needs HTTPS) |
+| Several windows/monitors on one computer, offline | `local-multi-display` | `broadcast` | `broadcast` |
+| Turn-based or shared-state app; server-enforced capacity, persistence, auth | no preset (`useSnapPair` Firebase default) | `firebase` | `qr` or `code` |
+| Unit tests or a same-browser demo of any preset | that preset | `broadcast` | `code` |
+
+Transport trade-offs (cost notes are current free tiers; check pricing before launch):
+
+| Transport | Use for | Avoid for | Cost |
+| --- | --- | --- | --- |
+| `broadcast` (BroadcastChannel) | same browser on one machine, offline, tests | phones or other machines (it cannot reach them) | free, nothing to deploy |
+| `partykit` (Cloudflare relay) | phones anywhere, up to hundreds per room | apps that need server-side admission without extra code | Cloudflare free tier; paid Workers from ~$5/month |
+| `webrtc` (DataChannel star) | lowest-latency input, small rooms (≈2–16) | big rooms (the host device holds one connection per guest) | P2P free; signaling on PartyKit; TURN relays billed per GB |
+| `firebase` (RTDB + Functions) | shared state, server-authoritative join/capacity (≤300), persistence | high-frequency input: it has **no ephemeral messaging** (shared state only) | Spark free (100 connections, no Functions); Blaze (card) for Functions |
+
+Rules that follow from the table:
+
+- Never pick Firebase for a preset: every preset streams input with `send`/`broadcast`, which `FirebaseTransport` rejects (`capabilities.messaging === false`). Keep Firebase for auth/persistence and add PartyKit for the realtime part if needed.
+- PIN pairing works only on relay transports; `broadcast` pairing only on BroadcastChannel.
+- Respect the preset's rate limit (`PRESETS[i].rateLimit`): batch strokes every 33 ms, throttle motion to 30/s, blasts to 10/s, publish quiz tallies at most 4/s. Never send per `pointermove`/sensor event.
+- Send controller input to the host only: `transport.send({ type, payload, to: room.hostId })`. A broadcast makes a WebRTC host forward it to every guest.
+- Validate and clamp every payload on the host; it comes from other devices.
+- WebRTC splits frames over 16 KiB automatically (up to 1 MiB) and reconnects by itself (ICE restart, then re-offers with backoff); still keep payloads small.
+- Motion sensors and wake lock need HTTPS on phones, and iOS needs a permission tap: wrap controllers in `ControllerWrapper` with `motion`.
+- Bundled apps should inject optional peers: `socketFactory: (p) => new PartySocket(p)` and `useQrRenderer({ lib: QRCode })`.
+
+### CLI
+
+```bash
+npx snap-pair init                                   # interactive: by experience, architecture, stack, or free-text consult
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz          # non-interactive
+npx snap-pair init --yes --preset virtual-controller --transport webrtc --json   # JSON result on stdout (CI, agents)
+npx snap-pair init --yes --architecture managed --no-scaffold           # Firebase config only
+npx snap-pair presets --json                         # the preset registry
+npx snap-pair recommend "スマホを傾けて遊ぶレースゲーム"  # en/ja keyword recommender (offline, free)
+```
+
+Flags: `--path ux|architecture|stack|consult`, `--preset <id|none>`, `--transport`, `--pairing`, `--architecture same-device|realtime|p2p|managed`, `--stack firebase|cloudflare|none`, `--describe`, `--out`, `--partykit-host`, `--max-players`, `--no-scaffold`, `--force`, `--yes`, `--json`, `--lang en|ja`. AI agents should prefer `--yes --json` and read `config`, `files`, and `nextSteps` from the result.
+
+The CLI writes `snap-pair.config.json` (JSON Schema: `snap-pair-core/config.schema.json`; validator: `validateConfig` in `src/cli/config.ts`):
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+`preset` is a preset id or `null` (config only); `transport` must be one the preset supports; `pairing` must be offered by the transport; `webrtc: { signaling: "partykit" | "broadcast", iceServers? }` is required for `webrtc`; `firebase: { databasePath? }` is optional and Firebase keys stay in `VITE_FIREBASE_*` env vars, never in this file. Generated templates read the file at runtime (`src/snap.ts`).
+
+### Library surface for non-Firebase transports
+
+- `useSnapPair({ transport, guest })` takes a `Transport` instance (caller-owned; keep it stable with `useState`) or a factory (hook-owned). The return shape is the same as Firebase mode; use the instance's `send`/`broadcast`/`onMessage` for ephemeral input. Omit `transport` for the unchanged Firebase behavior.
+- Transports: `BroadcastChannelTransport`, `PartyKitTransport` (relay server: `examples/partykit/server.ts`), `WebRTCTransport({ signaling })`, `FirebaseTransport`.
+- UI: `HostHUD` (QR + code/PIN + status, `locale="en" | "ja" | "auto"`), `ControllerWrapper` (status, reconnect, wake lock, iOS motion permission, fullscreen + orientation lock).
+- Data: `PRESETS` / `getPreset(id)` (transports, pairing, message shapes, rate limits), i18n `t()` / `detectLocale()`.
+
+The rest of this document is the Firebase path (default transport, server-authoritative join).
 
 ## Private decision rooms
 

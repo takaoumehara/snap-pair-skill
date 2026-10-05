@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TransportError, type TransportMessage } from '../core/types';
-import { createBroadcastBus, FakeRTCPeerConnection, flush, waitFor } from '../testing/fakes';
+import { createBroadcastBus, FakeDataChannel, FakeRTCPeerConnection, flush, waitFor } from '../testing/fakes';
 import type { Transport } from './base';
 import { BroadcastChannelTransport } from './broadcast';
 import { isWebRTCSupported, RTC_SIGNAL_TYPE, WebRTCTransport, type WebRTCTransportOptions } from './webrtc';
@@ -165,11 +165,14 @@ describe('WebRTCTransport: handshake and star topology', () => {
 });
 
 describe('WebRTCTransport: teardown', () => {
-  it('removes a guest when its data channel closes; the guest goes to reconnecting (re-offer is TODO(phase3))', async () => {
-    const { host, guests: [a] } = await star(1);
+  it('removes a guest when its data channel closes; with reconnect: false the guest stays reconnecting', async () => {
+    const { host, guests: [a] } = await star(1, { reconnect: false });
     const guestPc = FakeRTCPeerConnection.instances[0];
     guestPc.channels[0].close();
     await waitFor(() => host.peers.length === 1);
+    expect(a.status).toBe('reconnecting');
+    await flush(30);
+    expect(FakeRTCPeerConnection.instances).toHaveLength(2); // no re-offer
     expect(a.status).toBe('reconnecting');
   });
 
@@ -198,5 +201,119 @@ describe('WebRTCTransport: teardown', () => {
     });
     expect(guest.signaling.room).toBeNull();
     expect(guest.room).toBeNull();
+  });
+});
+
+describe('WebRTCTransport: recovery', () => {
+  const fast = { reconnect: { baseDelayMs: 5, maxDelayMs: 20, iceRestartGraceMs: 30 }, connectTimeoutMs: 200 };
+
+  it('re-offers after the channel drops, and the host re-admits the guest', async () => {
+    const { host, guests: [a] } = await star(1, fast);
+    const statuses: string[] = [];
+    a.onStatus((s) => statuses.push(s));
+    const inbox: TransportMessage[] = [];
+    host.onMessage((m) => inbox.push(m));
+
+    FakeRTCPeerConnection.instances[0].channels[0].close();
+    await waitFor(() => statuses.includes('reconnecting'));
+    await waitFor(() => a.status === 'connected' && host.peers.length === 2);
+    expect(statuses).toEqual(['connected', 'reconnecting', 'connected']);
+    expect(FakeRTCPeerConnection.instances.length).toBe(4); // a fresh guest + host connection
+
+    // Traffic flows over the new channel in both directions.
+    await a.broadcast('after', 1);
+    await waitFor(() => inbox.length === 1);
+    await host.setState({ n: 42 });
+    await waitFor(() => (a.room?.state as any)?.n === 42);
+    expect(FakeRTCPeerConnection.instances[2].offerOptions).toEqual([undefined]);
+  });
+
+  it('backs off and reports failure after maxAttempts', async () => {
+    const { host, guests: [a] } = await star(1, { reconnect: { baseDelayMs: 5, maxDelayMs: 10, maxAttempts: 2 }, connectTimeoutMs: 20 });
+    const errors: Error[] = [];
+    a.onError((e) => errors.push(e));
+    await host.leaveRoom(); // Nobody answers offers any more.
+    await waitFor(() => errors.some((e) => /reconnect failed after 2 attempts/.test(e.message)), 2000);
+    expect(errors.find((e) => /reconnect failed/.test(e.message))).toBeInstanceOf(TransportError);
+    expect(a.status).toBe('reconnecting');
+    const offers = FakeRTCPeerConnection.instances.filter((pc) => pc.localDescription?.type === 'offer');
+    expect(offers.length).toBe(3); // the original + 2 attempts
+  });
+
+  it('restarts ICE on the same connection when it fails, without dropping the guest', async () => {
+    const { host, guests: [a] } = await star(1, fast);
+    const [guestPc, hostPc] = FakeRTCPeerConnection.instances;
+    const peerChanges: number[] = [];
+    host.onPeers((peers) => peerChanges.push(peers.length));
+
+    hostPc.simulateConnectionState('failed'); // The host waits (grace period) instead of dropping.
+    guestPc.simulateConnectionState('failed');
+    await waitFor(() => guestPc.offerOptions.length === 2);
+    expect(guestPc.offerOptions[1]).toEqual({ iceRestart: true });
+    expect(guestPc.restartIceCalls).toBe(1);
+    await waitFor(() => guestPc.connectionState === 'connected' && hostPc.connectionState === 'connected');
+    await flush(50); // past the grace period
+
+    expect(FakeRTCPeerConnection.instances).toHaveLength(2); // renegotiated, not replaced
+    expect(hostPc.remoteDescription?.sdp).toBe(guestPc.localDescription?.sdp);
+    expect(peerChanges).toEqual([]);
+    expect(host.peers).toHaveLength(2);
+    expect(a.status).toBe('connected');
+    await host.setState({ n: 7 });
+    await waitFor(() => (a.room?.state as any)?.n === 7);
+  });
+
+  it('host drops a guest whose ICE stays failed past the grace period', async () => {
+    const { host } = await star(1, fast);
+    FakeRTCPeerConnection.instances[1].simulateConnectionState('failed');
+    expect(host.peers).toHaveLength(2);
+    await waitFor(() => host.peers.length === 1);
+  });
+});
+
+describe('WebRTCTransport: chunking', () => {
+  afterEach(() => {
+    FakeDataChannel.maxMessageSize = Infinity;
+  });
+
+  it('splits frames above 16 KiB and reassembles them, including host forwarding', async () => {
+    FakeDataChannel.maxMessageSize = 16 * 1024; // like a strict SCTP stack
+    const { host, guests: [a, b] } = await star(2);
+    await waitFor(() => a.peers.length === 3 && b.peers.length === 3);
+    const big = 'x'.repeat(100_000) + '😀'.repeat(1000);
+    const inbox: Record<string, TransportMessage[]> = { host: [], b: [] };
+    host.onMessage((m) => inbox.host.push(m));
+    b.onMessage((m) => inbox.b.push(m));
+
+    await a.broadcast('big', big);
+    await waitFor(() => inbox.host.length === 1 && inbox.b.length === 1);
+    expect(inbox.host[0].payload).toBe(big);
+    expect(inbox.b[0].payload).toBe(big);
+
+    await host.setState({ blob: big });
+    await waitFor(() => (a.room?.state as any)?.blob === big && (b.room?.state as any)?.blob === big);
+
+    const sent = FakeRTCPeerConnection.instances.flatMap((pc) => pc.channels.flatMap((c) => c.sent as string[]));
+    const chunks = sent.filter((frame) => frame.startsWith('{"sp":"chunk"'));
+    expect(chunks.length).toBeGreaterThan(10);
+    expect(Math.max(...sent.map((frame) => new TextEncoder().encode(frame).length))).toBeLessThanOrEqual(16 * 1024);
+  });
+
+  it('honors maxMessageBytes and refuses frames above maxReassembledBytes', async () => {
+    const { host, guests: [a] } = await star(1, { maxMessageBytes: 4096, maxReassembledBytes: 50_000 });
+    const errors: Error[] = [];
+    a.onError((e) => errors.push(e));
+    const inbox: TransportMessage[] = [];
+    host.onMessage((m) => inbox.push(m));
+
+    await a.broadcast('medium', 'm'.repeat(20_000));
+    await waitFor(() => inbox.length === 1);
+    const guestSent = FakeRTCPeerConnection.instances[0].channels[0].sent as string[];
+    expect(Math.max(...guestSent.map((frame) => frame.length))).toBeLessThanOrEqual(4096);
+
+    await a.broadcast('huge', 'h'.repeat(60_000));
+    expect(errors.at(-1)?.message).toMatch(/Send failed: Message is \d+ bytes; the WebRTC transport carries at most 50000/);
+    await flush(10);
+    expect(inbox).toHaveLength(1);
   });
 });

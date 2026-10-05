@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "broadcast",
+  "pairing": "code",
+  "locale": "en",
+  "maxPlayers": 8
+}

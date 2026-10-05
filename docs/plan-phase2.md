@@ -126,7 +126,9 @@ orientation/motion/screen-orientation helpers.
 
 All of it is tested against a fake `RTCPeerConnection`, not real browsers.
 
-**WebRTC: scaffolded / `TODO(phase3)`**
+**WebRTC: scaffolded / `TODO(phase3)`** (Phase 3 implemented ICE restart,
+automatic re-offer with backoff, and chunking; the rest is listed under
+"Remaining" in `docs/plan-phase3.md`.)
 - ICE restart and automatic re-offer when a guest's channel drops. The guest
   goes to `reconnecting` and must call `joinRoom` again.
 - Renegotiation (adding channels or tracks after connect).

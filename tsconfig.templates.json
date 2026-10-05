@@ -1,0 +1,23 @@
+{
+  // Typechecks src/templates against the library source. Each template is a
+  // standalone Vite app that imports `snap-pair-core` by name, so the package
+  // is mapped to src/index.ts, and `rootDirs` merges src/templates/_shared/src
+  // with every preset's src/ the way `snap-pair init` merges them on disk.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "snap-pair-core": ["src/index.ts"] },
+    "rootDirs": [
+      "src/templates/_shared/src",
+      "src/templates/stroke-stream/src",
+      "src/templates/particle-blast/src",
+      "src/templates/type-throw/src",
+      "src/templates/room-quiz-poll/src",
+      "src/templates/virtual-controller/src",
+      "src/templates/motion-sensor/src"
+    ],
+    "types": ["vite/client"]
+  },
+  "include": ["src/templates/**/src/**/*.ts", "src/templates/**/src/**/*.tsx", "types/templates-shims.d.ts"],
+  "exclude": []
+}
