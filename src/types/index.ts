@@ -1,18 +1,22 @@
-export interface SnapPlayer {
-  id: string;
-  name: string;
-  connected: boolean;
-  [key: string]: any; // Allows extending with custom properties (e.g., player marks, ready state)
-}
+// Legacy type names, kept for backward compatibility. New code can import the
+// transport-agnostic names (`Peer`, `Room`, ...) from src/core/types.ts.
+import type { Peer, Room } from '../core/types';
 
-export interface SnapRoom<TPlayer extends SnapPlayer = SnapPlayer, TState = any> {
-  id: string;
-  code: string;
-  hostId: string; // The player ID (or auth UID) of the room host
-  maxPlayers: number; // Maximum allowed players in the room
-  players: Record<string, TPlayer>; // Map of playerId -> TPlayer to prevent write race conditions
-  status: 'waiting' | 'playing' | 'finished' | 'closed' | 'abandoned';
-  createdAt: number;
-  updatedAt: number;
-  state?: TState;
-}
+// Interfaces (not aliases) so consumers can still augment them via declaration merging.
+export interface SnapPlayer extends Peer {}
+
+export interface SnapRoom<TPlayer extends SnapPlayer = SnapPlayer, TState = any> extends Room<TPlayer, TState> {}
+
+export type {
+  ConnectionStatus,
+  PairingInfo,
+  PairingMethod,
+  Peer,
+  PeerRole,
+  Room,
+  RoomStatus,
+  TransportKind,
+  TransportMessage,
+  Unsubscribe,
+  WritableRoomStatus,
+} from '../core/types';

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>snap-pair · Local Multi-Display</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0d12; color: #f2f4f8; font-family: system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #hud { position: fixed; left: 12px; top: 12px; display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.45); padding: 8px 12px; border-radius: 10px; font-size: 14px; }
+  #hud button { font: inherit; border: 0; border-radius: 8px; padding: 6px 10px; background: #2b6cff; color: #fff; cursor: pointer; }
+  #hud.hidden { display: none; }
+  #warning { position: fixed; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="hud">
+  <span id="info">…</span>
+  <button id="open" type="button">Open another window</button>
+  <button id="next" type="button">Next scene</button>
+  <button id="hide" type="button">Hide (H)</button>
+</div>
+<div id="warning">BroadcastChannel is not available in this browser (Safari 15.4+, Chrome, Firefox, and Edge support it).</div>
+<script>
+/*
+ * snap-pair Local Multi-Display: several windows of one browser on one
+ * computer show slices of one wide scene. No server and no network:
+ * windows talk over BroadcastChannel (same origin, same browser profile).
+ *
+ * Pairing is "broadcast": every window opened with the same ?room= value
+ * joins automatically. Order = join time, so the first window is the leader
+ * and slice 0. All windows share the machine's clock, so the leader only
+ * broadcasts the scene and its start time, never frames.
+ *
+ * Messages (see the preset descriptor in snap-pair-core):
+ *   { t: 'hello', id, joinedAt }  announce / heartbeat (every 500 ms)
+ *   { t: 'bye', id }              window closing
+ *   { t: 'tick', scene, startedAt } leader -> all, on change and every second
+ *
+ * Want phones too? Use a React template with BroadcastChannelTransport for
+ * tests and PartyKitTransport across devices: `npx snap-pair init`.
+ */
+(() => {
+  if (typeof BroadcastChannel !== 'function') {
+    document.getElementById('warning').style.display = 'grid';
+    return;
+  }
+
+  const params = new URLSearchParams(location.search);
+  const room = (params.get('room') || 'demo').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32) || 'demo';
+  const me = { id: Math.random().toString(36).slice(2, 10), joinedAt: Date.now() };
+  const channel = new BroadcastChannel(`snap-pair-lmd:${room}`);
+  const peers = new Map([[me.id, { ...me, seenAt: Date.now() }]]);
+  const TIMEOUT_MS = 2000;
+  const SCENES = 3;
+  let world = { scene: 0, startedAt: Date.now() };
+
+  const alive = () => {
+    const now = Date.now();
+    for (const [id, peer] of peers) if (id !== me.id && now - peer.seenAt > TIMEOUT_MS) peers.delete(id);
+    return [...peers.values()].sort((a, b) => a.joinedAt - b.joinedAt || (a.id < b.id ? -1 : 1));
+  };
+  const isLeader = () => alive()[0].id === me.id;
+  const post = (message) => channel.postMessage(message);
+  const announce = () => post({ t: 'hello', id: me.id, joinedAt: me.joinedAt });
+  const tick = () => { if (isLeader()) post({ t: 'tick', ...world }); };
+
+  channel.onmessage = ({ data }) => {
+    if (!data || typeof data !== 'object') return;
+    if (data.t === 'hello' && typeof data.id === 'string' && typeof data.joinedAt === 'number') {
+      const isNew = !peers.has(data.id);
+      peers.set(data.id, { id: data.id, joinedAt: data.joinedAt, seenAt: Date.now() });
+      if (isNew) { announce(); tick(); }
+    } else if (data.t === 'bye' && typeof data.id === 'string') {
+      peers.delete(data.id);
+    } else if (data.t === 'tick' && Number.isInteger(data.scene) && typeof data.startedAt === 'number') {
+      world = { scene: ((data.scene % SCENES) + SCENES) % SCENES, startedAt: data.startedAt };
+    }
+  };
+
+  setInterval(() => { announce(); tick(); }, 500);
+  announce();
+  addEventListener('pagehide', () => post({ t: 'bye', id: me.id }));
+
+  // ---- UI ----
+  const hud = document.getElementById('hud');
+  document.getElementById('open').onclick = () => window.open(location.href, '_blank', 'popup,width=800,height=600');
+  document.getElementById('next').onclick = () => {
+    world = { scene: (world.scene + 1) % SCENES, startedAt: Date.now() };
+    post({ t: 'tick', ...world }); // any window may change the scene; the leader keeps re-broadcasting it
+  };
+  document.getElementById('hide').onclick = () => hud.classList.add('hidden');
+  addEventListener('keydown', (event) => { if (event.key === 'h' || event.key === 'H') hud.classList.toggle('hidden'); });
+  if (!params.has('room')) history.replaceState(null, '', `?room=${room}`);
+
+  // ---- Rendering: each window draws its slice of a world `count` screens wide ----
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  const draw = () => {
+    const list = alive();
+    const index = list.findIndex((peer) => peer.id === me.id);
+    const count = list.length;
+    document.getElementById('info').textContent =
+      `Room ${room} · screen ${index + 1}/${count}${index === 0 ? ' (leader)' : ''} · scene ${world.scene + 1}`;
+
+    const w = (canvas.width = innerWidth);
+    const h = (canvas.height = innerHeight);
+    const worldWidth = w * count;
+    const offset = w * index;
+    const t = (Date.now() - world.startedAt) / 1000;
+    ctx.fillStyle = '#0b0d12';
+    ctx.fillRect(0, 0, w, h);
+
+    if (world.scene === 0) {
+      // A ball bouncing across every screen.
+      const x = (Math.abs(((t * 0.35) % 2) - 1)) * worldWidth;
+      const y = h / 2 + Math.sin(t * 3) * h * 0.3;
+      ctx.fillStyle = '#2b6cff';
+      ctx.beginPath(); ctx.arc(x - offset, y, Math.min(w, h) * 0.08, 0, Math.PI * 2); ctx.fill();
+    } else if (world.scene === 1) {
+      // A rainbow that scrolls continuously across the screens.
+      for (let x = 0; x < w; x += 4) {
+        ctx.fillStyle = `hsl(${((x + offset) / worldWidth) * 360 + t * 60}, 80%, 50%)`;
+        ctx.fillRect(x, 0, 4, h);
+      }
+    } else {
+      // One big label spanning the wall.
+      ctx.fillStyle = '#f2f4f8';
+      ctx.font = `bold ${Math.floor(h * 0.4)}px system-ui, sans-serif`;
+      ctx.textBaseline = 'middle';
+      const text = 'SNAP · PAIR · ';
+      const textWidth = ctx.measureText(text).width;
+      const start = -((t * 200) % textWidth);
+      for (let x = start; x < worldWidth; x += textWidth) ctx.fillText(text, x - offset, h / 2);
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '16px system-ui, sans-serif';
+    ctx.fillText(`${index + 1}`, w - 28, h - 20);
+    requestAnimationFrame(draw);
+  };
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
