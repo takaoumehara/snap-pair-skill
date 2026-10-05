@@ -36,7 +36,8 @@ export function matchKeywords(text: string, keywords: { en: readonly string[]; j
   const lower = text.toLowerCase();
   const found: string[] = [];
   for (const keyword of keywords.en) {
-    const pattern = new RegExp(`(^|[^a-z0-9])${escapeRegExp(keyword.toLowerCase())}($|[^a-z0-9])`);
+    // Plain plurals match too ("gamepads", "quizzes" -> "quiz" + "zes" is not handled; list those explicitly).
+    const pattern = new RegExp(`(^|[^a-z0-9])${escapeRegExp(keyword.toLowerCase())}(e?s)?($|[^a-z0-9])`);
     if (pattern.test(lower)) found.push(keyword);
   }
   for (const keyword of keywords.ja) {
