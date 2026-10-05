@@ -1,3 +1,4 @@
+# Deploys site/ to GitHub Pages (source: GitHub Actions).
 name: Deploy docs site to GitHub Pages
 
 on:
