@@ -53,7 +53,7 @@ window.SNAP_I18N = {
     'what.title': '3つのレイヤーと、小さなAPI',
     'what.lead': 'プロダクト（クイズ、お絵描きウォール、ゲーム、ライトショー、ショールームなど）はあなたが用意します。snap-pairはペアリング、リアルタイム通信、そしてつまずきやすいスマホ側の細かな処理を引き受けます。',
     'what.pairTitle': 'ペアリング',
-    'what.pairBody': 'デバイスがルームを見つける方法です。参加URLを埋め込んだQRコード、6桁のPIN、紛らわしい文字を除いたルームコード、またはタブ間のローカルブロードキャスト。',
+    'what.pairBody': 'デバイスがルームを見つける方法です。参加URLを埋め込んだQRコード、6桁のPIN、紛らわしい文字を除いたルームコード、タブ間のローカルブロードキャスト、または実験的な超音波サウンド（Proximity）。',
     'what.trTitle': 'Transport',
     'what.trBody': '1つの<code>Transport</code> APIで4つのバックエンドを扱えます。Firebase Realtime Database、PartyKit、WebRTC DataChannel、BroadcastChannel。切り替えは1行です。',
     'what.clTitle': 'クライアントユーティリティ',
