@@ -65,8 +65,16 @@ export {
   RTC_SIGNAL_TYPE,
   WebRTCTransport,
   type RtcSignal,
+  type WebRTCReconnectOptions,
   type WebRTCTransportOptions,
 } from './transports/webrtc';
+export {
+  DEFAULT_MAX_MESSAGE_BYTES,
+  DEFAULT_MAX_REASSEMBLED_BYTES,
+  Reassembler,
+  splitMessage,
+  type ReassemblerOptions,
+} from './transports/chunking';
 
 // Pairing
 export {

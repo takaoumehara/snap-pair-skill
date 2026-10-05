@@ -206,6 +206,9 @@ export function createFakePartyKit(createServer: (room: FakePartyRoom) => PartyS
 // ---- WebRTC ------------------------------------------------------------------
 
 export class FakeDataChannel {
+  /** Largest message (UTF-8 bytes) `send` accepts, like an SCTP limit. Default: unlimited. */
+  static maxMessageSize = Infinity;
+
   readyState: 'connecting' | 'open' | 'closing' | 'closed' = 'connecting';
   peer: FakeDataChannel | null = null;
   onopen: (() => void) | null = null;
@@ -217,6 +220,9 @@ export class FakeDataChannel {
 
   send(data: unknown) {
     if (this.readyState !== 'open') throw new Error('InvalidStateError: channel is not open');
+    if (typeof data === 'string' && new TextEncoder().encode(data).length > FakeDataChannel.maxMessageSize) {
+      throw new TypeError('OperationError: message too large');
+    }
     this.sent.push(data);
     const peer = this.peer;
     queueMicrotask(() => { if (peer?.readyState === 'open') peer.onmessage?.({ data }); });
@@ -274,7 +280,25 @@ export class FakeRTCPeerConnection {
     return channel;
   }
 
-  async createOffer(): Promise<RTCSessionDescriptionInit> { return { type: 'offer', sdp: `offer:${this.id}` }; }
+  /** Options passed to every createOffer call (e.g. `{ iceRestart: true }`). */
+  readonly offerOptions: Array<RTCOfferOptions | undefined> = [];
+  restartIceCalls = 0;
+
+  async createOffer(options?: RTCOfferOptions): Promise<RTCSessionDescriptionInit> {
+    this.offerOptions.push(options);
+    const generation = this.offerOptions.length;
+    return { type: 'offer', sdp: generation > 1 ? `offer:${this.id}:${generation}` : `offer:${this.id}` };
+  }
+
+  restartIce() {
+    this.restartIceCalls += 1;
+  }
+
+  /** Test control: moves to `state` and fires `onconnectionstatechange` (e.g. simulate ICE `failed`). */
+  simulateConnectionState(state: RTCPeerConnectionState) {
+    this.connectionState = state;
+    this.onconnectionstatechange?.();
+  }
   async createAnswer(): Promise<RTCSessionDescriptionInit> { return { type: 'answer', sdp: `answer:${this.id}` }; }
 
   async setLocalDescription(description: RTCSessionDescriptionInit) {
@@ -308,7 +332,9 @@ export class FakeRTCPeerConnection {
     const offerer = FakeRTCPeerConnection.bySdp.get(this.remoteDescription?.sdp ?? '');
     if (!offerer) return;
     setTimeout(() => {
-      for (const local of offerer.channels) {
+      if (this.connectionState === 'closed' || offerer.connectionState === 'closed') return;
+      // An ICE-restart answer reconnects the transport; already-paired channels stay as they are.
+      for (const local of offerer.channels.filter((channel) => !channel.peer)) {
         const remote = new FakeDataChannel(local.label, local.options);
         this.channels.push(remote);
         local.peer = remote;
