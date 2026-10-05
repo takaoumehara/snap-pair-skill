@@ -4,6 +4,7 @@ import { Auth, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import type { Functions } from 'firebase/functions';
 import type { Peer, Room } from './types';
 import { normalizeRoomCode } from './utils';
+import { useTransportSnapPair, type SnapPairApi, type UseSnapPairTransportOptions } from './useTransportSnapPair';
 import { createSnapPairServer, type SnapPairServer } from '../services/snapPairServer';
 import {
   callCreateRoom,
@@ -14,6 +15,7 @@ import {
 } from '../transports/firebase';
 
 export { withTimeout } from './utils';
+export type { SnapPairApi, SnapPairTransportSource, UseSnapPairTransportOptions } from './useTransportSnapPair';
 
 const normalizeCode = normalizeRoomCode;
 
@@ -29,6 +31,35 @@ export interface UseSnapPairOptions<TPlayer extends Peer, TState> {
   pairingCodeLifespanMs?: number; // Default: 300000 (5 minutes)
   onStatus?: (msg: string) => void;
   parseGameState?: (rawVal: any) => TState | undefined;
+  /** Firebase mode: leave unset. Pass a `Transport` to use `UseSnapPairTransportOptions` instead. */
+  transport?: undefined;
+}
+
+/**
+ * React hook for one snap-pair room.
+ *
+ * - **Firebase (default):** pass `db`/`auth`/`functions` exactly as before;
+ *   behavior and return shape are unchanged.
+ * - **Any transport:** pass `transport` (an instance or a factory), e.g.
+ *   `useSnapPair({ transport: () => new BroadcastChannelTransport(), guest })`.
+ *   See `UseSnapPairTransportOptions`.
+ *
+ * The mode is fixed for the lifetime of the component; remount (e.g. with a
+ * `key`) to switch between Firebase and a custom transport.
+ */
+export function useSnapPair<TPlayer extends Peer, TState>(options: UseSnapPairOptions<TPlayer, TState>): SnapPairApi<TPlayer, TState>;
+export function useSnapPair<TPlayer extends Peer, TState>(options: UseSnapPairTransportOptions<TPlayer, TState>): SnapPairApi<TPlayer, TState>;
+export function useSnapPair<TPlayer extends Peer, TState>(
+  options: UseSnapPairOptions<TPlayer, TState> | UseSnapPairTransportOptions<TPlayer, TState>,
+): SnapPairApi<TPlayer, TState> {
+  const usesTransport = Boolean(options.transport);
+  const modeRef = useRef(usesTransport);
+  if (modeRef.current !== usesTransport) {
+    throw new Error('useSnapPair: switching between Firebase mode and a custom transport is not supported; remount the component (e.g. change its key).');
+  }
+  return usesTransport
+    ? useTransportSnapPair(options as UseSnapPairTransportOptions<TPlayer, TState>)
+    : useFirebaseSnapPair(options as UseSnapPairOptions<TPlayer, TState>);
 }
 
 /**
@@ -36,7 +67,7 @@ export interface UseSnapPairOptions<TPlayer extends Peer, TState> {
  * through `FirebaseRoomStore` (src/transports/firebase.ts); this hook owns the
  * auth lifecycle, React state, and the guards that drop stale async results.
  */
-export function useSnapPair<TPlayer extends Peer, TState>({
+function useFirebaseSnapPair<TPlayer extends Peer, TState>({
   db,
   auth,
   functions,
@@ -48,7 +79,7 @@ export function useSnapPair<TPlayer extends Peer, TState>({
   pairingCodeLifespanMs = 300000,
   onStatus,
   parseGameState,
-}: UseSnapPairOptions<TPlayer, TState>) {
+}: UseSnapPairOptions<TPlayer, TState>): SnapPairApi<TPlayer, TState> {
   const [room, setRoom] = useState<Room<TPlayer, TState> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

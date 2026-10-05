@@ -11,7 +11,13 @@ export {
   ROOM_CODE_ALPHABET,
   withTimeout,
 } from './core/utils';
-export { useSnapPair, type UseSnapPairOptions } from './core/useSnapPair';
+export {
+  useSnapPair,
+  type SnapPairApi,
+  type SnapPairTransportSource,
+  type UseSnapPairOptions,
+  type UseSnapPairTransportOptions,
+} from './core/useSnapPair';
 
 // Transports
 export { Transport } from './transports/base';
