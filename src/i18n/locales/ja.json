@@ -34,48 +34,112 @@
     "broadcast": {
       "name": "BroadcastChannel(同一端末)",
       "summary": "1台のマシン上の同じブラウザのタブ・ウィンドウ同士が直接通信します。ネットワークもサーバーも不要です。",
-      "pros": ["設定不要・無料・オフラインで動作", "最小の遅延(プロセス内)", "ローカルデモやテストに最適"],
-      "cons": ["同じマシンの同じブラウザプロファイルのみ: スマホは参加できない", "サーバー側での参加承認なし"],
+      "pros": [
+        "設定不要・無料・オフラインで動作",
+        "最小の遅延(プロセス内)",
+        "ローカルデモやテストに最適"
+      ],
+      "cons": [
+        "同じマシンの同じブラウザプロファイルのみ: スマホは参加できない",
+        "サーバー側での参加承認なし"
+      ],
       "cost": "無料。デプロイ不要。"
     },
     "partykit": {
       "name": "PartyKit(Cloudflare リレー)",
       "summary": "Cloudflare 上の小さな WebSocket リレールーム(PartyKit / Durable Objects)。インターネット上のどこからでもスマホと画面をつなぎます。",
-      "pros": ["ネットワークや NAT をまたいで動作(サーバー経由)", "1ルーム数百人まで拡張可能", "デプロイが簡単: examples/partykit/server.ts を `npx partykit deploy`"],
-      "cons": ["(小さな)サーバーを運用する", "リレー1ホップ分の遅延(通常 20〜80 ms)", "ホスト権限型: `admit` を追加しない限りコードを知っていれば誰でも参加申請できる"],
+      "pros": [
+        "ネットワークや NAT をまたいで動作(サーバー経由)",
+        "1ルーム数百人まで拡張可能",
+        "デプロイが簡単: examples/partykit/server.ts を `npx partykit deploy`"
+      ],
+      "cons": [
+        "(小さな)サーバーを運用する",
+        "リレー1ホップ分の遅延(通常 20〜80 ms)",
+        "ホスト権限型: `admit` を追加しない限りコードを知っていれば誰でも参加申請できる"
+      ],
       "cost": "Cloudflare に無料枠があります(Workers Free は1日あたりのリクエスト上限、Durable Objects にも無料枠)。有料の Workers プランは月額約 5 ドルから。最新の料金は Cloudflare で確認してください。"
     },
     "webrtc": {
       "name": "WebRTC DataChannel(P2P)",
       "summary": "各ゲストがホストへ直接 DataChannel を開きます。メッセージング可能なトランスポート(PartyKit)はハンドシェイクだけを運びます。",
-      "pros": ["端末間のネットワーク遅延が最小(同一 LAN なら特に)", "ハンドシェイク後はルームの通信がサーバーを通らない", "自動再接続と大きなメッセージの分割送信を内蔵"],
-      "cons": ["結局シグナリング用のトランスポート(PartyKit)が必要", "ネットワークによっては TURN サーバーが必要", "スター型: ホスト端末がすべてを中継するので少人数向け(約2〜16人)"],
+      "pros": [
+        "端末間のネットワーク遅延が最小(同一 LAN なら特に)",
+        "ハンドシェイク後はルームの通信がサーバーを通らない",
+        "自動再接続と大きなメッセージの分割送信を内蔵"
+      ],
+      "cons": [
+        "結局シグナリング用のトランスポート(PartyKit)が必要",
+        "ネットワークによっては TURN サーバーが必要",
+        "スター型: ホスト端末がすべてを中継するので少人数向け(約2〜16人)"
+      ],
       "cost": "P2P 通信は無料。シグナリングは PartyKit の無料枠、既定の公開 STUN サーバーも無料。TURN リレー(Cloudflare、Twilio、自前の coturn)は GB 単位の課金です。"
     },
     "firebase": {
       "name": "Firebase Realtime Database(マネージド)",
       "summary": "Google のマネージドバックエンド: Cloud Functions が参加を原子的に承認し、セキュリティルールが読み書きを制限し、RTDB が状態とプレゼンスを同期します。",
-      "pros": ["サーバー権限の参加・定員管理(1ルーム最大300人)", "マネージド: 運用するサーバーコードがない", "onDisconnect によるプレゼンス、永続化、認証"],
-      "cons": ["一時的なメッセージングは未対応: 共有状態のみなので高頻度入力には不向き", "Cloud Functions には Blaze プラン(クレジットカード)が必要", "P2P より遅延が大きい(約 50〜200 ms)"],
+      "pros": [
+        "サーバー権限の参加・定員管理(1ルーム最大300人)",
+        "マネージド: 運用するサーバーコードがない",
+        "onDisconnect によるプレゼンス、永続化、認証"
+      ],
+      "cons": [
+        "一時的なメッセージングは未対応: 共有状態のみなので高頻度入力には不向き",
+        "Cloud Functions には Blaze プラン(クレジットカード)が必要",
+        "P2P より遅延が大きい(約 50〜200 ms)"
+      ],
       "cost": "Spark(無料): 保存 1 GB、ダウンロード 10 GB/月、同時接続 100、Cloud Functions なし。Blaze(従量課金・カード必須)には毎月の無料枠があり、Functions に必要です。"
     }
   },
   "pairing": {
-    "qr": { "name": "QR コード", "description": "ホストが参加 URL の QR コードを表示し、スマホで読み取ります。" },
-    "code": { "name": "ルームコード", "description": "ABC 234 のような6文字のコードをゲスト端末で入力します。" },
-    "pin": { "name": "数字 PIN", "description": "読み上げやすい6桁の PIN(リレー系トランスポートのみ)。" },
-    "broadcast": { "name": "同一端末ブロードキャスト", "description": "同じマシンの別タブがコードでルームを見つけます。スキャン不要。" }
+    "qr": {
+      "name": "QR コード",
+      "description": "ホストが参加 URL の QR コードを表示し、スマホで読み取ります。"
+    },
+    "code": {
+      "name": "ルームコード",
+      "description": "ABC 234 のような6文字のコードをゲスト端末で入力します。"
+    },
+    "pin": {
+      "name": "数字 PIN",
+      "description": "読み上げやすい6桁の PIN(リレー系トランスポートのみ)。"
+    },
+    "broadcast": {
+      "name": "同一端末ブロードキャスト",
+      "description": "同じマシンの別タブがコードでルームを見つけます。スキャン不要。"
+    }
   },
   "architectures": {
-    "same-device": { "name": "同一端末", "description": "1台のコンピューターで複数のタブ・ウィンドウ・ディスプレイを動かす。" },
-    "realtime": { "name": "LAN / オンラインのリアルタイム", "description": "リレーサーバー経由で、どこにあるスマホや画面でもつなぐ。" },
-    "p2p": { "name": "P2P 低遅延", "description": "高速な入力のための端末間ダイレクト通信。" },
-    "managed": { "name": "サーバーレス・マネージド", "description": "サーバー側の参加承認と永続化を持つマネージドバックエンド。" }
+    "same-device": {
+      "name": "同一端末",
+      "description": "1台のコンピューターで複数のタブ・ウィンドウ・ディスプレイを動かす。"
+    },
+    "realtime": {
+      "name": "LAN / オンラインのリアルタイム",
+      "description": "リレーサーバー経由で、どこにあるスマホや画面でもつなぐ。"
+    },
+    "p2p": {
+      "name": "P2P 低遅延",
+      "description": "高速な入力のための端末間ダイレクト通信。"
+    },
+    "managed": {
+      "name": "サーバーレス・マネージド",
+      "description": "サーバー側の参加承認と永続化を持つマネージドバックエンド。"
+    }
   },
   "stacks": {
-    "firebase": { "name": "Firebase を使っている", "description": "既存の Firebase プロジェクト(Auth + RTDB + Functions)を再利用。" },
-    "cloudflare": { "name": "Cloudflare / PartyKit", "description": "Cloudflare に小さなリレーをデプロイ。" },
-    "none": { "name": "バックエンドなし", "description": "デプロイ不要。同一マシン(シグナリングを足せば P2P も)。" }
+    "firebase": {
+      "name": "Firebase を使っている",
+      "description": "既存の Firebase プロジェクト(Auth + RTDB + Functions)を再利用。"
+    },
+    "cloudflare": {
+      "name": "Cloudflare / PartyKit",
+      "description": "Cloudflare に小さなリレーをデプロイ。"
+    },
+    "none": {
+      "name": "バックエンドなし",
+      "description": "デプロイ不要。同一マシン(シグナリングを足せば P2P も)。"
+    }
   },
   "cli": {
     "intro": "snap-pair init: マルチデバイス体験をセットアップします",
@@ -125,6 +189,67 @@
     "missingValue": "オプション {flag} には値が必要です。",
     "aborted": "中止しました。",
     "presetsTitle": "プリセット",
-    "done": "完了しました。"
+    "done": "完了しました。",
+    "reasonPreset": "{preset}: {keywords} に一致",
+    "reasonTransport": "{transport}: {keywords} に一致",
+    "reasonTransportDefault": "{transport} は {preset} のおすすめトランスポートです",
+    "reasonTransportUnsupported": "{transport} は {preset} に合わないため、代わりに {fallback} を使います",
+    "reasonFirebase": "Firebase にはまだ一時的なメッセージングがないため、リアルタイム入力は {transport} で送ります。認証や永続化には引き続き Firebase を使えます",
+    "reasonScale": "{count} 人は WebRTC のスター型には多すぎるため、{transport} を使います",
+    "acceptRecommendation": "このおすすめで進めますか?",
+    "yes": "y",
+    "no": "n",
+    "firebaseNote": "7つのプリセットはすべて一時的な入力(send/broadcast)を流しますが、Firebase トランスポートはまだこれに対応していません。Firebase は useSnapPair による共有状態型のアプリ(ターン制ゲーム、チェックリスト、ロビー)に向いています。",
+    "firebaseOnly": "Firebase のみ: useSnapPair による共有状態アプリ(設定ファイルのみ、テンプレートなし)",
+    "firebaseWithPartykit": "アプリには Firebase を使い続け、プリセットのリアルタイムメッセージには PartyKit を使う",
+    "stackNoneNote": "バックエンドがない場合、端末同士は同じマシン上(BroadcastChannel)でしかつながれません。スマホをつなぐにはリレー(PartyKit、または PartyKit シグナリング付きの WebRTC)が必要です。",
+    "noTemplate": "この選択にはテンプレートがないため、{file} のみを書き出しました。",
+    "presetCompat": "トランスポート",
+    "help": [
+      "使い方: snap-pair <コマンド> [オプション]",
+      "",
+      "コマンド:",
+      "  init                 対話式セットアップウィザード(既定のコマンド)",
+      "  presets              7つの UX プリセットを一覧表示",
+      "  recommend \"<文章>\"   アイデアに合うプリセットとトランスポートを提案(日本語/英語)",
+      "",
+      "init のオプション:",
+      "  --path <p>           ux | architecture | stack | consult(最初のメニューを省略)",
+      "  --preset <id>        stroke-stream, particle-blast, type-throw, room-quiz-poll,",
+      "                       virtual-controller, motion-sensor, local-multi-display, none",
+      "  --transport <t>      broadcast | partykit | webrtc | firebase",
+      "  --pairing <m>        qr | code | pin | broadcast",
+      "  --architecture <a>   same-device | realtime | p2p | managed",
+      "  --stack <s>          firebase | cloudflare | none",
+      "  --describe <文章>    おすすめ機能に渡すアイデア(consult)",
+      "  --out <dir>          出力先フォルダ(既定: ./snap-pair-<preset>)",
+      "  --partykit-host <h>  設定ファイルに書く PartyKit ホスト",
+      "  --max-players <n>    ルームの定員(2〜300)",
+      "  --no-scaffold        snap-pair.config.json だけを書き出す",
+      "  --force              既存ファイルを上書き",
+      "  -y, --yes            すべて既定値で進める(非対話)",
+      "  --json               結果を JSON で標準出力へ(メッセージは標準エラーへ)",
+      "  --lang <en|ja>       表示言語(既定: LANG / LC_ALL から判定)",
+      "",
+      "共通:",
+      "  -h, --help           このヘルプを表示",
+      "  -v, --version        バージョンを表示",
+      "",
+      "例:",
+      "  npx snap-pair init",
+      "  npx snap-pair init --yes --preset room-quiz-poll --out my-quiz",
+      "  npx snap-pair recommend \"友達4人で遊ぶ傾けて操作するレースゲーム\""
+    ],
+    "next": {
+      "install": "cd {dir} && npm install",
+      "dev": "npm run dev を実行し、大画面(ホスト)で URL を開いて、スマホで QR コードを読み取る",
+      "devBroadcast": "npm run dev を実行し、同じブラウザの2つのタブで URL を開く(ホストと、ホストに表示される参加リンク)",
+      "partykitDev": "ローカルのリレー: 別のターミナルで npx partykit dev party/server.ts(ポート 1999)",
+      "partykitDeploy": "リレーをデプロイ: npx partykit deploy party/server.ts を実行し、そのホストを partykit.host(snap-pair.config.json)か VITE_PARTYKIT_HOST に設定",
+      "lan": "同じ Wi-Fi のスマホから: npm run dev -- --host で LAN の URL を開く(多くのスマホではモーションセンサーと画面点灯の維持に HTTPS が必要)",
+      "html": "{file} を同じブラウザの2つ以上のウィンドウで開く(別々のモニターにドラッグ)",
+      "firebase": "SKILL.md の手順で Firebase(Auth、RTDB、ルール、Functions)を準備し、useSnapPair({ db, auth, functions }) を呼ぶ",
+      "docs": "生成フォルダの README.md と snap-pair-core の SKILL.md を読む"
+    }
   }
 }

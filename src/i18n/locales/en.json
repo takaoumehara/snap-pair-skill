@@ -34,48 +34,112 @@
     "broadcast": {
       "name": "BroadcastChannel (same device)",
       "summary": "Tabs and windows of one browser on one machine talk directly. No network, no server.",
-      "pros": ["Zero setup, zero cost, works offline", "Lowest latency (in-process)", "Great for local demos and tests"],
-      "cons": ["Same browser profile on one machine only: phones cannot join", "No server-side admission"],
+      "pros": [
+        "Zero setup, zero cost, works offline",
+        "Lowest latency (in-process)",
+        "Great for local demos and tests"
+      ],
+      "cons": [
+        "Same browser profile on one machine only: phones cannot join",
+        "No server-side admission"
+      ],
       "cost": "Free. Nothing to deploy."
     },
     "partykit": {
       "name": "PartyKit (Cloudflare relay)",
       "summary": "A small WebSocket relay room on Cloudflare (PartyKit / Durable Objects). Phones and screens anywhere on the internet.",
-      "pros": ["Works across networks and NATs (it is a server)", "Scales to hundreds of peers per room", "Simple deploy: `npx partykit deploy` with examples/partykit/server.ts"],
-      "cons": ["You run (a tiny) server", "One relay hop of latency (usually 20–80 ms)", "Host-authoritative: anyone with the code can ask to join unless you add `admit`"],
+      "pros": [
+        "Works across networks and NATs (it is a server)",
+        "Scales to hundreds of peers per room",
+        "Simple deploy: `npx partykit deploy` with examples/partykit/server.ts"
+      ],
+      "cons": [
+        "You run (a tiny) server",
+        "One relay hop of latency (usually 20–80 ms)",
+        "Host-authoritative: anyone with the code can ask to join unless you add `admit`"
+      ],
       "cost": "Cloudflare has a free tier (Workers Free with daily request limits; Durable Objects allowances); the paid Workers plan starts at about $5/month. Check current Cloudflare pricing."
     },
     "webrtc": {
       "name": "WebRTC DataChannel (P2P)",
       "summary": "Each guest opens a direct DataChannel to the host; a messaging transport (PartyKit) only carries the handshake.",
-      "pros": ["Lowest network latency between devices (often on the same LAN)", "Room traffic never touches a server after the handshake", "Auto-reconnect and large-message chunking built in"],
-      "cons": ["Needs a signaling transport (PartyKit) anyway", "Some networks need a TURN server", "Star topology: the host's device relays everything, so keep rooms small (≈2–16)"],
+      "pros": [
+        "Lowest network latency between devices (often on the same LAN)",
+        "Room traffic never touches a server after the handshake",
+        "Auto-reconnect and large-message chunking built in"
+      ],
+      "cons": [
+        "Needs a signaling transport (PartyKit) anyway",
+        "Some networks need a TURN server",
+        "Star topology: the host's device relays everything, so keep rooms small (≈2–16)"
+      ],
       "cost": "P2P traffic is free; signaling uses the PartyKit free tier; the default public STUN server is free. TURN relays (Cloudflare, Twilio, self-hosted coturn) are billed per GB."
     },
     "firebase": {
       "name": "Firebase Realtime Database (managed)",
       "summary": "Google-managed backend: Cloud Functions admit peers atomically, security rules gate reads and writes, RTDB syncs state and presence.",
-      "pros": ["Server-authoritative join and capacity (up to 300 per room)", "Managed: no server code to operate", "Presence via onDisconnect, persistence, auth"],
-      "cons": ["No ephemeral messaging yet: shared state only, so not for high-frequency input", "Cloud Functions need the Blaze plan (credit card)", "Higher latency than P2P (≈50–200 ms)"],
+      "pros": [
+        "Server-authoritative join and capacity (up to 300 per room)",
+        "Managed: no server code to operate",
+        "Presence via onDisconnect, persistence, auth"
+      ],
+      "cons": [
+        "No ephemeral messaging yet: shared state only, so not for high-frequency input",
+        "Cloud Functions need the Blaze plan (credit card)",
+        "Higher latency than P2P (≈50–200 ms)"
+      ],
       "cost": "Spark (free): 1 GB stored, 10 GB/month download, 100 simultaneous connections, no Cloud Functions. Blaze (pay-as-you-go, card required) includes free monthly quotas and is needed for Functions."
     }
   },
   "pairing": {
-    "qr": { "name": "QR code", "description": "The host shows a QR code with the join URL; phones scan it." },
-    "code": { "name": "Room code", "description": "A six-character code like ABC 234, typed on the guest device." },
-    "pin": { "name": "Numeric PIN", "description": "A six-digit PIN, easy to read aloud (relay transports only)." },
-    "broadcast": { "name": "Same-device broadcast", "description": "Other tabs on the same machine find the room by code; no scanning." }
+    "qr": {
+      "name": "QR code",
+      "description": "The host shows a QR code with the join URL; phones scan it."
+    },
+    "code": {
+      "name": "Room code",
+      "description": "A six-character code like ABC 234, typed on the guest device."
+    },
+    "pin": {
+      "name": "Numeric PIN",
+      "description": "A six-digit PIN, easy to read aloud (relay transports only)."
+    },
+    "broadcast": {
+      "name": "Same-device broadcast",
+      "description": "Other tabs on the same machine find the room by code; no scanning."
+    }
   },
   "architectures": {
-    "same-device": { "name": "Same device", "description": "Several tabs/windows/displays driven by one computer." },
-    "realtime": { "name": "LAN / online realtime", "description": "Phones and screens anywhere, through a relay server." },
-    "p2p": { "name": "P2P low latency", "description": "Direct device-to-device channels for fast input." },
-    "managed": { "name": "Serverless managed", "description": "A managed backend with server-side admission and persistence." }
+    "same-device": {
+      "name": "Same device",
+      "description": "Several tabs/windows/displays driven by one computer."
+    },
+    "realtime": {
+      "name": "LAN / online realtime",
+      "description": "Phones and screens anywhere, through a relay server."
+    },
+    "p2p": {
+      "name": "P2P low latency",
+      "description": "Direct device-to-device channels for fast input."
+    },
+    "managed": {
+      "name": "Serverless managed",
+      "description": "A managed backend with server-side admission and persistence."
+    }
   },
   "stacks": {
-    "firebase": { "name": "I already use Firebase", "description": "Reuse your Firebase project (Auth + RTDB + Functions)." },
-    "cloudflare": { "name": "Cloudflare / PartyKit", "description": "Deploy a tiny relay on Cloudflare." },
-    "none": { "name": "No backend", "description": "Nothing to deploy; same machine (or P2P once you add signaling)." }
+    "firebase": {
+      "name": "I already use Firebase",
+      "description": "Reuse your Firebase project (Auth + RTDB + Functions)."
+    },
+    "cloudflare": {
+      "name": "Cloudflare / PartyKit",
+      "description": "Deploy a tiny relay on Cloudflare."
+    },
+    "none": {
+      "name": "No backend",
+      "description": "Nothing to deploy; same machine (or P2P once you add signaling)."
+    }
   },
   "cli": {
     "intro": "snap-pair init: set up a multi-device experience",
@@ -125,6 +189,67 @@
     "missingValue": "Option {flag} needs a value.",
     "aborted": "Aborted.",
     "presetsTitle": "Presets",
-    "done": "Done."
+    "done": "Done.",
+    "reasonPreset": "{preset}: matched {keywords}",
+    "reasonTransport": "{transport}: matched {keywords}",
+    "reasonTransportDefault": "{transport} is the recommended transport for {preset}",
+    "reasonTransportUnsupported": "{transport} does not fit {preset}, so {fallback} is used instead",
+    "reasonFirebase": "Firebase has no ephemeral messaging yet, so realtime input goes over {transport}; you can still use Firebase for auth and persistence",
+    "reasonScale": "{count} people is too many for a WebRTC star, so {transport} is used",
+    "acceptRecommendation": "Use this recommendation?",
+    "yes": "y",
+    "no": "n",
+    "firebaseNote": "All 7 presets stream ephemeral input (send/broadcast), which the Firebase transport does not support yet. Firebase fits shared-state apps (turn-based games, checklists, lobbies) through useSnapPair.",
+    "firebaseOnly": "Firebase only: a shared-state app with useSnapPair (config only, no template)",
+    "firebaseWithPartykit": "Keep Firebase for your app, and use PartyKit for the preset's realtime messages",
+    "stackNoneNote": "Without any backend, devices can only meet on the same machine (BroadcastChannel). Phones need a relay: PartyKit, or WebRTC with PartyKit signaling.",
+    "noTemplate": "No template for this choice: only {file} was written.",
+    "presetCompat": "Transports",
+    "help": [
+      "Usage: snap-pair <command> [options]",
+      "",
+      "Commands:",
+      "  init                 Interactive setup wizard (default command)",
+      "  presets              List the 7 UX presets",
+      "  recommend \"<text>\"   Recommend a preset and transport for an idea (en/ja)",
+      "",
+      "Options for init:",
+      "  --path <p>           ux | architecture | stack | consult (skip the first menu)",
+      "  --preset <id>        stroke-stream, particle-blast, type-throw, room-quiz-poll,",
+      "                       virtual-controller, motion-sensor, local-multi-display, none",
+      "  --transport <t>      broadcast | partykit | webrtc | firebase",
+      "  --pairing <m>        qr | code | pin | broadcast",
+      "  --architecture <a>   same-device | realtime | p2p | managed",
+      "  --stack <s>          firebase | cloudflare | none",
+      "  --describe <text>    Free-text idea for the recommender (consult path)",
+      "  --out <dir>          Target folder (default: ./snap-pair-<preset>)",
+      "  --partykit-host <h>  PartyKit host to write into the config",
+      "  --max-players <n>    Room capacity (2-300)",
+      "  --no-scaffold        Write snap-pair.config.json only",
+      "  --force              Overwrite existing files",
+      "  -y, --yes            Accept every default (non-interactive)",
+      "  --json               Print a JSON result on stdout (messages go to stderr)",
+      "  --lang <en|ja>       Language (default: from LANG / LC_ALL)",
+      "",
+      "General:",
+      "  -h, --help           Show this help",
+      "  -v, --version        Show the version",
+      "",
+      "Examples:",
+      "  npx snap-pair init",
+      "  npx snap-pair init --yes --preset room-quiz-poll --out my-quiz",
+      "  npx snap-pair recommend \"a tilt racing game for 4 friends\""
+    ],
+    "next": {
+      "install": "cd {dir} && npm install",
+      "dev": "npm run dev, open the URL on the big screen (host), and scan the QR code with a phone",
+      "devBroadcast": "npm run dev, then open the URL in two tabs of the same browser: the host, and the join link it shows",
+      "partykitDev": "Local relay: npx partykit dev party/server.ts (port 1999) in another terminal",
+      "partykitDeploy": "Deploy the relay: npx partykit deploy party/server.ts, then put its host in partykit.host (snap-pair.config.json) or VITE_PARTYKIT_HOST",
+      "lan": "Phones on your Wi-Fi: npm run dev -- --host and open the LAN URL (HTTPS is needed for motion sensors and wake lock on most phones)",
+      "html": "Open {file} in two or more windows of the same browser (drag them onto different monitors)",
+      "firebase": "Provision Firebase (Auth, RTDB, rules, Functions) as described in SKILL.md, then call useSnapPair({ db, auth, functions })",
+      "docs": "Read README.md in the generated folder and SKILL.md in snap-pair-core"
+    }
   }
 }
