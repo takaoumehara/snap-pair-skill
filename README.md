@@ -205,6 +205,62 @@ unchanged. See [docs/plan-phase1.md](docs/plan-phase1.md).
   code, and PIN fallback. Bring your own QR renderer via
   `renderQr={(value, size) => <QRCodeSVG value={value} size={size} />}`.
 
+#### Transports & client utilities (Phase 2)
+
+Three more transports implement the same `Transport` API. In each one the
+browser that created the room is the host and owns the roster and the shared
+state; the medium only moves frames (wire protocol in
+`src/transports/protocol.ts`). Unlike Firebase, nothing server-side admits
+peers (`capabilities.serverAuthoritativeJoin === false`). Use the `admit`
+option to gate who gets in. See [docs/plan-phase2.md](docs/plan-phase2.md).
+
+```ts
+import {
+  BroadcastChannelTransport, PartyKitTransport, WebRTCTransport,
+} from './index'; // snap-pair-core's src/index.ts
+
+// Same machine, no network: one tab per screen.
+const local = new BroadcastChannelTransport({ pairing: 'pin' });
+await local.connect();
+const { pairing } = await local.createRoom({ initialState: { scene: 0 } });
+// Another tab: await other.joinRoom(pairing.pin!)
+
+// Internet relay: examples/partykit/ has the server. `partysocket` is optional.
+const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev' });
+
+// Peer-to-peer DataChannels. Signaling travels over another transport.
+const p2p = new WebRTCTransport({ signaling: party, iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+
+p2p.onMessage((m) => console.log(m.type, m.payload, m.from));
+await p2p.broadcast('tap', { x: 0.5, y: 0.2 });
+```
+
+Pairing and client helpers:
+
+```tsx
+import {
+  generatePin, normalizePin, isValidPin, verifyPin, useQrRenderer,
+  HostHUD, useWakeLock, needsPermission, requestOrientationPermission, subscribeOrientation,
+} from './index';
+
+generatePin();                    // '004217' (uniform; uses crypto.getRandomValues)
+isValidPin(normalizePin('１２３ ４５６')); // true
+
+const renderQr = useQrRenderer(); // undefined unless the optional `qrcode` package is available
+<HostHUD pairing={pairing} renderQr={renderQr} />;
+
+useWakeLock(true);                // keep a controller screen on; no-op if unsupported
+
+// iOS 13+: call from a tap handler.
+button.onclick = async () => {
+  if (needsPermission() && (await requestOrientationPermission()) !== 'granted') return;
+  const stop = subscribeOrientation(({ beta, gamma }) => steer(beta, gamma));
+};
+```
+
+Numeric PINs work with the three transports above. The Firebase room server
+still issues six-character codes only.
+
 ### React usage
 
 ```ts

@@ -7,10 +7,10 @@
 /** Function returned by every subscription; calling it more than once is a no-op. */
 export type Unsubscribe = () => void;
 
-/** Backends that can carry a snap-pair room. Only `firebase` is implemented in Phase 1. */
+/** Backends that can carry a snap-pair room (all four implemented as of Phase 2). */
 export type TransportKind = 'firebase' | 'partykit' | 'webrtc' | 'broadcast';
 
-/** How a peer found the room. Only `qr` and `code` are backed by a server in Phase 1. */
+/** How a peer found the room. `pin` works with the relay transports (BroadcastChannel, PartyKit, WebRTC), not Firebase. */
 export type PairingMethod = 'qr' | 'code' | 'pin' | 'broadcast';
 
 /**
@@ -59,9 +59,15 @@ export interface Room<TPeer extends Peer = Peer, TState = any> {
 /** Everything a host needs to show so another device can join. */
 export interface PairingInfo {
   roomId: string;
-  /** Six-character room code from the font-safe alphabet, e.g. `ABC234`. */
+  /**
+   * What a guest types: a six-character room code from the font-safe alphabet
+   * (e.g. `ABC234`), or the PIN itself for relay transports in `pairing: 'pin'` mode.
+   */
   code: string;
-  /** Optional six-digit numeric PIN (no server support yet; see docs/plan-phase1.md). */
+  /**
+   * Six-digit numeric PIN (relay transports in `pairing: 'pin'` mode; then it
+   * equals `code`). The Firebase room server does not issue PINs; see docs/plan-phase2.md.
+   */
   pin?: string;
   /** URL encoded in the QR code; it should carry the room code. */
   joinUrl?: string;
