@@ -1,0 +1,24 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #0b0d12;
+  color: #f2f4f8;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+button { font: inherit; padding: 0.6em 1em; border-radius: 10px; border: 0; background: #2b6cff; color: white; }
+button:disabled { opacity: 0.5; }
+input { font: inherit; font-size: 1.6rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.4em; border-radius: 10px; border: 1px solid #445; background: #151922; color: inherit; width: 100%; }
+
+.host { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.host canvas { display: block; width: 100%; height: 100%; }
+.hud { position: absolute; right: 16px; bottom: 16px; display: flex; align-items: flex-end; gap: 8px; }
+.hud [data-snap-pair-hud] { background: rgba(255, 255, 255, 0.95); color: #111; }
+.hud-toggle { background: rgba(255, 255, 255, 0.2); }
+
+.controller { height: 100%; display: flex; flex-direction: column; touch-action: none; user-select: none; -webkit-user-select: none; }
+.controller.join { align-items: center; justify-content: center; padding: 24px; }
+.controller.join form { display: flex; flex-direction: column; gap: 12px; width: min(360px, 100%); }
+.pad { flex: 1; touch-action: none; }
+.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; text-align: center; }
