@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 2.0.0 - 2026-10-05
+
+First npm release of `snap-pair-core` (Phases 1-3). May contain breaking changes relative to 1.x.
 
 ### Added (Phase 3: CLI, presets, templates, packaging; see `docs/plan-phase3.md`)
 - `snap-pair` CLI (`npx snap-pair init`, `presets`, `recommend`, `--help`,
