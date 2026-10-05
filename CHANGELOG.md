@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+### Added (Phase 2: transports, pairing, client utilities; see `docs/plan-phase2.md`)
+- `src/transports/protocol.ts`: versioned JSON wire protocol (`hello`, `join`,
+  `leave`, `state`, `message`, `ping`) with `decodeWire`/`encodeWire`.
+- `src/transports/relay.ts`: `RelayTransport`, a shared host-authoritative
+  engine. It handles admission (`admit` hook, `maxPlayers`), roster/state
+  fan-out, heartbeats and timeouts, room-key claiming, and messaging.
+- `src/transports/broadcast.ts`: `BroadcastChannelTransport` for
+  same-machine multi-tab/window rooms. It works offline and fails with
+  `TransportError('unsupported')` when `BroadcastChannel` is missing.
+- `src/transports/partykit.ts`: `PartyKitTransport` over WebSocket with an
+  injectable socket factory (`partysocket` if importable, else the global
+  `WebSocket` with reconnect/backoff). Also `buildPartyKitUrl`.
+- `examples/partykit/`: minimal relay server (`server.ts`, `partykit.json`,
+  README). The unit tests run this server.
+- `src/transports/webrtc.ts`: `WebRTCTransport`, a DataChannel star
+  (host <-> guests). Signaling goes over any messaging transport, with
+  configurable `iceServers`. ICE restart and automatic re-offer are not done
+  yet (`TODO(phase3)`).
+- `src/pairing/pin.ts`: `generatePin` (CSPRNG, no modulo bias),
+  `normalizePin` (full-width digits, dashes, spaces), `isValidPin`,
+  `verifyPin` (constant-time compare), `formatPin`, and
+  `deriveRoomId`/`deriveChannelName` (SHA-256 via SubtleCrypto, with an
+  identical pure-JS fallback).
+- `src/pairing/qr.ts`: `buildPairingJoinUrl`, `parseJoinUrl`, `loadQrLib`,
+  `toQrDataUrl`, `createQrRenderer`, and `useQrRenderer` (optional `qrcode`).
+- `src/client/wakeLock.ts`: `createWakeLock`, `useWakeLock`, and
+  `isWakeLockSupported`. The lock is re-acquired when the page becomes
+  visible again.
+- `src/client/orientation.ts`: `needsPermission`,
+  `requestOrientationPermission` (iOS 13+ user-gesture flow),
+  `subscribeOrientation`, `subscribeMotion`, `lockScreenOrientation`,
+  `unlockScreenOrientation`, and `getScreenOrientation`. All are SSR-safe.
+- `src/core/utils.ts`: `getRandomBytes`, `generateRoomCode`, `createId`.
+- Optional peer dependencies: `partysocket`, `qrcode`. No new runtime
+  dependency.
+- Tests for every new module, using fakes for BroadcastChannel, WebSocket,
+  PartyKit, RTCPeerConnection, wake lock, device orientation/motion, and
+  crypto.
+
+### Changed (Phase 2)
+- `HostHUD` hides the QR figure when `renderQr` returns `null`/`undefined`.
+  It also shows the PIN row only when the PIN differs from the room code.
+
 ### Added (Phase 1: core + transport foundation; see `docs/plan-phase1.md`)
 - `src/core/types.ts`: transport-agnostic types (`Peer`, `PeerRole`, `Room`,
   `RoomStatus`, `ConnectionStatus`, `TransportMessage`,
