@@ -35,9 +35,10 @@ export interface HostHUDProps {
   pairing: PairingInfo | null;
   /**
    * Renders the QR code for `value` (the join URL). snap-pair ships no QR
-   * encoder; plug one in, e.g. with `qrcode.react`:
+   * encoder; plug one in, e.g. `useQrRenderer()` from `src/pairing/qr.ts`
+   * (optional `qrcode` peer dependency) or `qrcode.react`:
    * `renderQr={(value, size) => <QRCodeSVG value={value} size={size} />}`.
-   * Without it the HUD falls back to the link and the room code.
+   * Without it, or when it returns null, the HUD falls back to the link and the room code.
    */
   renderQr?: (value: string, size: number) => ReactNode;
   /** Pixel size passed to `renderQr`. Default: 192. */
@@ -104,6 +105,12 @@ export function HostHUD({
     setCopied(false);
   }, [joinUrl]);
 
+  // A renderer may return null (e.g. no QR encoder available); then the figure is omitted.
+  const qr = joinUrl && renderQr ? renderQr(joinUrl, qrSize) : null;
+  const hasQr = qr !== null && qr !== undefined && qr !== false;
+  // PIN-only rooms (relay transports with `pairing: 'pin'`) use the PIN as the code; show it once.
+  const showPin = Boolean(pairing?.pin) && pairing?.pin !== pairing?.code;
+
   const canCopy = Boolean(joinUrl) && typeof navigator !== 'undefined' && Boolean(navigator.clipboard?.writeText);
   const copyLink = () => {
     if (!joinUrl) return;
@@ -116,9 +123,9 @@ export function HostHUD({
         <p role="status">{labels.waiting}</p>
       ) : (
         <>
-          {joinUrl && renderQr && (
+          {hasQr && (
             <figure style={{ margin: 0, textAlign: 'center' }} data-snap-pair-qr="">
-              {renderQr(joinUrl, qrSize)}
+              {qr}
               <figcaption style={styles.label}>{labels.scanToJoin}</figcaption>
             </figure>
           )}
@@ -130,7 +137,7 @@ export function HostHUD({
             </span>
           </div>
 
-          {pairing.pin && (
+          {showPin && pairing.pin && (
             <div style={{ textAlign: 'center' }}>
               <div style={styles.label}>{labels.pin}</div>
               <span style={styles.pin} aria-label={`${labels.pin}: ${pairing.pin.split('').join(' ')}`}>
