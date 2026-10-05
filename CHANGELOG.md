@@ -2,6 +2,65 @@
 
 ## Unreleased
 
+### Added (Phase 3: CLI, presets, templates, packaging; see `docs/plan-phase3.md`)
+- `snap-pair` CLI (`npx snap-pair init`, `presets`, `recommend`, `--help`,
+  `--version`). The interactive wizard (`node:readline/promises`, no new
+  dependencies) offers four paths: by experience (seven presets), by
+  architecture (same device / realtime / P2P / managed), by stack (Firebase /
+  Cloudflare-PartyKit / no backend), or a free-text consult that runs a
+  rule-based en/ja keyword recommender (no paid API). Every choice lists pros,
+  cons, and free-tier cost notes. For CI and agents, flags (`--yes`,
+  `--preset`, `--transport`, `--pairing`, `--out`, `--json`, `--lang`, ...)
+  answer every question.
+- `snap-pair.config.json`: JSON Schema (`CONFIG_JSON_SCHEMA`, shipped as
+  `snap-pair-core/config.schema.json`) plus `validateConfig`, which also
+  checks that the preset, transport, and pairing method fit together.
+- `src/presets`: registry of the seven presets (`PRESETS`, `getPreset`,
+  `supportedTransports`, `pairingFor`, `presetsForTransport`). Each entry has
+  en/ja names and descriptions, transports, pairing methods, message shapes,
+  rate limits, controller needs, and recommender keywords.
+- `src/templates`: starter apps for Stroke Stream, Particle Blast, Type Throw,
+  Room Quiz/Poll, Virtual Controller, and Motion/Sensor (Vite + React host
+  and controller pages on a shared scaffold, plus a PartyKit relay), and a
+  single-file BroadcastChannel demo for Local Multi-Display. They are
+  typechecked against the library (`tsconfig.templates.json`).
+- `src/i18n`: `en`/`ja` dictionaries, `t()`, `tList()`, `createTranslator()`,
+  and `detectLocale()` (`LC_ALL`/`LC_MESSAGES`/`LANG`/`Intl` in Node,
+  `navigator.languages` in browsers, `en` fallback).
+- `ControllerWrapper`: controller-side shell with connection status, a
+  reconnect banner, a wake-lock toggle, the iOS motion-permission button, and
+  fullscreen with orientation lock. All strings are localized.
+- `src/client/fullscreen.ts`: `enterFullscreen`, `exitFullscreen`,
+  `isFullscreen`, `isFullscreenSupported`, `onFullscreenChange`.
+- `useSnapPair({ transport })`: the hook accepts any `Transport` instance or
+  factory and returns the same shape as before. Without `transport` it uses
+  the Firebase path exactly as before.
+- `WebRTCTransport` recovery: ICE restart when a guest's connection fails,
+  then fresh offers with exponential backoff after its channel drops
+  (`reconnect` option). The host keeps failed peers for a grace period.
+- `WebRTCTransport` chunking: frames over `maxMessageBytes` (16 KiB) are
+  split and reassembled (`maxReassembledBytes`, 1 MiB) via
+  `src/transports/chunking.ts` (`splitMessage`, `Reassembler`).
+- Build: tsup produces `dist/` (ESM + CJS + `.d.ts`) and the `snap-pair` bin.
+
+### Changed (Phase 3)
+- Packaging: `main`/`module`/`types` point to `dist/`. The `exports` map
+  covers `.`, `./hooks/useSnapPair`, the legacy deep imports
+  `./src/hooks/useSnapPair(.ts)`, `./transports/*`, `./config.schema.json`,
+  and `./package.json`. Also added: `"type": "module"`,
+  `"sideEffects": false`, `engines.node >= 18`, a `files` allowlist, and a
+  `prepublishOnly` gate (typecheck, test, build). The version stays 1.0.1.
+- `react` is now a peer dependency (`>=18.2.0`), and so is `react-dom`
+  (optional: the library itself does not import it). Both remain
+  devDependencies. `firebase` stays a dependency because the default
+  `useSnapPair` path imports it.
+- `HostHUD` accepts `locale` (`'en'`, `'ja'`, `'auto'`). `labels` still
+  overrides single strings. `HostHUDLabels.pairing` (optional) names the
+  region.
+- WebRTC signals carry an optional per-connection `session` id (and
+  `restart` for ICE restarts), so stale answers and candidates are ignored.
+  Phase 2 peers without it still interoperate.
+
 ### Added (Phase 2: transports, pairing, client utilities; see `docs/plan-phase2.md`)
 - `src/transports/protocol.ts`: versioned JSON wire protocol (`hello`, `join`,
   `leave`, `state`, `message`, `ping`) with `decodeWire`/`encodeWire`.
