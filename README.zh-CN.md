@@ -300,3 +300,5 @@ npx snap-pair recommend "a tilt racing game for 4 friends"
 ## 许可协议
 
 MIT —— 详见 [LICENSE](./LICENSE)。
+
+> v2.1.0+ adds experimental ultrasonic (Proximity) sound pairing alongside QR and PIN. See the English README for API details and limitations.

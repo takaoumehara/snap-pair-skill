@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import type { ConnectionStatus, PairingInfo } from '../core/types';
 import { detectLocale, getMessages, type Locale } from '../i18n';
+import { useSoundPairing } from '../pairing/useSoundPairing';
 
 export interface HostHUDLabels {
   waiting: string;
@@ -12,6 +13,10 @@ export interface HostHUDLabels {
   copied: string;
   /** Accessible name of the HUD region. Default: `'Pairing'`. */
   pairing?: string;
+  /** Label for the optional ultrasonic proximity toggle. */
+  sound?: string;
+  soundOn?: string;
+  soundOff?: string;
   status: Record<ConnectionStatus, string>;
 }
 
@@ -24,6 +29,9 @@ export const defaultHostHUDLabels: HostHUDLabels = {
   copyLink: 'Copy link',
   copied: 'Copied',
   pairing: 'Pairing',
+  sound: 'Proximity sound',
+  soundOn: 'Sound on',
+  soundOff: 'Sound off',
   status: {
     idle: 'Idle',
     connecting: 'Connecting…',
@@ -62,6 +70,11 @@ export interface HostHUDProps {
   style?: CSSProperties;
   /** Extra content rendered at the bottom of the HUD (e.g. a start button). */
   children?: ReactNode;
+  /**
+   * When true, show an experimental Proximity (ultrasonic) toggle that emits
+   * `pairing.pin || pairing.code` via Web Audio. QR and PIN stay primary.
+   */
+  enableSoundPairing?: boolean;
 }
 
 /** HUD labels from the bundled dictionaries (`src/i18n/locales`); `'auto'` uses `detectLocale()`. */
@@ -108,6 +121,7 @@ export function HostHUD({
   className,
   style,
   children,
+  enableSoundPairing = false,
 }: HostHUDProps) {
   const base = locale ? getHostHUDLabels(locale) : defaultHostHUDLabels;
   const labels: HostHUDLabels = {
@@ -127,6 +141,9 @@ export function HostHUD({
   const hasQr = qr !== null && qr !== undefined && qr !== false;
   // PIN-only rooms (relay transports with `pairing: 'pin'`) use the PIN as the code; show it once.
   const showPin = Boolean(pairing?.pin) && pairing?.pin !== pairing?.code;
+
+  const soundToken = pairing?.pin || pairing?.code || null;
+  const sound = useSoundPairing({ token: enableSoundPairing ? soundToken : null });
 
   const canCopy = Boolean(joinUrl) && typeof navigator !== 'undefined' && Boolean(navigator.clipboard?.writeText);
   const copyLink = () => {
@@ -170,6 +187,17 @@ export function HostHUD({
                 <button type="button" onClick={copyLink}>{copied ? labels.copied : labels.copyLink}</button>
               )}
             </div>
+          )}
+
+          {enableSoundPairing && sound.supported && soundToken && (
+            <button
+              type="button"
+              data-snap-pair-sound=""
+              aria-pressed={sound.emitting}
+              onClick={() => { if (sound.emitting) sound.stopEmit(); else void sound.startEmit(); }}
+            >
+              {sound.emitting ? (labels.soundOn ?? 'Sound on') : (labels.soundOff ?? labels.sound ?? 'Proximity sound')}
+            </button>
           )}
         </>
       )}

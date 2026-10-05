@@ -1,6 +1,6 @@
 ---
 name: snap-pair
-description: Use when building React or Next.js apps that pair nearby devices (phones, screens, tabs) by QR code, room code, or PIN — multi-device rooms, second-screen controllers, audience quizzes and polls, live drawing or reactions, motion controls, multi-monitor displays, presence, temporary sessions, or participant-limited access — over Firebase Realtime Database, PartyKit, WebRTC, or BroadcastChannel.
+description: Use when building React or Next.js apps that pair nearby devices (phones, screens, tabs) by QR code, room code, PIN, or experimental ultrasonic sound — multi-device rooms, second-screen controllers, audience quizzes and polls, live drawing or reactions, motion controls, multi-monitor displays, presence, temporary sessions, or participant-limited access — over Firebase Realtime Database, PartyKit, WebRTC, or BroadcastChannel.
 ---
 
 # snap-pair
@@ -39,7 +39,7 @@ Transport trade-offs (cost notes are current free tiers; check pricing before la
 Rules that follow from the table:
 
 - Never pick Firebase for a preset: every preset streams input with `send`/`broadcast`, which `FirebaseTransport` rejects (`capabilities.messaging === false`). Keep Firebase for auth/persistence and add PartyKit for the realtime part if needed.
-- PIN pairing works only on relay transports; `broadcast` pairing only on BroadcastChannel.
+- PIN and experimental `sound` (ultrasonic Proximity) pairing work only on relay transports; `broadcast` pairing only on BroadcastChannel. Sound needs mic permission and is sensitive to noise — keep QR/PIN primary.
 - Respect the preset's rate limit (`PRESETS[i].rateLimit`): batch strokes every 33 ms, throttle motion to 30/s, blasts to 10/s, publish quiz tallies at most 4/s. Never send per `pointermove`/sensor event.
 - Send controller input to the host only: `transport.send({ type, payload, to: room.hostId })`. A broadcast makes a WebRTC host forward it to every guest.
 - Validate and clamp every payload on the host; it comes from other devices.

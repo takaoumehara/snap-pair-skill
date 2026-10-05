@@ -37,7 +37,7 @@ export const CONFIG_FILE_NAME = 'snap-pair.config.json';
 export const CONFIG_VERSION = 1;
 
 export const TRANSPORT_KINDS: readonly TransportKind[] = ['firebase', 'partykit', 'webrtc', 'broadcast'];
-export const PAIRING_METHODS: readonly PairingMethod[] = ['qr', 'code', 'pin', 'broadcast'];
+export const PAIRING_METHODS: readonly PairingMethod[] = ['qr', 'code', 'pin', 'broadcast', 'sound'];
 
 export interface SnapPairConfig {
   $schema?: string;

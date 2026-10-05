@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.1.0 - 2026-10-05
+
+### Added
+- **Experimental Proximity pairing (Web Audio ultrasonic):** host emits an inaudible ~18–20 kHz FSK token (PIN or room code); a nearby phone page listens on the mic, demodulates, and joins via the existing transport. QR and 6-digit PIN stay primary.
+  - Pure codec: `encodeSoundToken` / `decodeSoundToken` (synthetic-buffer round-trip tested)
+  - Live helpers: `startSoundEmitter`, `startSoundListener`, `isSoundPairSupported`, `normalizeSoundToken`
+  - React: `useSoundPairing` hook; optional `HostHUD` `enableSoundPairing` toggle
+  - Pairing method `'sound'` on PartyKit, WebRTC, and BroadcastChannel (`TRANSPORT_PAIRING`)
+- Docs site, README (en + ja), SKILL.md, and pairing matrix updated with limitations (noise, mic permission, browser support).
+
+### Notes
+- Sound pairing is **not** a secret channel — anyone in earshot can recover the token. Gate sensitive rooms with `admit`.
+- Firebase transport still uses QR / room code for admission; sound can still convey a room code for a guest to type or auto-join after decode in app code.
+
 ## 2.0.0 - 2026-10-05
 
 First npm release of `snap-pair-core` (Phases 1-3). May contain breaking changes relative to 1.x.
