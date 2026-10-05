@@ -300,3 +300,5 @@ La **referencia completa de la API**, las **preguntas frecuentes** y la **hoja d
 ## Licencia
 
 MIT. Consulta [LICENSE](./LICENSE).
+
+> v2.1.0+ adds experimental ultrasonic (Proximity) sound pairing alongside QR and PIN. See the English README for API details and limitations.

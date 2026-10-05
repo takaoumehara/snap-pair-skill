@@ -300,3 +300,5 @@ Firebase 전송을 쓸 때만 필요합니다. PartyKit, WebRTC, BroadcastChanne
 ## 라이선스
 
 MIT. 자세한 내용은 [LICENSE](./LICENSE)를 참고하세요.
+
+> v2.1.0+ adds experimental ultrasonic (Proximity) sound pairing alongside QR and PIN. See the English README for API details and limitations.

@@ -26,7 +26,7 @@ window.SNAP_I18N = {
 
   ja: {
     'meta.title': 'snap-pair：スマホがコントローラー、大画面がホスト',
-    'meta.description': 'snap-pairは、マルチスクリーンのインタラクティブなWeb体験をつくるオープンソースのDevToolです。QRコード・6桁PIN・ブロードキャストでスマホと画面をペアリングし、Firebase・PartyKit・WebRTC・BroadcastChannelでリアルタイムに入力を送れます。',
+    'meta.description': 'snap-pairは、マルチスクリーンのインタラクティブなWeb体験をつくるオープンソースのDevToolです。QRコード・6桁PIN・ブロードキャスト・実験的な超音波サウンドでスマホと画面をペアリングし、Firebase・PartyKit・WebRTC・BroadcastChannelでリアルタイムに入力を送れます。',
     'ui.skip': '本文へスキップ',
     'ui.copy': 'コピー',
     'ui.copied': 'コピー済み',
@@ -44,7 +44,7 @@ window.SNAP_I18N = {
 
     'hero.eyebrow': 'オープンソースのDevTool · MIT',
     'hero.tagline': 'スマホがコントローラー。大画面がホスト。',
-    'hero.lead': 'マルチスクリーンのインタラクティブなWeb体験をつくれます。参加者はいつものブラウザでQRコードを読み取るか6桁のPINを入力するだけでペアリングでき、その場のすべてのデバイスが入力と状態をリアルタイムに共有します。インストールは不要です。',
+    'hero.lead': 'マルチスクリーンのインタラクティブなWeb体験をつくれます。参加者はいつものブラウザでQRコードを読み取るか、6桁のPINを入力するか、（実験的に）超音波の近接サウンドでペアリングでき、その場のすべてのデバイスが入力と状態をリアルタイムに共有します。インストールは不要です。',
     'hero.ctaStart': 'はじめる',
     'hero.ctaDemo': '2タブでデモを試す',
     'hero.alt': 'スマホで描いた線が、QRコードとPINを表示した大画面にリアルタイムで表示される様子。',
@@ -53,7 +53,7 @@ window.SNAP_I18N = {
     'what.title': '3つのレイヤーと、小さなAPI',
     'what.lead': 'プロダクト（クイズ、お絵描きウォール、ゲーム、ライトショー、ショールームなど）はあなたが用意します。snap-pairはペアリング、リアルタイム通信、そしてつまずきやすいスマホ側の細かな処理を引き受けます。',
     'what.pairTitle': 'ペアリング',
-    'what.pairBody': 'デバイスがルームを見つける方法です。参加URLを埋め込んだQRコード、6桁のPIN、紛らわしい文字を除いたルームコード、またはタブ間のローカルブロードキャスト。',
+    'what.pairBody': 'デバイスがルームを見つける方法です。参加URLを埋め込んだQRコード、6桁のPIN、紛らわしい文字を除いたルームコード、タブ間のローカルブロードキャスト、または実験的な超音波サウンド（Proximity）。',
     'what.trTitle': 'Transport',
     'what.trBody': '1つの<code>Transport</code> APIで4つのバックエンドを扱えます。Firebase Realtime Database、PartyKit、WebRTC DataChannel、BroadcastChannel。切り替えは1行です。',
     'what.clTitle': 'クライアントユーティリティ',
@@ -89,6 +89,9 @@ window.SNAP_I18N = {
     'connect.codeBody': '<code>ABC 234</code>のような6文字で、見間違えやすい文字は含みません。Firebaseのデフォルトです。',
     'connect.bc': 'ブロードキャスト',
     'connect.bcBody': '同じマシンで別のタブやウィンドウを開くだけ。ネットワークは使いません。',
+    'connect.sound': '近接サウンド',
+    'connect.soundBody': '実験的機能。ホストが約18–20kHzの不可聴音を出し、近くのスマホがマイクで拾って参加します。マイク許可が必要で、騒音や一部ブラウザでは不安定です。QRとPINが主経路です。',
+    'connect.soundNote': 'サウンドペアリングの制限：周囲の騒音、マイク許可、ブラウザ差（Chrome/Edgeが最安定）。音は秘密ではありません。ゲート付きルームでは admit を使ってください。',
     'connect.flowAlt': 'シーケンス：ホストがルームを作成し、QRとPINを表示。コントローラーが読み取りまたは入力して参加し、ホストが受け入れた後、リアルタイムのメッセージが双方向に流れます。',
     'connect.hud': '1つのコンポーネントですべてを表示',
 
@@ -232,6 +235,7 @@ window.SNAP_I18N = {
     'road.later': '今後',
     'road.p1': '<b>Phase 1：</b><code>Transport</code>の抽象化、<code>FirebaseTransport</code>、<code>HostHUD</code>',
     'road.p2': '<b>Phase 2：</b>PartyKit・WebRTC・BroadcastChannelのTransport、PINとQRのヘルパー、Wake Lockと端末の向き',
+    'road.sound': '<b>Proximity：</b>Web Audio超音波ペアリング（実験的）',
     'road.p3': '<b>Phase 3：</b><code>npx snap-pair init</code>（4つの入り口、英語/日本語）と<code>presets</code>・<code>recommend</code>、7つのプリセットテンプレート、<code>ControllerWrapper</code>、<code>useSnapPair({ transport })</code>、i18n、exports map付きのESM/CJSビルド、WebRTCの自動再接続と分割送信',
     'road.p4': '<b>WebRTC：</b>再ネゴシエーション（チャネルやメディアの追加）、バイナリペイロード、バックプレッシャー（<code>bufferedAmount</code>）、メッシュ構成、ホストの引き継ぎ、実ブラウザでのE2Eテスト',
     'road.p5': '<b>バンドルサイズ：</b>ルートの<code>useSnapPair</code>が<code>firebase/auth</code>を静的にインポートしています。Firebaseを含まないフックのエントリー、または遅延読み込み',

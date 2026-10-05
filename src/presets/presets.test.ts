@@ -72,9 +72,11 @@ describe('presets registry', () => {
 
   it('filters pairing methods by transport', () => {
     const quiz = getPreset('room-quiz-poll')!;
-    expect(pairingFor(quiz, 'partykit')).toEqual(['pin', 'qr', 'code']);
-    expect(pairingFor(quiz, 'broadcast')).toEqual(['pin', 'code']);
+    expect(pairingFor(quiz, 'partykit')).toEqual(['pin', 'qr', 'code', 'sound']);
+    expect(pairingFor(quiz, 'broadcast')).toEqual(['pin', 'code', 'sound']);
     expect(TRANSPORT_PAIRING.firebase).not.toContain('pin');
+    expect(TRANSPORT_PAIRING.partykit).toContain('sound');
+    expect(TRANSPORT_PAIRING.firebase).not.toContain('sound');
   });
 
   it('lists presets for a transport, recommended first', () => {

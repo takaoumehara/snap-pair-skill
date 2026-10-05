@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>snap-pair: phone as controller, big screen as host</title>
-  <meta name="description" data-i18n-key="meta.description" content="snap-pair is an open-source DevTool for multi-screen interactive web experiences. Pair phones and screens with QR, 6-digit PIN or broadcast, then stream realtime input over Firebase, PartyKit, WebRTC or BroadcastChannel.">
+  <meta name="description" data-i18n-key="meta.description" content="snap-pair is an open-source DevTool for multi-screen interactive web experiences. Pair phones and screens with QR, 6-digit PIN, broadcast, or experimental ultrasonic sound, then stream realtime input over Firebase, PartyKit, WebRTC or BroadcastChannel.">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="snap-pair">
   <meta property="og:title" content="snap-pair: phone as controller, big screen as host">
-  <meta property="og:description" content="Pair phones and screens with QR, PIN or broadcast. Stream realtime input over Firebase, PartyKit, WebRTC or BroadcastChannel. 7 UX presets and a CLI.">
+  <meta property="og:description" content="Pair phones and screens with QR, PIN, broadcast, or experimental ultrasonic sound. Stream realtime input over Firebase, PartyKit, WebRTC or BroadcastChannel. 7 UX presets and a CLI.">
   <meta property="og:url" content="https://takaoumehara.github.io/snap-pair-skill/">
   <meta property="og:image" content="https://takaoumehara.github.io/snap-pair-skill/assets/img/hero.svg">
   <meta name="twitter:card" content="summary_large_image">
@@ -81,7 +81,7 @@
         <div class="hero-grid">
           <p class="tagline" data-i18n="hero.tagline">Phone as controller. Big screen as host.</p>
           <div>
-            <p class="lead" data-i18n="hero.lead">Build multi-screen interactive web experiences. People pair by scanning a QR code or typing a 6-digit PIN in the browser they already have, and every device in the room shares live input and state. Nothing to install.</p>
+            <p class="lead" data-i18n="hero.lead">Build multi-screen interactive web experiences. People pair by scanning a QR code, typing a 6-digit PIN, or (experimentally) hearing an ultrasonic chirp in the browser they already have, and every device in the room shares live input and state. Nothing to install.</p>
             <ul class="meta-list" aria-label="Transports">
               <li>Firebase RTDB</li><li>PartyKit</li><li>WebRTC</li><li>BroadcastChannel</li>
             </ul>
@@ -116,7 +116,7 @@
           <article class="col">
             <span class="col-k">Layer 1</span>
             <h3 data-i18n="what.pairTitle">Pairing</h3>
-            <p data-i18n="what.pairBody">How a device finds the room: a QR code that carries the join URL, a 6-digit PIN, a look-alike-free room code, or local broadcast between tabs.</p>
+            <p data-i18n="what.pairBody">How a device finds the room: a QR code that carries the join URL, a 6-digit PIN, a look-alike-free room code, local broadcast between tabs, or experimental ultrasonic sound (Proximity).</p>
           </article>
           <article class="col">
             <span class="col-k">Layer 2</span>
@@ -216,7 +216,7 @@ await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });</code></pre></div>
             <p class="lead" data-i18n="connect.lead">The host creates a room and shows how to join. Guests use the camera or a keyboard. Then messages flow both ways in realtime.</p>
           </div>
         </div>
-        <div class="cols cols-4" data-reveal>
+        <div class="cols cols-4 connect-modes" data-reveal>
           <article class="col">
             <span class="col-k">01</span>
             <h3 data-i18n="connect.qr">QR code</h3>
@@ -241,7 +241,14 @@ await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });</code></pre></div>
             <p data-i18n="connect.bcBody">Open another tab or window on the same machine. No network involved.</p>
             <p class="apis"><code>BroadcastChannelTransport</code></p>
           </article>
+          <article class="col">
+            <span class="col-k">05</span>
+            <h3 data-i18n="connect.sound">Proximity sound</h3>
+            <p data-i18n="connect.soundBody">Experimental. The host emits an inaudible ~18–20&nbsp;kHz tone; a nearby phone listens on the mic and joins. Needs mic permission; noisy rooms and some browsers are unreliable. QR and PIN stay primary.</p>
+            <p class="apis"><code>useSoundPairing</code><code>encodeSoundToken</code></p>
+          </article>
         </div>
+        <p class="muted small note" data-i18n="connect.soundNote" data-reveal>Sound pairing limitations: ambient noise, microphone permission, and uneven browser support (Chrome/Edge best). The tone is not a secret — use <code>admit</code> for gated rooms.</p>
         <figure class="figure" data-reveal>
           <img class="diagram" src="assets/img/pairing-flow.svg" width="1000" height="580" loading="lazy" alt="Sequence: host creates room, shows QR and PIN, controller scans or enters PIN, joins, host admits, realtime messages flow both ways." data-i18n-attr="alt:connect.flowAlt">
           <figcaption><span class="fig-no">Fig. 2</span><span>Pairing sequence</span></figcaption>
@@ -793,6 +800,7 @@ guests join by QR code and answer on their phones"].</code></pre></div>
           <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.p1"><b>Phase 1:</b> <code>Transport</code> abstraction, <code>FirebaseTransport</code>, <code>HostHUD</code></span></li>
           <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.p2"><b>Phase 2:</b> PartyKit, WebRTC and BroadcastChannel transports; PIN and QR helpers; wake lock and orientation</span></li>
           <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.p3"><b>Phase 3:</b> <code>npx snap-pair init</code> (4 paths, en/ja) with <code>presets</code> and <code>recommend</code>, 7 preset templates, <code>ControllerWrapper</code>, <code>useSnapPair({ transport })</code>, i18n, ESM/CJS build with an exports map, WebRTC auto-reconnect and chunking</span></li>
+          <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.sound"><b>Proximity:</b> Web Audio ultrasonic pairing (experimental)</span></li>
           <li><span class="state next" data-i18n="road.next">Next</span><span data-i18n="road.p4"><b>WebRTC:</b> renegotiation (extra channels, media), binary payloads, backpressure (<code>bufferedAmount</code>), mesh topology, host migration, real-browser e2e tests</span></li>
           <li><span class="state next" data-i18n="road.next">Next</span><span data-i18n="road.p5"><b>Bundle size:</b> the root <code>useSnapPair</code> imports <code>firebase/auth</code> statically; a Firebase-free hook entry or lazy loading</span></li>
           <li><span class="state later" data-i18n="road.later">Later</span><span data-i18n="road.p6"><b>Firebase:</b> numeric PINs and ephemeral messaging, so presets can run on it. More locales, TURN guidance</span></li>

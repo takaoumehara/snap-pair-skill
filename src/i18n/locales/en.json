@@ -15,7 +15,10 @@
       "reconnecting": "Reconnecting…",
       "disconnected": "Offline",
       "error": "Connection error"
-    }
+    },
+    "sound": "Proximity sound",
+    "soundOn": "Sound on",
+    "soundOff": "Sound off"
   },
   "controller": {
     "region": "Controller",
@@ -107,6 +110,10 @@
     "broadcast": {
       "name": "Same-device broadcast",
       "description": "Other tabs on the same machine find the room by code; no scanning."
+    },
+    "sound": {
+      "name": "Ultrasonic sound (Proximity)",
+      "description": "Experimental: the host emits an inaudible ~18–20 kHz tone; a nearby phone listens on the mic and joins. Needs mic permission; noisy rooms and some browsers are unreliable. QR and PIN stay primary."
     }
   },
   "architectures": {

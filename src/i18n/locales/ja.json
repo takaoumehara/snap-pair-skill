@@ -15,7 +15,10 @@
       "reconnecting": "再接続中…",
       "disconnected": "オフライン",
       "error": "接続エラー"
-    }
+    },
+    "sound": "近接サウンド",
+    "soundOn": "サウンドオン",
+    "soundOff": "サウンドオフ"
   },
   "controller": {
     "region": "コントローラー",
@@ -107,6 +110,10 @@
     "broadcast": {
       "name": "同一端末ブロードキャスト",
       "description": "同じマシンの別タブがコードでルームを見つけます。スキャン不要。"
+    },
+    "sound": {
+      "name": "超音波サウンド（Proximity）",
+      "description": "実験的：ホストが約18–20kHzの不可聴音を出し、近くのスマホがマイクで拾って参加します。マイク許可が必要で、騒音や一部ブラウザでは不安定です。QRとPINが主経路です。"
     }
   },
   "architectures": {

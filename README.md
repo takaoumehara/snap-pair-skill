@@ -25,14 +25,14 @@
 
 **snap-pair is a DevTool for multi-screen interactive web experiences.**
 A phone becomes the controller and a big screen becomes the host. People pair
-by scanning a QR code or typing a 6-digit PIN in their normal browser, with
+by scanning a QR code, typing a 6-digit PIN, or (experimentally) hearing an ultrasonic chirp in their normal browser, with
 nothing to install, and every device in the room shares live input and state.
 
 You bring the product (a quiz, a drawing wall, a game, a light show, a
 showroom) and build it on top. snap-pair handles the pairing, the realtime
 transport and the phone-side details that are easy to get wrong.
 
-- **Pairing:** QR code, 6-digit PIN, or local broadcast between tabs.
+- **Pairing:** QR code, 6-digit PIN, local broadcast between tabs, or experimental ultrasonic sound (Proximity).
 - **Transport:** Firebase Realtime Database, PartyKit, WebRTC DataChannel or
   BroadcastChannel, all behind one `Transport` API.
 - **Client utilities:** screen wake lock, device orientation and motion
@@ -124,6 +124,7 @@ Swap `BroadcastChannelTransport` for `PartyKitTransport` (or
 |---|---|---|---|
 | **QR code** | Scans with the camera; the URL carries `?room=` or `?pin=` | All transports | `buildPairingJoinUrl`, `parseJoinUrl`, `useQrRenderer`, `HostHUD` |
 | **6-digit PIN** | Types `042 917` (full-width digits and dashes are normalized) | PartyKit, WebRTC, BroadcastChannel | `generatePin`, `normalizePin`, `isValidPin`, `verifyPin` |
+| **Ultrasonic sound (Proximity)** | Host emits ~18–20 kHz FSK; phone listens on mic | PartyKit, WebRTC, BroadcastChannel (experimental) | `encodeSoundToken`, `decodeSoundToken`, `startSoundEmitter`, `startSoundListener`, `useSoundPairing` |
 | **Room code** | Types a 6-character code like `ABC 234` (no look-alike characters) | All transports (Firebase's default) | `normalizeRoomCode`, `generateRoomCode` |
 | **Broadcast** | Opens another tab/window on the same machine | BroadcastChannel | `BroadcastChannelTransport` |
 
@@ -137,6 +138,8 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 ```
 
 ---
+
+> **Sound pairing limitations:** experimental Proximity mode. Needs microphone permission on the guest, a speaker that can produce ~18–20 kHz, and a relatively quiet room. Chrome/Edge work best; Safari is uneven. The tone is not a secret — anyone nearby can recover the token; use `admit` for gated rooms. Prefer QR or PIN in production.
 
 ## Transports and when to use which
 
@@ -687,6 +690,8 @@ Create transports inside effects or client components.
       `presets` and `recommend` commands, 7 preset templates,
       `ControllerWrapper`, `useSnapPair({ transport })`, i18n, ESM/CJS build
       with an `exports` map, WebRTC auto-reconnect and message chunking
+
+- [x] **Proximity pairing:** Web Audio ultrasonic FSK (`sound`) as an experimental pairing layer
 
 Still to do:
 

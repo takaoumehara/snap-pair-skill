@@ -28,7 +28,7 @@
 
 プロダクト（クイズ、お絵描きウォール、ゲーム、ライトショー、ショールームなど）はご自身で用意し、その上に構築していただく形です。snap-pairは、ペアリング、リアルタイム通信（Transport）、そしてつまずきやすいスマートフォン側の細かな処理を引き受けます。
 
-- **ペアリング：** QRコード、6桁のPIN、またはタブ間のローカルブロードキャスト。
+- **ペアリング：** QRコード、6桁のPIN、タブ間のローカルブロードキャスト、または実験的な超音波サウンド（Proximity）。
 - **Transport：** Firebase Realtime Database、PartyKit、WebRTC DataChannel、BroadcastChannelを、すべて1つの`Transport` APIで扱えます。
 - **クライアントユーティリティ：** 画面のスリープ防止（Wake Lock）、デバイスの向き・モーション（iOSの許可ダイアログを含む）、画面の向きのロック。
 - **7種類のUXプリセット**と、動作するアプリを生成するCLI（`npx snap-pair init`）。
@@ -112,6 +112,7 @@ await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
 |---|---|---|---|
 | **QRコード** | カメラでスキャン。URLに`?room=`または`?pin=`が含まれます | すべてのTransport | `buildPairingJoinUrl`, `parseJoinUrl`, `useQrRenderer`, `HostHUD` |
 | **6桁のPIN** | `042 917`のように入力（全角数字やハイフンも正規化されます） | PartyKit, WebRTC, BroadcastChannel | `generatePin`, `normalizePin`, `isValidPin`, `verifyPin` |
+| **超音波サウンド（Proximity）** | ホストが約18–20kHzのFSKを発信；スマホがマイクで復調 | PartyKit・WebRTC・BroadcastChannel（実験的） | `encodeSoundToken`、`decodeSoundToken`、`startSoundEmitter`、`startSoundListener`、`useSoundPairing` |
 | **ルームコード** | `ABC 234`のような6文字のコードを入力（見間違えやすい文字は使いません） | すべてのTransport（Firebaseのデフォルト） | `normalizeRoomCode`, `generateRoomCode` |
 | **ブロードキャスト** | 同じマシンで別のタブ／ウィンドウを開く | BroadcastChannel | `BroadcastChannelTransport` |
 

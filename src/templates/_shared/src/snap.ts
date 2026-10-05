@@ -21,7 +21,7 @@ import rawConfig from '../snap-pair.config.json';
 interface AppConfig {
   preset: string | null;
   transport: 'broadcast' | 'partykit' | 'webrtc' | 'firebase';
-  pairing: 'qr' | 'code' | 'pin' | 'broadcast';
+  pairing: 'qr' | 'code' | 'pin' | 'broadcast' | 'sound';
   locale?: Locale;
   maxPlayers?: number;
   namespace?: string;

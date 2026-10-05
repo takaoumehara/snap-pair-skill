@@ -10,8 +10,8 @@ export type Unsubscribe = () => void;
 /** Backends that can carry a snap-pair room (all four implemented as of Phase 2). */
 export type TransportKind = 'firebase' | 'partykit' | 'webrtc' | 'broadcast';
 
-/** How a peer found the room. `pin` works with the relay transports (BroadcastChannel, PartyKit, WebRTC), not Firebase. */
-export type PairingMethod = 'qr' | 'code' | 'pin' | 'broadcast';
+/** How a peer found the room. `pin` and experimental `sound` work with the relay transports (BroadcastChannel, PartyKit, WebRTC), not Firebase. */
+export type PairingMethod = 'qr' | 'code' | 'pin' | 'broadcast' | 'sound';
 
 /**
  * Lifecycle of the link between this client and the transport backend.

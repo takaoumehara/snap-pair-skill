@@ -100,6 +100,33 @@ export {
   type QrOptions,
   type QrRenderer,
 } from './pairing/qr';
+export {
+  SOUND_PAIR_BIT_MS,
+  SOUND_PAIR_DEFAULT_GAIN,
+  SOUND_PAIR_MARK_HZ,
+  SOUND_PAIR_PREAMBLE,
+  SOUND_PAIR_SAMPLE_RATE,
+  SOUND_PAIR_SPACE_HZ,
+  SOUND_PAIR_VERSION,
+  crc8,
+  decodeSoundToken,
+  encodeSoundToken,
+  isSoundPairSupported,
+  normalizeSoundToken,
+  startSoundEmitter,
+  startSoundListener,
+  type SoundDecodeOptions,
+  type SoundEmitOptions,
+  type SoundEncodeOptions,
+  type SoundEmitter,
+  type SoundListenOptions,
+  type SoundListener,
+} from './pairing/sound';
+export {
+  useSoundPairing,
+  type UseSoundPairingOptions,
+  type UseSoundPairingResult,
+} from './pairing/useSoundPairing';
 
 // Client utilities
 export {

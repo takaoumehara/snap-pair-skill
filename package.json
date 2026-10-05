@@ -1,7 +1,7 @@
 {
   "name": "snap-pair-core",
-  "version": "2.0.0",
-  "description": "Pair phones and screens by QR code, room code, or PIN: React hooks, components, and transports (Firebase, PartyKit, WebRTC, BroadcastChannel) for multi-device experiences, plus the `snap-pair` setup CLI",
+  "version": "2.1.0",
+  "description": "Pair phones and screens by QR code, room code, PIN, or experimental ultrasonic sound: React hooks, components, and transports (Firebase, PartyKit, WebRTC, BroadcastChannel) for multi-device experiences, plus the `snap-pair` setup CLI",
   "license": "MIT",
   "author": "Takao Umehara",
   "repository": {
@@ -22,7 +22,10 @@
     "webrtc",
     "broadcastchannel",
     "second-screen",
-    "controller"
+    "controller",
+    "ultrasonic",
+    "web-audio",
+    "proximity"
   ],
   "type": "module",
   "sideEffects": false,
