@@ -1,232 +1,410 @@
-# snap-pair-core
+<p align="center">
+  <a href="https://takaoumehara.github.io/snap-pair-skill/"><strong>📖 Documentation site →  takaoumehara.github.io/snap-pair-skill</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://takaoumehara.github.io/snap-pair-skill/demo.html">▶ Live two-tab demo</a>
+</p>
 
-**English** · [日本語](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ko.md)
+<p align="center">
+  <a href="https://takaoumehara.github.io/snap-pair-skill/"><img src="./docs/assets/hero.svg" alt="snap-pair: phone as controller, big screen as host. Pair with QR, 6-digit PIN or broadcast; stream over Firebase, PartyKit, WebRTC or BroadcastChannel." width="100%"></a>
+</p>
 
-Pair phones and browsers with a QR code or a six-character code, then share
-live state across every device in the room. No app install. React hook on the
-client; Firebase Auth + Cloud Functions + Realtime Database on the server.
+<p align="center">
+  <a href="https://www.npmjs.com/package/snap-pair-core"><img src="https://img.shields.io/badge/npm-snap--pair--core-cb3837?logo=npm" alt="npm: snap-pair-core"></a>
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
+  <img src="https://img.shields.io/badge/React-18%2B-61dafb?logo=react&logoColor=white" alt="React 18+">
+  <img src="https://img.shields.io/badge/TypeScript-ready-3178c6?logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/transports-4-4f46e5" alt="4 transports">
+  <img src="https://img.shields.io/badge/UX%20presets-7-0d9488" alt="7 UX presets">
+</p>
 
-This repository is the **open engine** (MIT). It is intentionally generic — you
-bring the product (the game, the vote, the checklist, the light show) and build
-it on top.
+<p align="center">
+  <b>English</b> · <a href="https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ja.md">日本語</a> · <a href="https://github.com/takaoumehara/snap-pair-skill/blob/main/README.zh-CN.md">简体中文</a> · <a href="https://github.com/takaoumehara/snap-pair-skill/blob/main/README.es.md">Español</a> · <a href="https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ko.md">한국어</a>
+</p>
+
+# snap-pair
+
+**snap-pair is a DevTool for multi-screen interactive web experiences.**
+A phone becomes the controller and a big screen becomes the host. People pair
+by scanning a QR code or typing a 6-digit PIN in their normal browser, with
+nothing to install, and every device in the room shares live input and state.
+
+You bring the product (a quiz, a drawing wall, a game, a light show, a
+showroom) and build it on top. snap-pair handles the pairing, the realtime
+transport and the phone-side details that are easy to get wrong.
+
+- **Pairing:** QR code, 6-digit PIN, or local broadcast between tabs.
+- **Transport:** Firebase Realtime Database, PartyKit, WebRTC DataChannel or
+  BroadcastChannel, all behind one `Transport` API.
+- **Client utilities:** screen wake lock, device orientation and motion
+  (including the iOS permission prompt), screen orientation lock.
+- **7 UX presets** and a CLI (`npx snap-pair init`) that scaffolds a working app.
+
+The npm package is **`snap-pair-core`** (MIT).
+
+## Contents
+
+- [Quick start](#quick-start)
+- [How devices connect](#how-devices-connect)
+- [Transports and when to use which](#transports-and-when-to-use-which)
+- [Presets](#presets)
+- [CLI](#cli)
+- [API overview](#api-overview)
+- [For everyone (non-engineers)](#for-everyone-non-engineers)
+- [Firebase setup](#firebase-setup)
+- [Security model](#security-model)
+- [AI agent skill](#ai-agent-skill)
+- [FAQ](#faq)
+- [Roadmap](#roadmap)
 
 ---
 
-## For everyone (non-engineers)
+## Quick start
 
-**What is this?**
-A way to make many people's phones join one shared screen instantly. Everyone
-scans a QR code (or types a short code) in their normal browser — no app to
-download — and their phones become part of one live, synchronized experience.
+```bash
+# 1. Scaffold a new app with the interactive wizard (en/ja)
+npx snap-pair init
 
-**Who is it for?**
-- People who run **events, venues, classes, streams, showrooms, or exhibitions**
-  and want the audience to participate with their own phones.
-- The **engineers and AI builders** who make those experiences for them.
+#    …or non-interactively (CI, AI agents)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
 
-**What can you build with it?**
-- Live voting, polls, and quizzes on a big screen
-- Group checklists and "everyone's ready" confirmations
-- Audience reactions, prediction games, collaborative drawing
-- A synchronized phone light show across a whole room
-- Any "one shared screen + many phones + instant result" moment
-
-### What do you want to do? Pick one
-
-There are three different ways to use this repository. **Pick the one that
-matches what you actually want right now** — don't do more than one, they're
-not steps of the same process, they're separate paths.
-
-| | **A. Just see it work** | **B. Have an AI build my own app** | **C. Work with the source code** |
-|---|---|---|---|
-| **For** | "I want to see it running in 2 minutes" | "I want a custom app, but I don't want to write or manage code myself" | "I'm an engineer, I want to read/modify the actual source, or contribute" |
-| **What you install** | Nothing | One AI coding tool (you probably already have it) | One AI coding tool **and** Git/Node.js familiarity |
-| **What you download** | One HTML file | **Nothing** — the AI connects directly, no repo download | The whole repository (`git clone` or ZIP) |
-| **Credit card needed?** | No | Depends on what you build — see the Firebase table below | Depends on what you build |
-| **Can you share a link with others?** | Yes (same room, same Wi-Fi/network) | Yes, once deployed | Yes, once deployed |
-| **Jump to** | [Path A](#path-a-just-see-it-work-2-minutes-no-setup) | [Path B](#path-b-have-an-ai-build-your-own-app-no-download-needed) | [Path C — "For engineers"](#for-engineers) |
-
----
-
-### Path A: Just see it work (2 minutes, no setup)
-
-1. Download this one file: [`examples/snap-pair-lite.html`](./examples/snap-pair-lite.html)
-2. Open it in your browser (double-click it).
-3. Scan the QR code with a second phone or browser.
-
-That's it — no install, no account, no credit card. This is a fixed demo (a
-tic-tac-toe two phones can play), not a custom app — for that, go to Path B.
-
----
-
-### Path B: Have an AI build your own app (no download needed)
-
-**This is the important part people usually get confused about:** you do
-**not** need to download this repository, clone it, or unzip anything for
-this path. Connecting to two small tools (called MCP servers) is enough —
-exactly like connecting to any other MCP server. The one extra thing beyond a
-normal MCP setup is telling the AI to read this project's build instructions
-directly from the web, so it knows the correct, safe way to build a snap-pair
-app.
-
-**What you need first:** one AI coding tool that can run commands and fetch
-web pages for you — Claude Code, Cursor, Codex, Gemini CLI, or similar. If you
-don't have one yet, see ["I don't have an AI coding tool yet"](#i-dont-have-an-ai-coding-tool-yet)
-below.
-
-**Step 1 — open a chat in your AI tool**, in any project folder (a brand-new
-empty folder is fine — this will become your app).
-
-**Step 2 — type this into the chat, as-is:**
-
-```
-Fetch https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
-and use it as your build instructions.
-
-Connect these two MCP servers if they aren't connected yet:
-- firebase: npx -y firebase-tools@latest mcp
-- snap-pair-provisioner: npx -y snap-pair-provisioner
-
-Then help me build: [describe what you want — e.g. "a live quiz game where
-guests join by QR code and answer on their phones"].
+# 2. Or add the library to an existing React app
+npm i snap-pair-core
 ```
 
-**Step 3 — answer the AI's questions as they come up.** It will typically ask:
-which Google account to use for Firebase, and at some point it will show you
-a one-time browser link to click to sign in to Firebase (this single click is
-the only manual step in the whole process — it cannot be automated, by design,
-for your account's safety).
+<details>
+<summary>pnpm / yarn / bun</summary>
 
-If your AI tool cannot fetch web pages, ask it to say so — then fall back to
-downloading just the one `SKILL.md` file from this repository and pasting its
-contents into the chat instead of the fetch instruction above.
+```bash
+pnpm add snap-pair-core
+yarn add snap-pair-core
+bun add snap-pair-core
+```
 
-#### I don't have an AI coding tool yet
+</details>
 
-Pick **one** (you only need one):
-- **[Cursor](https://cursor.com)** — the simplest option: a full code editor
-  with AI chat built in. Download and install like any other app.
-- **Claude Code** — install the extension from the VS Code marketplace if you
-  already use VS Code, or the standalone CLI from
-  [claude.com/code](https://claude.com/code).
-- **Codex** or **Gemini CLI** — if you already use OpenAI or Google's coding
-  tools.
+Peer dependencies: `react` (18.2+). Optional: `qrcode` (QR rendering in
+`HostHUD`), `partysocket` (a sturdier PartyKit socket) and `react-dom` (only
+the generated templates use it).
 
-Once installed, open it, open (or create) a folder for your project, and go to
-Step 1 above.
-
----
-
-### Firebase setup: what it means for Path B
-
-At some point in Path B, the AI will need to connect a **Firebase** project
-(Google's service that runs the realtime backend). Which option applies
-depends on whether you want to **learn/build privately** or **let other
-people actually use it**:
-
-| Your goal | Use | Credit card? | Can others join by URL? |
-|---|---|---|---|
-| Learn, experiment, let a child build & test | **Firebase Emulator** (runs on your computer) | **No card needed** | No — local only |
-| Let real people join from their own phones | **Firebase Blaze plan** | **Yes, a credit card is required** | Yes |
-
-- **Learning / building privately → Emulator.** It runs entirely on your own
-  computer, for free, with **no credit card**. Perfect for trying things and
-  for kids learning to build with AI. The only limit: it's local, so you can't
-  send other people a link.
-- **Going live with real guests → Blaze plan.** To publish the backend
-  (Cloud Functions) to the internet, Firebase requires the **Blaze
-  (pay-as-you-go) plan, which needs a credit card on file.** The free
-  allowance is large (about 2 million function calls per month are free), so a
-  small event usually costs nothing — but **the card is required to turn it
-  on.** Always set a budget alert in the Firebase console.
-- **Why is a card needed at all?** For safety, snap-pair checks room creation
-  and joining on the server (Cloud Functions), not in the browser. Firebase
-  does not allow Cloud Functions to be published on the free (Spark) plan — only
-  on Blaze. That's a Firebase rule, not a snap-pair limitation. If you don't
-  want to add a card, you can still do everything except share a public link by
-  using the Emulator.
-
-The two MCP servers from Step 2 above create the project, enable what's
-needed, and write your `.env` for you — you don't click through the Firebase
-console by hand. See
-[`SKILL.md`](./SKILL.md#firebase-setup-mcp-automation-vs-manual) for the full
-breakdown of what's automatic and what stays a manual, one-time step.
-
----
-
-### Path C: Work with the source code (engineers)
-
-This is for reading, modifying, or contributing to the actual source — see
-the **["For engineers"](#for-engineers)** section below. This path does
-involve downloading the repository (`git clone` or "Download ZIP" from
-GitHub), because you're working with the code itself, not just asking an AI
-to generate a new app from instructions.
-
----
-
-## For engineers
-
-`snap-pair-core` is a React/Firebase Realtime Database foundation for
-temporarily pairing browsers via a QR or six-character code, with presence and
-lightweight shared state for rooms of up to 300 participants.
-
-Production is server-assisted. Firebase Auth identifies each browser, Cloud
-Functions create rooms and admit participants, and RTDB security rules let only
-admitted room members subscribe or update narrowly scoped fields. A short
-pairing code locates a room; it is **not** an authorization credential.
-
-### Architecture
-
-- **React 18 hook** (`src/hooks/useSnapPair.ts`): auth readiness, room
-  subscription, own presence, scoped state updates, and leave behavior.
-- **Types** (`src/types/index.ts`): `SnapPlayer`, `SnapRoom`, pairing types.
-- **Callable Cloud Functions** (`functions/src/`): `createSnapRoom`,
-  `joinSnapRoom`, and a scheduled `cleanupExpiredData`.
-- **Security rules** (`database.rules.json`): membership-gated reads and narrow
-  client writes, with no broad room-level write.
-
-Room creation and joining go through the Admin SDK paths in `functions/`.
-Browsers cannot read pairing-code records, create rooms directly, or write
-membership/capacity records.
-
-### React usage
+The smallest possible multi-screen app needs no server at all. It pairs two
+tabs in the same browser with a PIN:
 
 ```ts
-import { getAuth } from 'firebase/auth';
-import { getDatabase } from 'firebase/database';
-import { getFunctions } from 'firebase/functions';
-import { useSnapPair } from './hooks/useSnapPair';
+import { BroadcastChannelTransport } from 'snap-pair-core';
 
-const pairing = useSnapPair({
-  db: getDatabase(),
-  auth: getAuth(),
-  functions: getFunctions(),
-  guest: { id: '', name: 'John Doe' },
-  maxPlayers: 8,
-});
+// Tab 1: the host (big screen)
+const host = new BroadcastChannelTransport({ pairing: 'pin' });
+await host.connect();
+const { pairing } = await host.createRoom({ initialState: { strokes: [] } });
+console.log('PIN', pairing.pin); // e.g. '042917'
+host.onMessage((m) => draw(m.payload)); // m.type === 'stroke'
 
-const {
-  room, authReady,
-  createRoom, joinRoom,
-  updateState, updateOwnPlayer, updateRoomStatus, leaveRoom,
-} = pairing;
+// Tab 2: the controller
+const ctrl = new BroadcastChannelTransport({ pairing: 'pin' });
+await ctrl.connect();
+await ctrl.joinRoom('042917');
+await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
+```
+
+Swap `BroadcastChannelTransport` for `PartyKitTransport` (or
+`WebRTCTransport`) and the same code works across the internet.
+`FirebaseTransport` shares room state but has no ephemeral messaging, so
+`broadcast` is not available there (see [Transports](#transports-and-when-to-use-which)).
+[Try it live in two tabs →](https://takaoumehara.github.io/snap-pair-skill/demo.html)
+
+---
+
+## How devices connect
+
+<p align="center">
+  <img src="./docs/assets/pairing-flow.svg" alt="Pairing flow: host creates room, shows QR and PIN, controller scans or enters PIN, joins, host admits, then realtime messages flow both ways." width="100%">
+</p>
+
+| Method | What the guest does | Works with | Helpers |
+|---|---|---|---|
+| **QR code** | Scans with the camera; the URL carries `?room=` or `?pin=` | All transports | `buildPairingJoinUrl`, `parseJoinUrl`, `useQrRenderer`, `HostHUD` |
+| **6-digit PIN** | Types `042 917` (full-width digits and dashes are normalized) | PartyKit, WebRTC, BroadcastChannel | `generatePin`, `normalizePin`, `isValidPin`, `verifyPin` |
+| **Room code** | Types a 6-character code like `ABC 234` (no look-alike characters) | All transports (Firebase's default) | `normalizeRoomCode`, `generateRoomCode` |
+| **Broadcast** | Opens another tab/window on the same machine | BroadcastChannel | `BroadcastChannelTransport` |
+
+The host shows everything with one component:
+
+```tsx
+import { HostHUD, useQrRenderer } from 'snap-pair-core';
+
+const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so the HUD shows the code only
+<HostHUD pairing={pairing} renderQr={renderQr} peerCount={peers.length} status={status} />;
+```
+
+---
+
+## Transports and when to use which
+
+<p align="center">
+  <img src="./docs/assets/architecture.svg" alt="Architecture: your app on top of presets, useSnapPair, HostHUD, ControllerWrapper and the CLI, built on three layers: Pairing, Transport and Client utilities." width="100%">
+</p>
+
+<p align="center">
+  <img src="./docs/assets/transport-matrix.svg" alt="Transport comparison across same-device, internet, latency, server needed, cost and offline." width="100%">
+</p>
+
+| If you need… | Use | Why |
+|---|---|---|
+| Shared-state apps (turn-based games, checklists, lobbies) with server-checked joins (up to 300), auth and persistence | **Firebase** (`useSnapPair` default) | Cloud Functions admit every guest; RTDB rules limit what members can write. Shared state only: no ephemeral messaging |
+| Input from phones over the internet, rooms up to hundreds, simple deploy | **PartyKit** | A tiny WebSocket relay ([`examples/partykit/`](./examples/partykit/)); the host's browser owns the room |
+| The lowest latency (drawing, games, motion) | **WebRTC** | Peer-to-peer DataChannels; signaling rides on PartyKit (or any transport with messaging) |
+| Several windows or displays on **one** machine, offline | **BroadcastChannel** | No network, no server, no account |
+
+All four implement the same `Transport` interface (`connect`, `createRoom`,
+`joinRoom`, `setState`, `send`, `broadcast`, `onMessage`, `onPeers`,
+`onState`, `onStatus`…), so switching is a one-line change. Check
+`transport.capabilities` (`messaging`, `presence`, `serverAuthoritativeJoin`)
+when your UI needs to degrade gracefully.
+
+> **Firebase has no ephemeral messaging.** `FirebaseTransport` reports
+> `capabilities.messaging === false` and rejects `send`/`broadcast`, and
+> `setState` replaces the whole state object, so concurrent writers would
+> clobber each other. All seven presets stream input, so none of them runs on
+> Firebase. When you pick Firebase, `npx snap-pair init` offers two options: a
+> config-only Firebase app (`preset: null`, shared state through
+> `useSnapPair`), or Firebase for your app plus PartyKit for the preset's
+> realtime messages.
+
+```ts
+import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
+
+const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' });
+const p2p = new WebRTCTransport({ signaling: party }); // DataChannel star, host in the middle
+const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms, shared state only
+```
+
+WebRTC reconnects on its own (ICE restart on the same connection, then
+re-offers with exponential backoff) and splits frames over 16 KiB into chunks
+(up to 1 MiB per message). Pass `reconnect: false` to turn recovery off.
+
+---
+
+## Presets
+
+Seven ready-made UX patterns. Each one has a template you can scaffold with
+`npx snap-pair init`, a recommended transport, message shapes and a rate
+limit the template stays under (`PRESETS` / `getPreset(id)` expose all of it).
+
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/stroke-stream.svg" alt="Stroke Stream: draw on your phone; strokes stream live onto the big screen. Recommended: WebRTC or PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/particle-blast.svg" alt="Particle Blast: tap or swipe to fire particle bursts across the host canvas. Recommended: PartyKit or WebRTC." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/type-throw.svg" alt="Type Throw: type a word and flick it onto the shared wall. Recommended: PartyKit or WebRTC." width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./site/assets/img/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: everyone answers on their phone; results appear instantly. Recommended: PartyKit with PIN pairing." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/virtual-controller.svg" alt="Virtual Controller: D-pad and buttons turn every phone into a gamepad. Recommended: WebRTC or PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/motion-sensor.svg" alt="Motion / Sensor: tilt, shake and rotate with device orientation. Recommended: WebRTC or PartyKit." width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./site/assets/img/presets/local-multi-display.svg" alt="Local Multi-Display: sync windows and tabs on one machine, even offline. Recommended: BroadcastChannel." width="100%"></td>
+    <td colspan="2" valign="middle">
+      <b>Preset ids</b> (for the CLI and <code>snap-pair.config.json</code>):<br><br>
+      <code>stroke-stream</code> · <code>particle-blast</code> · <code>type-throw</code> · <code>room-quiz-poll</code> · <code>virtual-controller</code> · <code>motion-sensor</code> · <code>local-multi-display</code>
+    </td>
+  </tr>
+</table>
+
+| Preset | id | Host shows | Phone sends (rate limit) | Transports (**recommended** first) | Pairing (default first) |
+|---|---|---|---|---|---|
+| Stroke Stream | `stroke-stream` | Shared canvas | `stroke` batches (≤30/s) | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Particle Blast | `particle-blast` | Particle field | `blast` taps / swipes (≤10/s) | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Type Throw | `type-throw` | Word wall | `throw` short text (≤2/s) | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Room Quiz / Poll | `room-quiz-poll` | Question + live tally | `vote` (once per question) | **PartyKit** · BroadcastChannel · WebRTC | PIN · QR · code |
+| Virtual Controller | `virtual-controller` | The game | `input` d-pad / buttons (≤60/s, on change) | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Motion / Sensor | `motion-sensor` | Scene driven by tilt | `motion` orientation (≤30/s) | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Local Multi-Display | `local-multi-display` | One scene across windows | `tick`, `hello` (≤60/s) | **BroadcastChannel** | broadcast |
+
+Firebase is not listed for any preset; see the note under
+[Transports](#transports-and-when-to-use-which). Templates send controller
+input to the host only (`send({ to: hostId })`), keep the host as the only
+state writer (`allowGuestState: false`) and clamp every payload on the host.
+
+---
+
+## CLI
+
+```bash
+npx snap-pair init                                    # interactive wizard (default command)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+npx snap-pair init --yes --preset virtual-controller --transport webrtc --json
+npx snap-pair init --yes --architecture managed --no-scaffold   # Firebase config only
+npx snap-pair presets                                 # list the 7 presets (--json for the registry)
+npx snap-pair recommend "a tilt racing game for 4 friends"
+```
+
+The wizard speaks English or Japanese (from `LANG` / `LC_ALL`, or `--lang
+en|ja`) and offers four ways in (`--path` skips the menu):
+
+| Path (`--path`) | You answer | You get |
+|---|---|---|
+| **1. By experience** (`ux`) | Which of the 7 presets feels right | That preset, then a transport it supports (recommended first) |
+| **2. By architecture** (`architecture`) | Same device, realtime, P2P, or managed | A transport, then the presets that fit it |
+| **3. By stack** (`stack`) | What you already have: Firebase, Cloudflare/PartyKit, or no backend | A transport built around your stack |
+| **4. Describe it** (`consult`) | A sentence in English or Japanese, e.g. "audience votes on a stage screen" | A rule-based recommendation you can accept or adjust |
+
+Each transport option prints a summary, pros, cons and a cost line with
+free-tier notes. Picking Firebase offers a config-only Firebase app or
+Firebase plus PartyKit for the preset's realtime messages. Non-interactively:
+`--yes --architecture managed --no-scaffold` writes the Firebase-only config,
+and `--yes --stack firebase --preset <id>` keeps your Firebase app and puts
+the preset on PartyKit (`--transport firebase --preset <id>` is rejected).
+
+Every path writes **`snap-pair.config.json`** and scaffolds a Vite + React
+template (host and controller in one app, picked by URL), plus a PartyKit
+relay (`party/server.ts`) when the transport needs one:
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+| Flag | Meaning |
+|---|---|
+| `--preset <id\|none>` | One of the 7 preset ids, or `none` |
+| `--transport <t>` | `broadcast` \| `partykit` \| `webrtc` \| `firebase` |
+| `--pairing <m>` | `qr` \| `code` \| `pin` \| `broadcast` |
+| `--architecture <a>` | `same-device` \| `realtime` \| `p2p` \| `managed` |
+| `--stack <s>` | `firebase` \| `cloudflare` \| `none` |
+| `--describe <text>` | Free-text idea for the `consult` path |
+| `--out <dir>` | Target folder (default: `./snap-pair-<preset>`) |
+| `--partykit-host <h>`, `--max-players <n>` | Written into the config (`maxPlayers`: 2–300) |
+| `--no-scaffold`, `--force` | Config only; overwrite existing files |
+| `-y, --yes` | Accept every default (non-interactive) |
+| `--json` | JSON result on stdout (`config`, `files`, `nextSteps`); messages go to stderr |
+| `--lang <en\|ja>` | Language |
+
+Re-run the command any time to change your choices.
+
+---
+
+## API overview
+
+Everything is exported from `snap-pair-core` (ESM and CJS, with types).
+Subpath entries share the same classes as the root:
+
+| Import path | Contents |
+|---|---|
+| `snap-pair-core` | Everything below, plus presets, i18n and the room server |
+| `snap-pair-core/hooks/useSnapPair` | `useSnapPair` only (the old `snap-pair-core/src/hooks/useSnapPair` path still works) |
+| `snap-pair-core/transports/{base,firebase,partykit,webrtc,broadcast}` | One transport each |
+| `snap-pair-core/config.schema.json` | JSON Schema for `snap-pair.config.json` |
+| `snap-pair` (bin) | The CLI: `npx snap-pair` |
+
+### React: `useSnapPair`
+
+```tsx
+import { useState } from 'react';
+import { PartyKitTransport, useSnapPair } from 'snap-pair-core';
+
+// Firebase (default): server-assisted rooms
+const sp = useSnapPair({ db, auth, functions, guest: { id: '', name: 'Ada' }, maxPlayers: 8 });
+
+// Any other transport: pass an instance (you own it) or a factory (the hook owns it)
+const [party] = useState(() => new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' }));
+const sp = useSnapPair({ transport: party, guest: { id: '', name: 'Ada' } });
+
+const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, updateRoomStatus, leaveRoom } = sp;
 ```
 
 Wait for `authReady` before calling `createRoom(initialState)` or
-`joinRoom(code)`. Both call trusted server functions; after the server persists
-`roomMembers/{roomId}/{uid}`, the hook may read and subscribe to that room.
+`joinRoom(code)`. Both modes return the same shape. With a transport,
+`authReady` follows the connection, `localGuest.id` becomes the transport's
+peer id, and you use the instance's `send` / `broadcast` / `onMessage` for
+ephemeral input. Keep an instance stable (`useState(() => new X())`); a
+factory (`transport: () => new X()`) is created once and disconnected on
+unmount. The mode is fixed for a component's lifetime. With Firebase, members
+may update shared `state`, their own `name`, `connected` and `lastSeenAt`, and
+only the host may change the room status.
 
-Members may update shared `state`, their own `name`, `connected`, and
-`lastSeenAt`, plus `meta/updatedAt`. Only the host may change room status. IDs,
-roles, join timestamps, membership, capacity, pairing codes, and `joinState`
-stay server-authoritative.
+### Transports
 
-`state` is intentionally generic and does not validate a product-specific
-schema or guarantee payload-size and write-rate limits. Every product must add
-state validation, payload limits, and client/server throttling appropriate to
-its data and traffic before production deployment.
+| Export | Notes |
+|---|---|
+| `Transport` | Abstract base: `connect` / `disconnect`, `createRoom` / `joinRoom` / `leaveRoom`, `setState`, `send` / `broadcast`, `on*` subscriptions that return an idempotent unsubscribe, and `capabilities` |
+| `FirebaseTransport`, `FirebaseRoomStore` | RTDB + callable Cloud Functions; `serverAuthoritativeJoin: true` |
+| `PartyKitTransport` | Options: `host`, `party`, `pairing`, `socketFactory` (inject `partysocket` in bundled apps), `connectTimeoutMs`. Falls back to `WebSocket` with backoff |
+| `WebRTCTransport` | Options: `signaling` (any transport with messaging), `iceServers` (default: one public STUN), `connectTimeoutMs`, `reconnect` (`false` or `{ maxAttempts, baseDelayMs, maxDelayMs, iceRestartGraceMs }`), `maxMessageBytes` (16 KiB), `maxReassembledBytes` (1 MiB) |
+| `BroadcastChannelTransport` | Same-origin tabs/windows; `isBroadcastChannelSupported()` |
+| `RelayTransport` | Shared host-authoritative engine behind the last three. Common options: `pairing: 'code' \| 'pin'`, `maxPlayers`, `admit(peer)`, `namespace`, `joinBaseUrl`, `heartbeatMs`, `peerTimeoutMs`, `allowGuestState` |
 
-### Data layout
+### Pairing
+
+| Export | Notes |
+|---|---|
+| `generatePin()`, `normalizePin()`, `isValidPin()`, `formatPin()`, `verifyPin()` | Uniform 6-digit PINs (`crypto.getRandomValues`), constant-time verify |
+| `deriveRoomId()`, `deriveChannelName()` | Hash a code or PIN into a namespaced room key; works on plain-HTTP LAN origins too |
+| `buildPairingJoinUrl()`, `parseJoinUrl()` | `?pin=` / `?room=` join links |
+| `useQrRenderer()`, `createQrRenderer()`, `toQrDataUrl()`, `loadQrLib()` | QR rendering via the optional `qrcode` package |
+| `generateRoomCode()`, `normalizeRoomCode()`, `ROOM_CODE_ALPHABET` | 6-character, look-alike-free room codes |
+
+### Client utilities
+
+| Export | Notes |
+|---|---|
+| `useWakeLock(enabled)`, `createWakeLock()`, `isWakeLockSupported()` | Keeps a controller screen on; re-acquires when the tab becomes visible |
+| `needsPermission()`, `requestOrientationPermission()` | iOS 13+ permission prompt; call from a tap handler. Resolves `'granted' \| 'denied' \| 'unsupported'` |
+| `subscribeOrientation()`, `subscribeMotion()` | `alpha/beta/gamma` and acceleration readings |
+| `lockScreenOrientation()`, `unlockScreenOrientation()`, `getScreenOrientation()` | Screen orientation lock where supported |
+
+```ts
+button.onclick = async () => {
+  if (needsPermission() && (await requestOrientationPermission()) !== 'granted') return;
+  const stop = subscribeOrientation(({ beta, gamma }) => transport.broadcast('tilt', { beta, gamma }));
+};
+```
+
+Every client utility feature-detects at call time and degrades to a no-op, so
+it is safe to import during SSR.
+
+### Components
+
+| Export | Notes |
+|---|---|
+| `HostHUD` | Host pairing panel: QR (via `renderQr`), room code, PIN, join link with copy button, peer count, status. `locale="en" \| "ja" \| "auto"`; every string can be overridden with `labels` |
+| `ControllerWrapper` | Phone-side shell: status bar, reconnect banner, wake lock toggle, iOS motion permission button, fullscreen + orientation lock. Each control hides itself where the browser lacks the API |
+
+```tsx
+import { ControllerWrapper } from 'snap-pair-core';
+
+<ControllerWrapper
+  transport={party}            // or status={status}
+  roomCode={room?.code}
+  onReconnect={() => joinRoom(code)}
+  motion                       // shows the iOS permission button until granted
+  orientation="portrait"       // fullscreen button that also locks orientation
+  locale="auto"                // 'en' | 'ja' | 'auto'; override strings with labels
+>
+  {({ status, motionPermission }) => <Pad disabled={status !== 'connected' || motionPermission !== 'granted'} />}
+</ControllerWrapper>;
+```
+
+`wakeLock` defaults to `true`; `onMotionPermission`, `className` and `style`
+are also accepted.
+
+### Presets and i18n
+
+`PRESETS`, `getPreset(id)`, `supportedTransports(preset)`, `pairingFor(preset,
+transport)` and `presetsForTransport(transport)` expose the preset registry
+the CLI uses. `createTranslator(locale)`, `t()`, `detectLocale()` and
+`SUPPORTED_LOCALES` (`en`, `ja`) are the bundled dictionaries behind the CLI,
+`HostHUD` and `ControllerWrapper`.
+
+<details>
+<summary><b>Firebase data layout and room server</b></summary>
 
 ```text
 pairingCodes/{code}                 # Admin SDK only
@@ -238,16 +416,124 @@ rooms/{roomId}/state
 rooms/{roomId}/joinState            # Admin SDK only
 ```
 
+- Callable Cloud Functions (`functions/src/`): `createSnapRoom`,
+  `joinSnapRoom`, and a scheduled `cleanupExpiredData`.
+- Security rules (`database.rules.json`): membership-gated reads and narrow
+  client writes, with no broad room-level write.
+- `state` is intentionally generic. It does not validate a product schema or
+  limit payload size and write rate. Every product must add validation,
+  payload limits and throttling before going to production.
+
+Design notes: [docs/plan-phase1.md](./docs/plan-phase1.md),
+[docs/plan-phase2.md](./docs/plan-phase2.md),
+[docs/plan-phase3.md](./docs/plan-phase3.md).
+
+</details>
+
 ---
 
-## Firebase setup: three paths
+## For everyone (non-engineers)
 
-Choose based on whether you need a shareable URL and whether you can add a card.
+**What is this?** A way to make many people's phones join one shared screen
+instantly. Everyone scans a QR code (or types a short code) in their normal
+browser, with no app to download, and their phones become part of one live,
+synchronized experience.
 
-### 1. Emulator — free, no credit card, local only (best for learning)
+**Who is it for?** People who run **events, venues, classes, streams,
+showrooms or exhibitions** and want the audience to take part with their own
+phones, and the **engineers and AI builders** who make those experiences.
 
-The Firebase Emulator Suite runs Auth, Realtime Database, and Cloud Functions
-entirely on your machine. No billing account, no card.
+**What can you build?** Live votes, polls and quizzes on a big screen; group
+checklists and "everyone's ready" checks; audience reactions, prediction
+games and collaborative drawing; a synchronized phone light show; any "one
+shared screen + many phones + instant result" moment.
+
+### Pick one path
+
+These are three separate paths, not steps of one process. Pick the one that
+matches what you want right now.
+
+| | **A. Just see it work** | **B. Have an AI build my app** | **C. Work with the source** |
+|---|---|---|---|
+| **For** | "Show me in 2 minutes" | "I want a custom app without writing code" | "I'm an engineer and want to read, modify or contribute" |
+| **Install** | Nothing | One AI coding tool | An AI coding tool **and** Git/Node.js |
+| **Download** | Nothing (or one HTML file) | **Nothing**: the AI reads the instructions from the web | The repository |
+| **Credit card?** | No | Depends on the backend (see [Firebase setup](#firebase-setup)) | Depends on the backend |
+| **Share a link?** | Same browser / same network | Yes, once deployed | Yes, once deployed |
+| **Go to** | [Path A](#path-a-just-see-it-work) | [Path B](#path-b-have-an-ai-build-your-app) | [Path C](#path-c-work-with-the-source) |
+
+#### Path A: Just see it work
+
+- **In your browser, right now:** open the
+  [live demo](https://takaoumehara.github.io/snap-pair-skill/demo.html) in two
+  tabs. One is the host and shows a PIN; type it into the other and draw.
+  Nothing to set up.
+- **Across two phones:** download
+  [`examples/snap-pair-lite.html`](./examples/snap-pair-lite.html), open it,
+  and scan the QR code with a second device. It's a fixed tic-tac-toe demo
+  running on the free Firebase Spark plan with no credit card (see
+  [`examples/README.md`](./examples/README.md)).
+
+#### Path B: Have an AI build your app
+
+You do **not** need to download or clone this repository. Connecting two
+small tools (MCP servers) is enough, plus telling the AI to read this
+project's build instructions from the web.
+
+**You need** one AI coding tool that can run commands and fetch web pages:
+Claude Code, Cursor, Codex, Gemini CLI or similar. Don't have one? Pick one:
+[Cursor](https://cursor.com) (an editor with AI built in), **Claude Code**
+(VS Code extension or the CLI from [claude.com/code](https://claude.com/code)),
+or **Codex** / **Gemini CLI**.
+
+1. Open a chat in your AI tool in any folder (an empty folder is fine).
+2. Paste this, as-is:
+
+   ```
+   Fetch https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
+   and use it as your build instructions.
+
+   Connect these two MCP servers if they aren't connected yet:
+   - firebase: npx -y firebase-tools@latest mcp
+   - snap-pair-provisioner: npx -y snap-pair-provisioner
+
+   Then help me build: [describe what you want, e.g. "a live quiz game where
+   guests join by QR code and answer on their phones"].
+   ```
+
+3. Answer the AI's questions as they come up. It will ask which Google account
+   to use for Firebase and, at one point, show a one-time sign-in link. That
+   click is the only manual step, by design, for your account's safety.
+
+If your tool cannot fetch web pages, download just
+[`SKILL.md`](./SKILL.md) and paste its contents into the chat instead.
+
+#### Path C: Work with the source
+
+```bash
+git clone https://github.com/takaoumehara/snap-pair-skill.git
+cd snap-pair-skill
+npm install
+npm test
+```
+
+Then read the [API overview](#api-overview) and the design notes in
+[`docs/`](./docs/).
+
+---
+
+## Firebase setup
+
+Only needed for the Firebase transport. PartyKit, WebRTC and
+BroadcastChannel don't use Firebase at all.
+
+| Your goal | Use | Credit card? | Others can join by URL? |
+|---|---|---|---|
+| Learn, experiment, let a child build and test | **Firebase Emulator** (on your computer) | **No** | No, local only |
+| Free public demo, open rules, small groups | **Spark plan** + Lite mode ([`examples/`](./examples/)) | **No** | Yes (up to 100 simultaneous connections) |
+| Real guests with server-checked rooms | **Blaze plan** | **Yes** | Yes |
+
+### 1. Emulator: free, no card, local only
 
 ```bash
 npm install
@@ -256,24 +542,19 @@ npm --prefix functions run build
 npx firebase-tools emulators:start --only auth,database,functions
 ```
 
-Everything runs locally. You cannot give other people a public link from the
-emulator — it is for development and learning.
+### 2. Spark (free): what it can and can't do
 
-### 2. Spark (free) plan — what it can and cannot do
+Spark needs no card, serves a public site with Firebase Hosting and allows
+Realtime Database with a hard cap of **100 simultaneous connections**.
+**Spark cannot deploy Cloud Functions**, and snap-pair's secure mode relies on
+them for room creation and joining. Use it for Lite mode, or pick another
+transport.
 
-The Spark plan needs **no credit card**, serves a public site via Firebase
-Hosting, and allows Realtime Database with a hard cap of **100 simultaneous
-connections**. **However, Spark cannot deploy Cloud Functions** — and snap-pair
-relies on Cloud Functions for secure room creation and joining. So Spark alone
-is not enough to run the full server-assisted design publicly.
+### 3. Blaze (pay-as-you-go): required for secure mode (card needed)
 
-### 3. Blaze (pay-as-you-go) plan — required to go live (credit card needed)
-
-To deploy Cloud Functions to the public internet, the project must be on the
-**Blaze plan, which requires a credit card / billing account.** Blaze keeps the
-free quotas (about **2,000,000 function invocations/month** free; RTDB up to
-200,000 simultaneous connections) and only bills beyond them, so a small event
-often costs nothing — but the card must be on file to enable it.
+Blaze keeps the free quotas (about **2,000,000 function invocations/month**;
+RTDB up to 200,000 simultaneous connections) and only bills beyond them, so
+a small event often costs nothing. The card must be on file to enable it.
 
 ```bash
 npm --prefix functions run build
@@ -282,19 +563,151 @@ firebase deploy --only functions
 firebase deploy --only database
 ```
 
-Both callables enforce Firebase App Check; configure a debug token for local
+Both callables enforce Firebase App Check. Configure a debug token for local
 development against a real project, and never disable enforcement in the
 deployed callable. **Set a budget alert** in Firebase console → Usage and
-billing. (Budget alerts notify but do not hard-cap charges; a hard cutoff needs
-a custom billing function.)
+billing (alerts notify; they do not hard-cap charges).
+
+The MCP servers from Path B create the project, enable services and write
+your `.env` for you. See
+[`SKILL.md`](./SKILL.md#firebase-setup-mcp-automation-vs-manual) for what is
+automatic and what stays a one-time manual step.
 
 ---
 
-## Verification
+## Security model
+
+- **A pairing code locates a room. It is not a password.** Treat QR codes,
+  room codes and PINs as rendezvous handles.
+- **Firebase (secure mode)** is server-authoritative: Firebase Auth
+  identifies each browser, Cloud Functions create rooms and admit
+  participants, and RTDB rules let only admitted members read or update
+  narrowly scoped fields. IDs, roles, membership, capacity, pairing codes and
+  `joinState` stay server-only.
+- **PartyKit, WebRTC and BroadcastChannel** are host-authoritative: the
+  browser that created the room owns the roster and state, and nothing on a
+  server admits peers (`capabilities.serverAuthoritativeJoin === false`).
+  Gate entry with `admit(peer)` and `maxPlayers`. Room keys are hashed and
+  namespaced, so raw PINs never appear in URLs or relay logs.
+- A 6-digit PIN has only 10⁶ values. On a public relay, add rate limiting
+  (see [`examples/partykit/`](./examples/partykit/)) and don't use PINs alone
+  for anything sensitive.
+- **Payments** are outside this project. If a product needs them, add a
+  separate trusted server integration with membership checks and provider
+  webhook verification.
+
+---
+
+## AI agent skill
+
+[`SKILL.md`](./SKILL.md) teaches an AI coding agent to generate a correct
+snap-pair integration and to choose a transport and preset. Point your agent
+at the raw URL:
+
+```
+https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
+```
+
+or copy it into your agent's skills directory. For a private-input,
+aggregate-reveal, commitment-threshold pattern, see
+[`references/one-room-one-decision.md`](./references/one-room-one-decision.md).
+
+---
+
+## FAQ
+
+<details>
+<summary><b>Do guests need to install an app?</b></summary>
+
+No. Guests open a URL in the browser they already have, by scanning a QR code
+or typing a code.
+</details>
+
+<details>
+<summary><b>Which transport should I start with?</b></summary>
+
+Prototyping on one machine: BroadcastChannel. Phones over the internet:
+PartyKit (WebRTC for the lowest latency in small rooms, ≈2–16 people).
+Shared-state apps where joins must be checked on a server: Firebase (it has
+no ephemeral messaging, so pair it with PartyKit for streamed input). Or run
+`npx snap-pair init` (or `npx snap-pair recommend "<your idea>"`) and let the
+CLI decide.
+</details>
+
+<details>
+<summary><b>Do I need a credit card?</b></summary>
+
+Not for BroadcastChannel, the Firebase Emulator, or Firebase Spark Lite mode.
+Firebase's secure mode needs the Blaze plan, which needs a card, though small
+events usually stay within the free quota. PartyKit has its own free tier.
+</details>
+
+<details>
+<summary><b>How many people can join one room?</b></summary>
+
+Firebase secure rooms are designed for up to 300 participants. Relay
+transports are limited by `maxPlayers` and by how many connections the host
+browser can handle. WebRTC uses a star around the host, which suits small
+groups best.
+</details>
+
+<details>
+<summary><b>Why doesn't motion work on my iPhone?</b></summary>
+
+iOS 13+ requires a permission prompt triggered by a tap. Call
+`requestOrientationPermission()` from a click handler (or use
+`ControllerWrapper`, which adds the button for you). The page must be served
+over HTTPS.
+</details>
+
+<details>
+<summary><b>Can I use it without React?</b></summary>
+
+Yes. Transports, pairing helpers and client utilities are plain TypeScript.
+Only `useSnapPair`, `useWakeLock`, `useQrRenderer`, `HostHUD` and
+`ControllerWrapper` need React. The [live demo](https://takaoumehara.github.io/snap-pair-skill/demo.html)
+is plain JavaScript.
+</details>
+
+<details>
+<summary><b>Does it work with Next.js and SSR?</b></summary>
+
+Yes. No module touches `window`, `document` or `navigator` at import time.
+Create transports inside effects or client components.
+</details>
+
+---
+
+## Roadmap
+
+- [x] **Phase 1:** `Transport` abstraction, `FirebaseTransport`, `HostHUD`
+- [x] **Phase 2:** PartyKit, WebRTC and BroadcastChannel transports; PIN and
+      QR helpers; wake lock and orientation utilities
+- [x] **Phase 3:** `npx snap-pair init` wizard (4 paths, en/ja) with
+      `presets` and `recommend` commands, 7 preset templates,
+      `ControllerWrapper`, `useSnapPair({ transport })`, i18n, ESM/CJS build
+      with an `exports` map, WebRTC auto-reconnect and message chunking
+
+Still to do:
+
+- [ ] **WebRTC:** renegotiation (extra channels, media tracks), binary
+      payloads, backpressure (`bufferedAmount`), mesh topology, host
+      migration, TURN guidance, real-browser end-to-end tests
+- [ ] **Bundle size:** the root `useSnapPair` imports `firebase/auth`
+      statically, so non-Firebase apps still bundle it; a Firebase-free hook
+      entry or lazy loading
+- [ ] **Firebase:** numeric PINs and ephemeral messaging
+      (`rooms/$roomId/messages`), so presets can run on it
+- [ ] **i18n:** more locales; transport errors and template UI strings in
+      Japanese
+
+## Development
 
 ```bash
 npm test
-npm run typecheck
+npm run typecheck   # library + templates
+npm run build       # dist/ (ESM + CJS + d.ts), dist/cli, templates/
+node dist/cli/index.js --help
 npm --prefix functions test
 npm --prefix functions run typecheck
 npm run test:rules-emulator
@@ -363,20 +776,6 @@ node scripts/ai-update-helper.mjs --dry-run --mode pr --base origin/main --head 
 > incomplete or wrong. Treat them as a starting point, and rely on CI and your
 > own review.
 
-## AI agent skill
-
-[`SKILL.md`](./SKILL.md) lets an AI coding agent generate a correct,
-server-assisted snap-pair integration for a new product. Copy it into your
-agent's skills directory. For a private-input, aggregate-reveal,
-commitment-threshold pattern, see
-[`references/one-room-one-decision.md`](./references/one-room-one-decision.md).
-
-## Payments
-
-Payments are outside this foundation. If a product needs them, add a separate
-trusted server integration with membership checks and provider webhook
-verification.
-
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE).

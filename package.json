@@ -1,7 +1,7 @@
 {
   "name": "snap-pair-core",
   "version": "1.0.1",
-  "description": "React and Firebase foundation for temporary multi-device pairing and shared state",
+  "description": "Pair phones and screens by QR code, room code, or PIN: React hooks, components, and transports (Firebase, PartyKit, WebRTC, BroadcastChannel) for multi-device experiences, plus the `snap-pair` setup CLI",
   "license": "MIT",
   "author": "Takao Umehara",
   "repository": {
@@ -12,23 +12,142 @@
   "bugs": {
     "url": "https://github.com/takaoumehara/snap-pair-skill/issues"
   },
-  "main": "src/hooks/useSnapPair.ts",
+  "keywords": [
+    "pairing",
+    "multi-device",
+    "qr-code",
+    "react",
+    "firebase",
+    "partykit",
+    "webrtc",
+    "broadcastchannel",
+    "second-screen",
+    "controller"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./hooks/useSnapPair": {
+      "import": {
+        "types": "./dist/hooks/useSnapPair.d.ts",
+        "default": "./dist/hooks/useSnapPair.js"
+      },
+      "require": {
+        "types": "./dist/hooks/useSnapPair.d.cts",
+        "default": "./dist/hooks/useSnapPair.cjs"
+      }
+    },
+    "./src/hooks/useSnapPair": {
+      "import": {
+        "types": "./dist/hooks/useSnapPair.d.ts",
+        "default": "./dist/hooks/useSnapPair.js"
+      },
+      "require": {
+        "types": "./dist/hooks/useSnapPair.d.cts",
+        "default": "./dist/hooks/useSnapPair.cjs"
+      }
+    },
+    "./src/hooks/useSnapPair.ts": {
+      "import": {
+        "types": "./dist/hooks/useSnapPair.d.ts",
+        "default": "./dist/hooks/useSnapPair.js"
+      },
+      "require": {
+        "types": "./dist/hooks/useSnapPair.d.cts",
+        "default": "./dist/hooks/useSnapPair.cjs"
+      }
+    },
+    "./transports/*": {
+      "import": {
+        "types": "./dist/transports/*.d.ts",
+        "default": "./dist/transports/*.js"
+      },
+      "require": {
+        "types": "./dist/transports/*.d.cts",
+        "default": "./dist/transports/*.cjs"
+      }
+    },
+    "./config.schema.json": "./dist/config.schema.json",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "hooks/useSnapPair": [
+        "./dist/hooks/useSnapPair.d.ts"
+      ],
+      "src/hooks/useSnapPair": [
+        "./dist/hooks/useSnapPair.d.ts"
+      ],
+      "transports/*": [
+        "./dist/transports/*.d.ts"
+      ]
+    }
+  },
+  "bin": {
+    "snap-pair": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "references",
+    "README*.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SKILL.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.templates.json",
     "test": "vitest run",
-    "test:rules-emulator": "npx --yes firebase-tools@15.23.0 emulators:exec --only database --project demo-snap-pair-rules-test \"vitest run database.rules.emulator.test.ts\""
+    "test:rules-emulator": "npx --yes firebase-tools@15.23.0 emulators:exec --only database --project demo-snap-pair-rules-test \"vitest run database.rules.emulator.test.ts\"",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "firebase": "^12.16.0"
   },
+  "peerDependencies": {
+    "partysocket": ">=1.0.0",
+    "qrcode": ">=1.5.0",
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "partysocket": {
+      "optional": true
+    },
+    "qrcode": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",
     "@testing-library/react": "^16.3.0",
+    "@types/node": "^20.19.43",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.3.7",
     "jsdom": "^26.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.3.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.3.3",
     "vitest": "^3.2.4"
   }
