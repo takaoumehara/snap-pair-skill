@@ -1,6 +1,6 @@
 # snap-pair-core
 
-**English** · [日本語](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-core/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-core/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ko.md)
+**English** · [日本語](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ko.md)
 
 Pair phones and browsers with a QR code or a six-character code, then share
 live state across every device in the room. No app install. React hook on the
@@ -80,7 +80,7 @@ empty folder is fine — this will become your app).
 **Step 2 — type this into the chat, as-is:**
 
 ```
-Fetch https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+Fetch https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 and use it as your build instructions.
 
 Connect these two MCP servers if they aren't connected yet:

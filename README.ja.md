@@ -1,6 +1,6 @@
 # snap-pair-core
 
-[English](https://github.com/takaoumehara/snap-pair-core/blob/main/README.md) · **日本語** · [简体中文](https://github.com/takaoumehara/snap-pair-core/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-core/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ko.md)
+[English](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.md) · **日本語** · [简体中文](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ko.md)
 
 QRコードまたは6桁のコードを使って、スマートフォンとブラウザをペアリングし、その場にいる全デバイス間でライブの状態を共有します。アプリのインストールは不要です。クライアント側はReactフック、サーバー側はFirebase Auth + Cloud Functions + Realtime Databaseで構成されています。
 
@@ -60,7 +60,7 @@ QRコードまたは6桁のコードを使って、スマートフォンとブ�
 **Step 2 — 次の文章をそのままチャットに貼り付ける：**
 
 ```
-https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 を取得して、これを作り方の指示書として使ってください。
 
 まだ接続していなければ、以下の2つのMCPサーバーに接続してください：
