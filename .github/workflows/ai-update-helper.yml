@@ -1,0 +1,78 @@
+name: AI update helper
+
+# Summarizes dependency updates with Gemini:
+# - on Dependabot PRs: one (updated-in-place) comment with release notes,
+#   impact verdicts and suggested code changes;
+# - weekly: one tracking issue listing outdated packages.
+# Without the GEMINI_API_KEY secret the script logs a notice and exits 0.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC, after Dependabot's 04:00 run
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  pr:
+    name: Analyze Dependabot PR
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: ai-update-helper-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Run AI update helper
+        run: node scripts/ai-update-helper.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
+          GITHUB_TOKEN: ${{ github.token }}
+          AI_HELPER_MODE: pr
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+  cron:
+    name: Weekly outdated report
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    concurrency:
+      group: ai-update-helper-cron
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Run AI update helper
+        run: node scripts/ai-update-helper.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
+          GITHUB_TOKEN: ${{ github.token }}
+          AI_HELPER_MODE: cron
+          REPO: ${{ github.repository }}
