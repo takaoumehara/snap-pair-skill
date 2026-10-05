@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import type { Readable, Writable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
@@ -417,6 +417,13 @@ function listFiles(dir: string, prefix = ''): string[] {
   });
 }
 
+/** `path` relative to `cwd` when it is inside it, absolute otherwise. */
+export function displayPath(cwd: string, path: string): string {
+  const rel = relative(cwd, path);
+  if (rel === '') return '.';
+  return rel.startsWith('..') || isAbsolute(rel) ? path : rel;
+}
+
 const npmName = (dir: string) =>
   basename(dir).toLowerCase().replace(/[^a-z0-9._~-]+/g, '-').replace(/^[-._]+|-+$/g, '') || 'snap-pair-app';
 
@@ -469,7 +476,7 @@ function writePlanned(outDir: string, files: PlannedFile[], force: boolean, tr: 
 }
 
 function nextSteps(tr: Translator, config: SnapPairConfig, preset: PresetDescriptor | undefined, outDir: string, cwd: string, scaffolded: boolean): string[] {
-  const dir = relative(cwd, outDir) || '.';
+  const dir = displayPath(cwd, outDir);
   if (!preset || !scaffolded) {
     return config.transport === 'firebase' ? [tr.t('cli.next.firebase'), tr.t('cli.next.docs')] : [tr.t('cli.next.docs')];
   }
@@ -542,8 +549,8 @@ export async function runInit(options: InitOptions, io: WizardIO): Promise<InitR
     s.log(`  ${s.tr.t('cli.transport')}: ${s.tr.t(`transports.${config.transport}.name`)}`);
     s.log(`  ${s.tr.t('cli.pairing')}: ${s.tr.t(`pairing.${config.pairing}.name`)}`);
     s.log(`  ${s.tr.t('cli.cost')}: ${s.tr.t(`transports.${config.transport}.cost`)}`);
-    s.log(s.tr.t('cli.written', { file: relative(cwd, configPath) || CONFIG_FILE_NAME }));
-    if (scaffold && preset) s.log(s.tr.t('cli.scaffolded', { preset: preset.id, dir: relative(cwd, outDir) || '.' }));
+    s.log(s.tr.t('cli.written', { file: displayPath(cwd, configPath) }));
+    if (scaffold && preset) s.log(s.tr.t('cli.scaffolded', { preset: preset.id, dir: displayPath(cwd, outDir) }));
     else if (preset) s.log(s.tr.t('cli.noTemplate', { file: CONFIG_FILE_NAME }));
     s.log('');
     s.log(`${s.tr.t('cli.nextSteps')}:`);
