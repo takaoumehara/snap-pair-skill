@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 220" width="360" height="220" role="img" aria-labelledby="title desc">
   <title id="title">Type Throw</title>
-  <desc id="desc">Type Throw preset (type-throw): Type a word and flick it onto the shared wall. Recommended transport: Firebase · PartyKit.</desc>
+  <desc id="desc">Type Throw preset (type-throw): Type a word and flick it onto the shared wall. Recommended transport: PartyKit · WebRTC.</desc>
   <style>
     .bg{fill:#ffffff}.edge{stroke:#e2e8f0}.ink{fill:#0f172a}.muted{fill:#475569}.faint{fill:#94a3b8}
     .tint{fill:#f0fdfa}.acc{fill:#0d9488}.acc-s{stroke:#0d9488}.chip{fill:#f0fdfa}
@@ -18,7 +18,7 @@
   <text class="ink" x="20" y="116" font-size="21" font-weight="700">Type Throw</text>
   <text class="muted" x="20" y="142" font-size="13.5">Type a word and flick it onto</text>
   <text class="muted" x="20" y="161" font-size="13.5">the shared wall.</text>
-  <rect class="chip" x="20" y="178" width="165" height="24" rx="12"/>
+  <rect class="chip" x="20" y="178" width="151" height="24" rx="12"/>
   <circle class="acc" cx="33" cy="190" r="4"/>
-  <text class="ink" x="43" y="194.5" font-size="12" font-weight="600">Firebase · PartyKit</text>
+  <text class="ink" x="43" y="194.5" font-size="12" font-weight="600">PartyKit · WebRTC</text>
 </svg>

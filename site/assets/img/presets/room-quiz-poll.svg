@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 220" width="360" height="220" role="img" aria-labelledby="title desc">
   <title id="title">Room Quiz / Poll</title>
-  <desc id="desc">Room Quiz / Poll preset (room-quiz-poll): Everyone answers on their phone; results appear instantly. Recommended transport: Firebase (secure, up to 300).</desc>
+  <desc id="desc">Room Quiz / Poll preset (room-quiz-poll): Everyone answers on their phone; results appear instantly. Recommended transport: PartyKit (PIN, up to 300).</desc>
   <style>
     .bg{fill:#ffffff}.edge{stroke:#e2e8f0}.ink{fill:#0f172a}.muted{fill:#475569}.faint{fill:#94a3b8}
     .tint{fill:#f5f3ff}.acc{fill:#7c3aed}.acc-s{stroke:#7c3aed}.chip{fill:#f5f3ff}
@@ -18,7 +18,7 @@
   <text class="ink" x="20" y="116" font-size="21" font-weight="700">Room Quiz / Poll</text>
   <text class="muted" x="20" y="142" font-size="13.5">Everyone answers on their phone;</text>
   <text class="muted" x="20" y="161" font-size="13.5">results appear instantly.</text>
-  <rect class="chip" x="20" y="178" width="227" height="24" rx="12"/>
+  <rect class="chip" x="20" y="178" width="205" height="24" rx="12"/>
   <circle class="acc" cx="33" cy="190" r="4"/>
-  <text class="ink" x="43" y="194.5" font-size="12" font-weight="600">Firebase (secure, up to 300)</text>
+  <text class="ink" x="43" y="194.5" font-size="12" font-weight="600">PartyKit (PIN, up to 300)</text>
 </svg>
