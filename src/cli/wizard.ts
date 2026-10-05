@@ -211,7 +211,9 @@ class Session {
 function transportDetails(tr: Translator, kind: TransportKind): string[] {
   return [
     tr.t(`transports.${kind}.summary`),
+    `${tr.t('cli.pros')}:`,
     ...tr.tList(`transports.${kind}.pros`).map((item) => `+ ${item}`),
+    `${tr.t('cli.cons')}:`,
     ...tr.tList(`transports.${kind}.cons`).map((item) => `- ${item}`),
     `$ ${tr.t('cli.cost')}: ${tr.t(`transports.${kind}.cost`)}`,
   ];
