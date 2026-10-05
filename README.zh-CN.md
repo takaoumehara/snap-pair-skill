@@ -1,6 +1,6 @@
 # snap-pair-core
 
-[English](https://github.com/takaoumehara/snap-pair-core/blob/main/README.md) · [日本語](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ja.md) · **简体中文** · [Español](https://github.com/takaoumehara/snap-pair-core/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ko.md)
+[English](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.md) · [日本語](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ja.md) · **简体中文** · [Español](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.es.md) · [한국어](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ko.md)
 
 通过扫描二维码或输入六位代码，将手机和浏览器配对，即可在房间内的所有设备之间实时共享状态。无需安装应用。客户端使用 React hook，服务端由 Firebase Auth + Cloud Functions + Realtime Database 构成。
 
@@ -60,7 +60,7 @@
 **第 2 步 —— 原样将以下内容粘贴到对话中：**
 
 ```
-获取 https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+获取 https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 并将其作为构建说明使用。
 
 如果尚未连接，请连接以下两个 MCP 服务器：

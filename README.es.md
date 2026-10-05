@@ -1,6 +1,6 @@
 # snap-pair-core
 
-[English](https://github.com/takaoumehara/snap-pair-core/blob/main/README.md) · [日本語](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-core/blob/main/README.zh-CN.md) · **Español** · [한국어](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ko.md)
+[English](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.md) · [日本語](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.zh-CN.md) · **Español** · [한국어](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ko.md)
 
 Empareja teléfonos y navegadores mediante un código QR o un código de seis caracteres, y comparte el estado en vivo entre todos los dispositivos de la sala. No requiere instalar ninguna app. En el cliente se usa un hook de React; en el servidor, Firebase Auth + Cloud Functions + Realtime Database.
 
@@ -60,7 +60,7 @@ Eso es todo — sin instalación, sin cuenta, sin tarjeta de crédito. Esto es u
 **Paso 2 — escribe esto en el chat, tal cual:**
 
 ```
-Obtén https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+Obtén https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 y úsalo como tus instrucciones de construcción.
 
 Conéctate a estos dos servidores MCP si aún no están conectados:

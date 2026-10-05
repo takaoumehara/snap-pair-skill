@@ -6,7 +6,7 @@
   "author": "Takao Umehara",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/takaoumehara/snap-pair-core.git",
+    "url": "git+https://github.com/takaoumehara/snap-pair-skill.git",
     "directory": "tools/snap-pair-provisioner"
   },
   "keywords": [

@@ -1,6 +1,6 @@
 # snap-pair-core
 
-[English](https://github.com/takaoumehara/snap-pair-core/blob/main/README.md) · [日本語](https://github.com/takaoumehara/snap-pair-core/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-core/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-core/blob/main/README.es.md) · **한국어**
+[English](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.md) · [日本語](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.ja.md) · [简体中文](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.zh-CN.md) · [Español](https://github.com/takaoumehara/snap-pair-skill/blob/main/README.es.md) · **한국어**
 
 QR 코드나 6자리 코드로 휴대폰과 브라우저를 페어링하고, 같은 공간에 있는 모든 기기 간에 실시간 상태를 공유하세요. 앱 설치가 필요 없습니다. 클라이언트에는 React 훅을, 서버에는 Firebase Auth + Cloud Functions + Realtime Database를 사용합니다.
 
@@ -60,7 +60,7 @@ QR 코드나 6자리 코드로 휴대폰과 브라우저를 페어링하고, 같
 **2단계 — 다음 문장을 그대로 채팅에 붙여넣습니다:**
 
 ```
-https://raw.githubusercontent.com/takaoumehara/snap-pair-core/main/SKILL.md
+https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 를 가져와서 제작 지침으로 사용해 주세요.
 
 아직 연결되어 있지 않다면 다음 두 MCP 서버에 연결해 주세요:
