@@ -2,101 +2,101 @@
   <title id="title">Pairing flow</title>
   <desc id="desc">1. The host calls createRoom. 2. The transport returns pairing info: room code, PIN and join URL. 3. The host shows a QR code and PIN. 4. The controller scans the QR or types the PIN. 5. The controller calls joinRoom. 6. The host admits the peer. 7. The host sends the roster and shared state. 8. Realtime messages flow both ways.</desc>
   <style>
-    .bg{fill:#f8fafc}.card{fill:#ffffff}.edge{stroke:#cbd5e1}
-    .ink{fill:#0f172a}.muted{fill:#64748b}
-    .life{stroke:#cbd5e1}
-    .host{fill:#4f46e5}.relay{fill:#0d9488}.ctrl{fill:#db2777}
-    .msg{stroke:#475569}.msg-f{fill:#475569}
-    .rt{stroke:#4f46e5}.rt-f{fill:#4f46e5}
-    .note{fill:#fff7ed}.note-e{stroke:#fdba74}
-    .step{fill:#e0e7ff}.step-t{fill:#3730a3}
-    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Hiragino Sans","Noto Sans JP",sans-serif}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.canvas{fill:#ffffff}.acc-soft{fill:#e8f0fa}
+    .hair{stroke:#e5e5e5}.strong{stroke:#cfcfcf}
+    .ink{fill:#0a0a0a}.ink2{fill:#3d3d3d}.muted{fill:#666666}.faint{fill:#999999}
+    .life{stroke:#cfcfcf}
+    .msg{stroke:#3d3d3d}.msg-f{fill:#3d3d3d}.oob{stroke:#999999}
+    .rt{stroke:#0062cc}.rt-f{fill:#0062cc}.acc{fill:#0062cc}
+    text{font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
     @media (prefers-color-scheme: dark){
-      .bg{fill:#0b1020}.card{fill:#131a2e}.edge{stroke:#2c3757}
-      .ink{fill:#e2e8f0}.muted{fill:#94a3b8}
-      .life{stroke:#2c3757}
-      .host{fill:#6366f1}.relay{fill:#14b8a6}.ctrl{fill:#ec4899}
-      .msg{stroke:#94a3b8}.msg-f{fill:#94a3b8}
-      .rt{stroke:#818cf8}.rt-f{fill:#818cf8}
-      .note{fill:#2a1a10}.note-e{stroke:#9a4a17}
-      .step{fill:#1e2547}.step-t{fill:#c7d2fe}
+      .bg{fill:#141414}.surface{fill:#111111}.canvas{fill:#0a0a0a}.acc-soft{fill:#0f1f33}
+      .hair{stroke:#262626}.strong{stroke:#3a3a3a}
+      .ink{fill:#f2f2f2}.ink2{fill:#d4d4d4}.muted{fill:#a3a3a3}.faint{fill:#6b6b6b}
+      .life{stroke:#3a3a3a}
+      .msg{stroke:#d4d4d4}.msg-f{fill:#d4d4d4}.oob{stroke:#6b6b6b}
+      .rt{stroke:#3b9cff}.rt-f{fill:#3b9cff}.acc{fill:#3b9cff}
     }
   </style>
   <defs>
-    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path class="msg-f" d="M0 0 L10 5 L0 10 z"/>
     </marker>
-    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="faint" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
       <path class="rt-f" d="M0 0 L10 5 L0 10 z"/>
     </marker>
   </defs>
 
-  <rect class="bg" width="1000" height="580" rx="20"/>
+  <rect class="bg" x="0" y="0" width="1000" height="580" rx="0"/>
 
   <!-- actors -->
-  <g font-size="15" font-weight="700" text-anchor="middle">
-    <rect class="host" x="90" y="28" width="200" height="56" rx="12"/>
-    <text x="190" y="52" fill="#ffffff">Host</text>
-    <text x="190" y="72" fill="#ffffff" font-size="12" font-weight="400" opacity="0.9">big screen / laptop</text>
-    <rect class="relay" x="400" y="28" width="200" height="56" rx="12"/>
-    <text x="500" y="52" fill="#ffffff">Transport</text>
-    <text x="500" y="72" fill="#ffffff" font-size="12" font-weight="400" opacity="0.9">Firebase · PartyKit · WebRTC · BC</text>
-    <rect class="ctrl" x="710" y="28" width="200" height="56" rx="12"/>
-    <text x="810" y="52" fill="#ffffff">Controller</text>
-    <text x="810" y="72" fill="#ffffff" font-size="12" font-weight="400" opacity="0.9">phone browser, no install</text>
+  <g text-anchor="middle">
+    <rect class="canvas strong" x="90.5" y="28.5" width="199" height="55" rx="6" stroke-width="1.25"/>
+    <text class="ink" x="190" y="52" font-size="15" font-weight="600" letter-spacing="-0.2">Host</text>
+    <text class="muted" x="190" y="72" font-size="12">big screen / laptop</text>
+    <rect class="canvas strong" x="400.5" y="28.5" width="199" height="55" rx="6" stroke-width="1.25"/>
+    <text class="ink" x="500" y="52" font-size="15" font-weight="600" letter-spacing="-0.2">Transport</text>
+    <text class="muted" x="500" y="72" font-size="12">Firebase · PartyKit · WebRTC · BC</text>
+    <rect class="canvas strong" x="710.5" y="28.5" width="199" height="55" rx="6" stroke-width="1.25"/>
+    <text class="ink" x="810" y="52" font-size="15" font-weight="600" letter-spacing="-0.2">Controller</text>
+    <text class="muted" x="810" y="72" font-size="12">phone browser, no install</text>
   </g>
 
   <!-- lifelines -->
-  <g class="life" stroke-width="2" stroke-dasharray="4 6">
+  <g class="life" stroke-width="1" stroke-dasharray="3 5">
     <path d="M190 86 V 556"/><path d="M500 86 V 556"/><path d="M810 86 V 556"/>
   </g>
 
-  <g font-size="13">
+  <g font-size="12.5">
     <!-- 1 createRoom -->
-    <circle class="step" cx="40" cy="124" r="13"/><text class="step-t" x="40" y="129" text-anchor="middle" font-weight="700">1</text>
-    <path class="msg" d="M192 128 H 496" stroke-width="2" marker-end="url(#m)"/>
-    <text class="ink mono" x="344" y="120" text-anchor="middle">createRoom({ initialState })</text>
+    <text class="faint mono" x="40" y="132" text-anchor="middle" font-size="11" letter-spacing="1">01</text>
+    <path class="msg" d="M192 128 H 496" stroke-width="1.25" marker-end="url(#m)"/>
+    <text class="ink mono" x="344" y="119" text-anchor="middle">createRoom({ initialState })</text>
 
     <!-- 2 pairing -->
-    <circle class="step" cx="40" cy="174" r="13"/><text class="step-t" x="40" y="179" text-anchor="middle" font-weight="700">2</text>
-    <path class="msg" d="M498 178 H 194" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#m)"/>
-    <text class="ink mono" x="344" y="170" text-anchor="middle">{ code, pin, joinUrl }</text>
+    <text class="faint mono" x="40" y="182" text-anchor="middle" font-size="11" letter-spacing="1">02</text>
+    <path class="msg" d="M498 178 H 194" stroke-width="1.25" stroke-dasharray="5 4" marker-end="url(#m)"/>
+    <text class="ink mono" x="344" y="169" text-anchor="middle">{ code, pin, joinUrl }</text>
 
     <!-- 3 show QR/PIN -->
-    <circle class="step" cx="40" cy="232" r="13"/><text class="step-t" x="40" y="237" text-anchor="middle" font-weight="700">3</text>
-    <rect class="note note-e" x="90" y="206" width="200" height="52" rx="8" stroke-width="1"/>
-    <text class="ink" x="190" y="228" text-anchor="middle" font-weight="600">Show QR + PIN</text>
-    <text class="muted mono" x="190" y="246" text-anchor="middle" font-size="12">&lt;HostHUD pairing /&gt;</text>
+    <text class="faint mono" x="40" y="236" text-anchor="middle" font-size="11" letter-spacing="1">03</text>
+    <rect class="surface hair" x="90.5" y="206.5" width="199" height="51" rx="4" stroke-width="1"/>
+    <text class="ink" x="190" y="228" text-anchor="middle" font-weight="500" font-size="13.5">Show QR + PIN</text>
+    <text class="muted mono" x="190" y="246" text-anchor="middle" font-size="11.5">&lt;HostHUD pairing /&gt;</text>
 
     <!-- 4 scan -->
-    <circle class="step" cx="40" cy="296" r="13"/><text class="step-t" x="40" y="301" text-anchor="middle" font-weight="700">4</text>
-    <path class="msg" d="M292 292 C 450 270, 600 270, 706 292" fill="none" stroke-width="1.5" stroke-dasharray="2 6" marker-end="url(#m)"/>
-    <text class="muted" x="500" y="266" text-anchor="middle" font-size="12">camera / eyes (out of band)</text>
-    <rect class="note note-e" x="710" y="272" width="200" height="52" rx="8" stroke-width="1"/>
-    <text class="ink" x="810" y="294" text-anchor="middle" font-weight="600">Scan QR or type PIN</text>
-    <text class="muted mono" x="810" y="312" text-anchor="middle" font-size="12">parseJoinUrl(location)</text>
+    <text class="faint mono" x="40" y="300" text-anchor="middle" font-size="11" letter-spacing="1">04</text>
+    <path class="oob" d="M292 292 C 450 270, 600 270, 706 292" fill="none" stroke-width="1" stroke-dasharray="2 5" marker-end="url(#o)"/>
+    <text class="muted" x="500" y="264" text-anchor="middle" font-size="12">camera / eyes (out of band)</text>
+    <rect class="surface hair" x="710.5" y="272.5" width="199" height="51" rx="4" stroke-width="1"/>
+    <text class="ink" x="810" y="294" text-anchor="middle" font-weight="500" font-size="13.5">Scan QR or type PIN</text>
+    <text class="muted mono" x="810" y="312" text-anchor="middle" font-size="11.5">parseJoinUrl(location)</text>
 
     <!-- 5 joinRoom -->
-    <circle class="step" cx="40" cy="362" r="13"/><text class="step-t" x="40" y="367" text-anchor="middle" font-weight="700">5</text>
-    <path class="msg" d="M808 366 H 504" stroke-width="2" marker-end="url(#m)"/>
-    <text class="ink mono" x="656" y="358" text-anchor="middle">joinRoom('042917')</text>
+    <text class="faint mono" x="40" y="366" text-anchor="middle" font-size="11" letter-spacing="1">05</text>
+    <path class="msg" d="M808 366 H 504" stroke-width="1.25" marker-end="url(#m)"/>
+    <text class="ink mono" x="656" y="357" text-anchor="middle">joinRoom('042917')</text>
 
     <!-- 6 admit -->
-    <circle class="step" cx="40" cy="410" r="13"/><text class="step-t" x="40" y="415" text-anchor="middle" font-weight="700">6</text>
-    <path class="msg" d="M498 414 H 194" stroke-width="2" marker-end="url(#m)"/>
-    <text class="ink mono" x="344" y="406" text-anchor="middle">join → admit(peer) ✓</text>
+    <text class="faint mono" x="40" y="414" text-anchor="middle" font-size="11" letter-spacing="1">06</text>
+    <path class="msg" d="M498 414 H 194" stroke-width="1.25" marker-end="url(#m)"/>
+    <text class="ink mono" x="344" y="405" text-anchor="middle">join → admit(peer) ✓</text>
 
     <!-- 7 roster + state -->
-    <circle class="step" cx="40" cy="458" r="13"/><text class="step-t" x="40" y="463" text-anchor="middle" font-weight="700">7</text>
-    <path class="msg" d="M192 462 H 806" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#m)"/>
-    <text class="ink mono" x="500" y="454" text-anchor="middle">roster + shared state</text>
+    <text class="faint mono" x="40" y="462" text-anchor="middle" font-size="11" letter-spacing="1">07</text>
+    <path class="msg" d="M192 462 H 806" stroke-width="1.25" stroke-dasharray="5 4" marker-end="url(#m)"/>
+    <text class="ink mono" x="500" y="453" text-anchor="middle">roster + shared state</text>
 
-    <!-- 8 realtime -->
-    <circle class="step" cx="40" cy="520" r="13"/><text class="step-t" x="40" y="525" text-anchor="middle" font-weight="700">8</text>
-    <path class="rt" d="M196 512 H 804" stroke-width="3" marker-start="url(#r)" marker-end="url(#r)"/>
-    <path class="rt" d="M196 528 H 804" stroke-width="3" marker-start="url(#r)" marker-end="url(#r)" opacity="0.5"/>
-    <text class="ink mono" x="500" y="504" text-anchor="middle" font-weight="600">broadcast('stroke', { x, y }) · onMessage · setState</text>
-    <text class="muted" x="500" y="548" text-anchor="middle" font-size="12">realtime, both directions</text>
+    <!-- 8 realtime (live data path) -->
+    <rect class="acc-soft" x="90" y="490" width="820" height="66" rx="4"/>
+    <text class="acc mono" x="40" y="524" text-anchor="middle" font-size="11" letter-spacing="1">08</text>
+    <path class="rt" d="M196 514 H 804" stroke-width="1.5" marker-start="url(#r)" marker-end="url(#r)"/>
+    <path class="rt" d="M196 528 H 804" stroke-width="1.5" marker-start="url(#r)" marker-end="url(#r)" opacity="0.5"/>
+    <text class="ink mono" x="500" y="506" text-anchor="middle" font-weight="500">broadcast('stroke', { x, y }) · onMessage · setState</text>
+    <text class="muted" x="500" y="547" text-anchor="middle" font-size="12">realtime, both directions</text>
   </g>
 </svg>

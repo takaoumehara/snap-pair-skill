@@ -46,7 +46,7 @@ window.SNAP_I18N = {
     'hero.tagline': 'スマホがコントローラー。大画面がホスト。',
     'hero.lead': 'マルチスクリーンのインタラクティブなWeb体験をつくれます。参加者はいつものブラウザでQRコードを読み取るか6桁のPINを入力するだけでペアリングでき、その場のすべてのデバイスが入力と状態をリアルタイムに共有します。インストールは不要です。',
     'hero.ctaStart': 'はじめる',
-    'hero.ctaDemo': '▶ 2タブでデモを試す',
+    'hero.ctaDemo': '2タブでデモを試す',
     'hero.alt': 'スマホで描いた線が、QRコードとPINを表示した大画面にリアルタイムで表示される様子。',
 
     'what.eyebrow': 'snap-pairとは',
@@ -122,7 +122,7 @@ window.SNAP_I18N = {
 
     'presets.eyebrow': 'プリセット',
     'presets.title': 'すぐに生成できる7つのUXパターン',
-    'presets.lead': '各プリセットは、推奨Transport、メッセージの形、送信レート上限（すべて<code>PRESETS</code>に定義）付きの、すぐ動くテンプレートとして提供されます。一時的なメッセージング機能がないFirebase上で動くプリセットはありません。カードをクリックすると、メッセージの流れの要点を確認できます。',
+    'presets.lead': '各プリセットは、推奨Transport、メッセージの形、送信レート上限（すべて<code>PRESETS</code>に定義）付きの、すぐ動くテンプレートとして提供されます。一時的なメッセージング機能がないFirebase上で動くプリセットはありません。プリセットを選ぶと、メッセージの流れの要点を確認できます。',
 
     'cli.title': '<code>npx snap-pair init</code>：4つの入り口',
     'cli.lead': 'ウィザードは英語と日本語に対応しています（<code>LANG</code> / <code>LC_ALL</code>から判定、または<code>--lang en|ja</code>）。プロジェクトの考え方に合う入り口を選んでください（<code>--path</code>で最初のメニューを飛ばせます）。どの入り口でも<code>snap-pair.config.json</code>を書き出し、Vite + Reactのテンプレートを生成します。リレーが必要なTransportではPartyKitリレーも含まれます。',
