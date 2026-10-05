@@ -1,12 +1,16 @@
 {
   "name": "snap-pair-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React and Firebase foundation for temporary multi-device pairing and shared state",
   "license": "MIT",
   "author": "Takao Umehara",
   "repository": {
     "type": "git",
-    "url": "https://github.com/takaoumehara/snap-pair-core"
+    "url": "https://github.com/takaoumehara/snap-pair-skill"
+  },
+  "homepage": "https://github.com/takaoumehara/snap-pair-skill#readme",
+  "bugs": {
+    "url": "https://github.com/takaoumehara/snap-pair-skill/issues"
   },
   "main": "src/hooks/useSnapPair.ts",
   "scripts": {
