@@ -189,6 +189,22 @@ Room creation and joining go through the Admin SDK paths in `functions/`.
 Browsers cannot read pairing-code records, create rooms directly, or write
 membership/capacity records.
 
+#### Architecture (Phase 1)
+
+The client is being split into layers so more transports and pairing methods
+can be added later. The existing `useSnapPair` import path and API are
+unchanged. See [docs/plan-phase1.md](docs/plan-phase1.md).
+
+- `src/core/types.ts`: transport-agnostic `Peer`, `Room`, `ConnectionStatus`,
+  `TransportMessage`, and `PairingInfo` (room code, optional PIN, join URL).
+- `src/transports/base.ts`: the abstract `Transport` (connect, rooms, state,
+  messaging, and subscriptions).
+- `src/transports/firebase.ts`: `FirebaseTransport` plus `FirebaseRoomStore`,
+  which holds every RTDB read and write. `useSnapPair` now delegates to it.
+- `src/components/HostHUD.tsx`: a host pairing panel with a QR code, room
+  code, and PIN fallback. Bring your own QR renderer via
+  `renderQr={(value, size) => <QRCodeSVG value={value} size={size} />}`.
+
 ### React usage
 
 ```ts
