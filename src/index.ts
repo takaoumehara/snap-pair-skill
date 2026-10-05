@@ -112,7 +112,31 @@ export {
 } from './client/orientation';
 
 // Components
-export { HostHUD, defaultHostHUDLabels, type HostHUDLabels, type HostHUDProps } from './components/HostHUD';
+export {
+  HostHUD,
+  defaultHostHUDLabels,
+  getHostHUDLabels,
+  type HostHUDLabels,
+  type HostHUDProps,
+} from './components/HostHUD';
+
+// i18n
+export {
+  createTranslator,
+  DEFAULT_LOCALE,
+  detectLocale,
+  getMessages,
+  isLocale,
+  resolveLocale,
+  SUPPORTED_LOCALES,
+  t,
+  tList,
+  type DetectLocaleSources,
+  type Locale,
+  type Messages,
+  type TranslateParams,
+  type Translator,
+} from './i18n';
 export type { SnapPlayer, SnapRoom } from './types';
 export {
   createSnapPairServer,

@@ -1,0 +1,130 @@
+{
+  "hud": {
+    "pairing": "Pairing",
+    "waiting": "Creating room…",
+    "scanToJoin": "Scan to join",
+    "enterCode": "Or enter code",
+    "pin": "PIN",
+    "peers": "Connected",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "status": {
+      "idle": "Idle",
+      "connecting": "Connecting…",
+      "connected": "Online",
+      "reconnecting": "Reconnecting…",
+      "disconnected": "Offline",
+      "error": "Connection error"
+    }
+  },
+  "controller": {
+    "region": "Controller",
+    "room": "Room",
+    "reconnect": "Reconnect",
+    "connectionLost": "Connection lost. Trying to get back…",
+    "wakeLockOn": "Screen stays on",
+    "wakeLockOff": "Keep screen on",
+    "enableMotion": "Enable motion sensors",
+    "motionDenied": "Motion access was denied. Allow it in your browser settings and reload.",
+    "motionUnsupported": "This device has no motion sensors.",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen"
+  },
+  "transports": {
+    "broadcast": {
+      "name": "BroadcastChannel (same device)",
+      "summary": "Tabs and windows of one browser on one machine talk directly. No network, no server.",
+      "pros": ["Zero setup, zero cost, works offline", "Lowest latency (in-process)", "Great for local demos and tests"],
+      "cons": ["Same browser profile on one machine only: phones cannot join", "No server-side admission"],
+      "cost": "Free. Nothing to deploy."
+    },
+    "partykit": {
+      "name": "PartyKit (Cloudflare relay)",
+      "summary": "A small WebSocket relay room on Cloudflare (PartyKit / Durable Objects). Phones and screens anywhere on the internet.",
+      "pros": ["Works across networks and NATs (it is a server)", "Scales to hundreds of peers per room", "Simple deploy: `npx partykit deploy` with examples/partykit/server.ts"],
+      "cons": ["You run (a tiny) server", "One relay hop of latency (usually 20–80 ms)", "Host-authoritative: anyone with the code can ask to join unless you add `admit`"],
+      "cost": "Cloudflare has a free tier (Workers Free with daily request limits; Durable Objects allowances); the paid Workers plan starts at about $5/month. Check current Cloudflare pricing."
+    },
+    "webrtc": {
+      "name": "WebRTC DataChannel (P2P)",
+      "summary": "Each guest opens a direct DataChannel to the host; a messaging transport (PartyKit) only carries the handshake.",
+      "pros": ["Lowest network latency between devices (often on the same LAN)", "Room traffic never touches a server after the handshake", "Auto-reconnect and large-message chunking built in"],
+      "cons": ["Needs a signaling transport (PartyKit) anyway", "Some networks need a TURN server", "Star topology: the host's device relays everything, so keep rooms small (≈2–16)"],
+      "cost": "P2P traffic is free; signaling uses the PartyKit free tier; the default public STUN server is free. TURN relays (Cloudflare, Twilio, self-hosted coturn) are billed per GB."
+    },
+    "firebase": {
+      "name": "Firebase Realtime Database (managed)",
+      "summary": "Google-managed backend: Cloud Functions admit peers atomically, security rules gate reads and writes, RTDB syncs state and presence.",
+      "pros": ["Server-authoritative join and capacity (up to 300 per room)", "Managed: no server code to operate", "Presence via onDisconnect, persistence, auth"],
+      "cons": ["No ephemeral messaging yet: shared state only, so not for high-frequency input", "Cloud Functions need the Blaze plan (credit card)", "Higher latency than P2P (≈50–200 ms)"],
+      "cost": "Spark (free): 1 GB stored, 10 GB/month download, 100 simultaneous connections, no Cloud Functions. Blaze (pay-as-you-go, card required) includes free monthly quotas and is needed for Functions."
+    }
+  },
+  "pairing": {
+    "qr": { "name": "QR code", "description": "The host shows a QR code with the join URL; phones scan it." },
+    "code": { "name": "Room code", "description": "A six-character code like ABC 234, typed on the guest device." },
+    "pin": { "name": "Numeric PIN", "description": "A six-digit PIN, easy to read aloud (relay transports only)." },
+    "broadcast": { "name": "Same-device broadcast", "description": "Other tabs on the same machine find the room by code; no scanning." }
+  },
+  "architectures": {
+    "same-device": { "name": "Same device", "description": "Several tabs/windows/displays driven by one computer." },
+    "realtime": { "name": "LAN / online realtime", "description": "Phones and screens anywhere, through a relay server." },
+    "p2p": { "name": "P2P low latency", "description": "Direct device-to-device channels for fast input." },
+    "managed": { "name": "Serverless managed", "description": "A managed backend with server-side admission and persistence." }
+  },
+  "stacks": {
+    "firebase": { "name": "I already use Firebase", "description": "Reuse your Firebase project (Auth + RTDB + Functions)." },
+    "cloudflare": { "name": "Cloudflare / PartyKit", "description": "Deploy a tiny relay on Cloudflare." },
+    "none": { "name": "No backend", "description": "Nothing to deploy; same machine (or P2P once you add signaling)." }
+  },
+  "cli": {
+    "intro": "snap-pair init: set up a multi-device experience",
+    "menuTitle": "How do you want to choose?",
+    "menu": {
+      "ux": "By experience: pick one of 7 presets",
+      "architecture": "By architecture: same device, realtime, P2P, or managed",
+      "stack": "By stack: Firebase, Cloudflare/PartyKit, or no backend",
+      "consult": "Describe your idea and get a recommendation"
+    },
+    "askPreset": "Which experience?",
+    "askArchitecture": "Which architecture?",
+    "askStack": "Which stack do you have?",
+    "askConsult": "Describe your idea in one or two sentences:",
+    "askTransport": "Which transport?",
+    "askPairing": "How do guests join?",
+    "askScaffold": "Scaffold the {preset} template into a folder?",
+    "askOut": "Target folder:",
+    "choose": "Choose 1-{max}",
+    "default": "default",
+    "recommended": "recommended",
+    "invalidChoice": "Please enter a number between 1 and {max}.",
+    "pros": "Pros",
+    "cons": "Cons",
+    "cost": "Cost",
+    "transport": "Transport",
+    "pairing": "Pairing",
+    "preset": "Preset",
+    "messages": "Messages",
+    "rateLimit": "Rate limit",
+    "consultResult": "Recommendation: {preset} over {transport} (pairing: {pairing})",
+    "consultReasons": "Why",
+    "consultNoMatch": "No keywords matched, so here is a general-purpose default. Try words like \"vote\", \"draw\", \"controller\", or \"tilt\".",
+    "matchedKeyword": "matched \"{keyword}\"",
+    "summary": "Summary",
+    "written": "Wrote {file}",
+    "scaffolded": "Scaffolded the {preset} template into {dir}",
+    "nextSteps": "Next steps",
+    "conflicts": "These files already exist (use --force to overwrite): {files}",
+    "unknownPreset": "Unknown preset \"{value}\". Known presets: {known}",
+    "unknownTransport": "Unknown transport \"{value}\". Known transports: {known}",
+    "unknownPairing": "Unknown pairing method \"{value}\". Known methods: {known}",
+    "unsupportedTransport": "The {preset} preset does not support the {transport} transport. Supported: {supported}",
+    "unsupportedPairing": "The {transport} transport does not support {pairing} pairing. Supported: {supported}",
+    "unknownCommand": "Unknown command \"{value}\". Run `snap-pair --help`.",
+    "unknownFlag": "Unknown option \"{value}\". Run `snap-pair --help`.",
+    "missingValue": "Option {flag} needs a value.",
+    "aborted": "Aborted.",
+    "presetsTitle": "Presets",
+    "done": "Done."
+  }
+}

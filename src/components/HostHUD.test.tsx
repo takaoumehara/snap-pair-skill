@@ -84,6 +84,31 @@ describe('HostHUD', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 
+  it('localizes built-in strings with the locale prop', () => {
+    render(<HostHUD pairing={pairing} status="connected" peerCount={2} locale="ja" />);
+    expect(screen.getByText('またはコードを入力')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toBe('オンライン');
+    expect(screen.getByText('接続中: 2')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'ペアリング' })).toBeTruthy();
+  });
+
+  it('applies label overrides on top of the locale', () => {
+    render(<HostHUD pairing={null} locale="ja" labels={{ waiting: 'お待ちください' }} />);
+    expect(screen.getByRole('status').textContent).toBe('お待ちください');
+    expect(screen.getByRole('region', { name: 'ペアリング' })).toBeTruthy();
+  });
+
+  it('detects the locale with locale="auto"', () => {
+    vi.stubGlobal('navigator', { ...navigator, languages: ['ja-JP', 'en'] });
+    render(<HostHUD pairing={null} locale="auto" />);
+    expect(screen.getByRole('status').textContent).toBe('ルームを作成中…');
+  });
+
+  it('keeps English and the "Pairing" region name by default', () => {
+    render(<HostHUD pairing={null} />);
+    expect(screen.getByRole('region', { name: 'Pairing' })).toBeTruthy();
+  });
+
   it('renders children below the pairing info', () => {
     render(<HostHUD pairing={pairing}><button type="button">Start</button></HostHUD>);
     expect(screen.getByRole('button', { name: 'Start' })).toBeTruthy();

@@ -1,0 +1,130 @@
+{
+  "hud": {
+    "pairing": "ペアリング",
+    "waiting": "ルームを作成中…",
+    "scanToJoin": "スキャンして参加",
+    "enterCode": "またはコードを入力",
+    "pin": "PIN",
+    "peers": "接続中",
+    "copyLink": "リンクをコピー",
+    "copied": "コピーしました",
+    "status": {
+      "idle": "待機中",
+      "connecting": "接続中…",
+      "connected": "オンライン",
+      "reconnecting": "再接続中…",
+      "disconnected": "オフライン",
+      "error": "接続エラー"
+    }
+  },
+  "controller": {
+    "region": "コントローラー",
+    "room": "ルーム",
+    "reconnect": "再接続",
+    "connectionLost": "接続が切れました。再接続しています…",
+    "wakeLockOn": "画面を点灯したまま",
+    "wakeLockOff": "画面を消さない",
+    "enableMotion": "モーションセンサーを有効にする",
+    "motionDenied": "モーションへのアクセスが拒否されました。ブラウザの設定で許可してから再読み込みしてください。",
+    "motionUnsupported": "この端末にはモーションセンサーがありません。",
+    "fullscreen": "全画面",
+    "exitFullscreen": "全画面を終了"
+  },
+  "transports": {
+    "broadcast": {
+      "name": "BroadcastChannel(同一端末)",
+      "summary": "1台のマシン上の同じブラウザのタブ・ウィンドウ同士が直接通信します。ネットワークもサーバーも不要です。",
+      "pros": ["設定不要・無料・オフラインで動作", "最小の遅延(プロセス内)", "ローカルデモやテストに最適"],
+      "cons": ["同じマシンの同じブラウザプロファイルのみ: スマホは参加できない", "サーバー側での参加承認なし"],
+      "cost": "無料。デプロイ不要。"
+    },
+    "partykit": {
+      "name": "PartyKit(Cloudflare リレー)",
+      "summary": "Cloudflare 上の小さな WebSocket リレールーム(PartyKit / Durable Objects)。インターネット上のどこからでもスマホと画面をつなぎます。",
+      "pros": ["ネットワークや NAT をまたいで動作(サーバー経由)", "1ルーム数百人まで拡張可能", "デプロイが簡単: examples/partykit/server.ts を `npx partykit deploy`"],
+      "cons": ["(小さな)サーバーを運用する", "リレー1ホップ分の遅延(通常 20〜80 ms)", "ホスト権限型: `admit` を追加しない限りコードを知っていれば誰でも参加申請できる"],
+      "cost": "Cloudflare に無料枠があります(Workers Free は1日あたりのリクエスト上限、Durable Objects にも無料枠)。有料の Workers プランは月額約 5 ドルから。最新の料金は Cloudflare で確認してください。"
+    },
+    "webrtc": {
+      "name": "WebRTC DataChannel(P2P)",
+      "summary": "各ゲストがホストへ直接 DataChannel を開きます。メッセージング可能なトランスポート(PartyKit)はハンドシェイクだけを運びます。",
+      "pros": ["端末間のネットワーク遅延が最小(同一 LAN なら特に)", "ハンドシェイク後はルームの通信がサーバーを通らない", "自動再接続と大きなメッセージの分割送信を内蔵"],
+      "cons": ["結局シグナリング用のトランスポート(PartyKit)が必要", "ネットワークによっては TURN サーバーが必要", "スター型: ホスト端末がすべてを中継するので少人数向け(約2〜16人)"],
+      "cost": "P2P 通信は無料。シグナリングは PartyKit の無料枠、既定の公開 STUN サーバーも無料。TURN リレー(Cloudflare、Twilio、自前の coturn)は GB 単位の課金です。"
+    },
+    "firebase": {
+      "name": "Firebase Realtime Database(マネージド)",
+      "summary": "Google のマネージドバックエンド: Cloud Functions が参加を原子的に承認し、セキュリティルールが読み書きを制限し、RTDB が状態とプレゼンスを同期します。",
+      "pros": ["サーバー権限の参加・定員管理(1ルーム最大300人)", "マネージド: 運用するサーバーコードがない", "onDisconnect によるプレゼンス、永続化、認証"],
+      "cons": ["一時的なメッセージングは未対応: 共有状態のみなので高頻度入力には不向き", "Cloud Functions には Blaze プラン(クレジットカード)が必要", "P2P より遅延が大きい(約 50〜200 ms)"],
+      "cost": "Spark(無料): 保存 1 GB、ダウンロード 10 GB/月、同時接続 100、Cloud Functions なし。Blaze(従量課金・カード必須)には毎月の無料枠があり、Functions に必要です。"
+    }
+  },
+  "pairing": {
+    "qr": { "name": "QR コード", "description": "ホストが参加 URL の QR コードを表示し、スマホで読み取ります。" },
+    "code": { "name": "ルームコード", "description": "ABC 234 のような6文字のコードをゲスト端末で入力します。" },
+    "pin": { "name": "数字 PIN", "description": "読み上げやすい6桁の PIN(リレー系トランスポートのみ)。" },
+    "broadcast": { "name": "同一端末ブロードキャスト", "description": "同じマシンの別タブがコードでルームを見つけます。スキャン不要。" }
+  },
+  "architectures": {
+    "same-device": { "name": "同一端末", "description": "1台のコンピューターで複数のタブ・ウィンドウ・ディスプレイを動かす。" },
+    "realtime": { "name": "LAN / オンラインのリアルタイム", "description": "リレーサーバー経由で、どこにあるスマホや画面でもつなぐ。" },
+    "p2p": { "name": "P2P 低遅延", "description": "高速な入力のための端末間ダイレクト通信。" },
+    "managed": { "name": "サーバーレス・マネージド", "description": "サーバー側の参加承認と永続化を持つマネージドバックエンド。" }
+  },
+  "stacks": {
+    "firebase": { "name": "Firebase を使っている", "description": "既存の Firebase プロジェクト(Auth + RTDB + Functions)を再利用。" },
+    "cloudflare": { "name": "Cloudflare / PartyKit", "description": "Cloudflare に小さなリレーをデプロイ。" },
+    "none": { "name": "バックエンドなし", "description": "デプロイ不要。同一マシン(シグナリングを足せば P2P も)。" }
+  },
+  "cli": {
+    "intro": "snap-pair init: マルチデバイス体験をセットアップします",
+    "menuTitle": "どの観点から選びますか?",
+    "menu": {
+      "ux": "体験から選ぶ: 7つのプリセットから1つ",
+      "architecture": "構成から選ぶ: 同一端末 / リアルタイム / P2P / マネージド",
+      "stack": "技術スタックから選ぶ: Firebase / Cloudflare・PartyKit / バックエンドなし",
+      "consult": "アイデアを文章で伝えておすすめを聞く"
+    },
+    "askPreset": "どの体験にしますか?",
+    "askArchitecture": "どの構成にしますか?",
+    "askStack": "どの技術スタックがありますか?",
+    "askConsult": "アイデアを1〜2文で説明してください:",
+    "askTransport": "どのトランスポートにしますか?",
+    "askPairing": "ゲストはどうやって参加しますか?",
+    "askScaffold": "{preset} テンプレートをフォルダに生成しますか?",
+    "askOut": "出力先フォルダ:",
+    "choose": "1〜{max} を選択",
+    "default": "既定",
+    "recommended": "おすすめ",
+    "invalidChoice": "1〜{max} の数字を入力してください。",
+    "pros": "長所",
+    "cons": "短所",
+    "cost": "コスト",
+    "transport": "トランスポート",
+    "pairing": "ペアリング",
+    "preset": "プリセット",
+    "messages": "メッセージ",
+    "rateLimit": "送信レート",
+    "consultResult": "おすすめ: {preset}({transport}、ペアリング: {pairing})",
+    "consultReasons": "理由",
+    "consultNoMatch": "キーワードが見つからなかったので、汎用的な既定値を提案します。「投票」「お絵かき」「コントローラー」「傾き」などの言葉を試してください。",
+    "matchedKeyword": "「{keyword}」に一致",
+    "summary": "まとめ",
+    "written": "{file} を書き出しました",
+    "scaffolded": "{preset} テンプレートを {dir} に生成しました",
+    "nextSteps": "次のステップ",
+    "conflicts": "次のファイルが既に存在します(上書きするには --force): {files}",
+    "unknownPreset": "不明なプリセット「{value}」。利用可能: {known}",
+    "unknownTransport": "不明なトランスポート「{value}」。利用可能: {known}",
+    "unknownPairing": "不明なペアリング方式「{value}」。利用可能: {known}",
+    "unsupportedTransport": "{preset} プリセットは {transport} トランスポートに対応していません。対応: {supported}",
+    "unsupportedPairing": "{transport} トランスポートは {pairing} ペアリングに対応していません。対応: {supported}",
+    "unknownCommand": "不明なコマンド「{value}」。`snap-pair --help` を実行してください。",
+    "unknownFlag": "不明なオプション「{value}」。`snap-pair --help` を実行してください。",
+    "missingValue": "オプション {flag} には値が必要です。",
+    "aborted": "中止しました。",
+    "presetsTitle": "プリセット",
+    "done": "完了しました。"
+  }
+}
