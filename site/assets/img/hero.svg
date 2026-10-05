@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-labelledby="title desc">
+  <title id="title">snap-pair: multi-screen interactive web experiences</title>
+  <desc id="desc">A phone acting as a controller draws a stroke that appears live on a big host screen showing a QR code and a six-digit PIN.</desc>
+  <style>
+    .bg{fill:#f8fafc}.dot{fill:#dbe2ec}
+    .surface{fill:#ffffff}.edge{stroke:#cbd5e1}
+    .ink{fill:#0f172a}.muted{fill:#475569}
+    .accent{fill:#4f46e5}.accent-s{stroke:#4f46e5}
+    .teal{fill:#0d9488}.teal-s{stroke:#0d9488}
+    .amber{fill:#f59e0b}
+    .screen{fill:#eef2ff}.qr{fill:#0f172a}.qrbg{fill:#ffffff}
+    .chip{fill:#e0e7ff}.chip-t{fill:#4338ca}
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Hiragino Sans","Noto Sans JP",sans-serif}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#0b1020}.dot{fill:#1c2645}
+      .surface{fill:#131a2e}.edge{stroke:#2c3757}
+      .ink{fill:#e2e8f0}.muted{fill:#94a3b8}
+      .accent{fill:#818cf8}.accent-s{stroke:#818cf8}
+      .teal{fill:#2dd4bf}.teal-s{stroke:#2dd4bf}
+      .amber{fill:#fbbf24}
+      .screen{fill:#0f1530}.qr{fill:#0b1020}.qrbg{fill:#e2e8f0}
+      .chip{fill:#1e2547}.chip-t{fill:#c7d2fe}
+    }
+  </style>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle class="dot" cx="2" cy="2" r="1.3"/>
+    </pattern>
+    <clipPath id="frame"><rect width="1200" height="420" rx="24"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+  <rect class="bg" width="1200" height="420"/>
+  <rect width="1200" height="420" fill="url(#dots)"/>
+
+  <!-- Copy -->
+  <g transform="translate(64 0)">
+    <rect class="chip" x="0" y="80" width="226" height="30" rx="15"/>
+    <text class="chip-t" x="16" y="100" font-size="14" font-weight="600">Open-source DevTool · MIT</text>
+    <text class="ink" x="-3" y="176" font-size="68" font-weight="800" letter-spacing="-2">snap-pair</text>
+    <text class="ink" x="0" y="224" font-size="26" font-weight="600">Phone as controller. Big screen as host.</text>
+    <text class="muted" x="0" y="262" font-size="17">Pair in seconds with QR, 6-digit PIN or local broadcast,</text>
+    <text class="muted" x="0" y="288" font-size="17">then stream realtime input over the transport that fits.</text>
+    <g transform="translate(0 318)" font-size="13" font-weight="600">
+      <rect class="surface edge" x="0" y="0" width="84" height="28" rx="8" stroke-width="1"/>
+      <text class="ink" x="14" y="19">Firebase</text>
+      <rect class="surface edge" x="94" y="0" width="84" height="28" rx="8" stroke-width="1"/>
+      <text class="ink" x="108" y="19">PartyKit</text>
+      <rect class="surface edge" x="188" y="0" width="80" height="28" rx="8" stroke-width="1"/>
+      <text class="ink" x="202" y="19">WebRTC</text>
+      <rect class="surface edge" x="278" y="0" width="146" height="28" rx="8" stroke-width="1"/>
+      <text class="ink" x="292" y="19">BroadcastChannel</text>
+    </g>
+  </g>
+
+  <!-- Big screen (host) -->
+  <g transform="translate(650 56)">
+    <rect class="surface edge" x="0" y="0" width="500" height="290" rx="18" stroke-width="2"/>
+    <rect class="screen" x="14" y="14" width="472" height="262" rx="10"/>
+    <rect class="surface edge" x="222" y="290" width="56" height="22" stroke-width="2"/>
+    <rect class="surface edge" x="170" y="310" width="160" height="10" rx="5" stroke-width="2"/>
+    <text class="muted" x="34" y="44" font-size="11" font-weight="700" letter-spacing="1.5">HOST</text>
+    <path class="accent-s" d="M60 200 C 110 110, 170 110, 200 170 S 290 240, 330 150" fill="none" stroke-width="7" stroke-linecap="round"/>
+    <path class="teal-s" d="M80 236 C 140 210, 190 250, 250 226" fill="none" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+    <circle class="amber" cx="330" cy="150" r="18" opacity="0.25"/>
+    <circle class="amber" cx="330" cy="150" r="9"/>
+    <!-- HUD with QR + PIN -->
+    <g transform="translate(372 30)">
+      <rect class="surface edge" x="0" y="0" width="100" height="140" rx="10" stroke-width="1"/>
+      <rect class="qrbg" x="14" y="12" width="72" height="72" rx="4"/>
+      <g class="qr">
+        <rect x="18" y="16" width="20" height="20"/><rect x="62" y="16" width="20" height="20"/><rect x="18" y="60" width="20" height="20"/>
+        <rect x="42" y="18" width="6" height="6"/><rect x="50" y="26" width="6" height="6"/><rect x="42" y="34" width="6" height="6"/>
+        <rect x="44" y="46" width="6" height="6"/><rect x="56" y="44" width="6" height="6"/><rect x="66" y="50" width="6" height="6"/>
+        <rect x="74" y="42" width="6" height="6"/><rect x="48" y="58" width="6" height="6"/><rect x="60" y="62" width="6" height="6"/>
+        <rect x="70" y="66" width="10" height="6"/><rect x="44" y="72" width="6" height="6"/><rect x="56" y="74" width="6" height="6"/>
+        <rect x="24" y="46" width="12" height="6"/>
+      </g>
+      <rect class="qrbg" x="22" y="20" width="12" height="12"/><rect class="qr" x="25" y="23" width="6" height="6"/>
+      <rect class="qrbg" x="66" y="20" width="12" height="12"/><rect class="qr" x="69" y="23" width="6" height="6"/>
+      <rect class="qrbg" x="22" y="64" width="12" height="12"/><rect class="qr" x="25" y="67" width="6" height="6"/>
+      <text class="muted" x="50" y="104" font-size="10" text-anchor="middle" font-weight="700" letter-spacing="1">PIN</text>
+      <text class="ink mono" x="50" y="126" font-size="17" text-anchor="middle" font-weight="700">042 917</text>
+    </g>
+  </g>
+
+  <!-- Signal arcs -->
+  <g fill="none" stroke-linecap="round" stroke-width="3" class="accent-s">
+    <path d="M688 262 q 40 -20 70 -60" stroke-dasharray="2 9"/>
+    <path d="M700 290 q 60 -24 104 -84" stroke-dasharray="2 9" opacity="0.55"/>
+  </g>
+
+  <!-- Phone (controller) -->
+  <g transform="translate(556 214) rotate(-8)">
+    <rect class="surface edge" x="0" y="0" width="118" height="200" rx="20" stroke-width="2.5"/>
+    <rect class="screen" x="8" y="22" width="102" height="160" rx="8"/>
+    <rect class="edge" x="44" y="10" width="30" height="5" rx="2.5" fill="none" stroke-width="2"/>
+    <path class="accent-s" d="M24 136 C 40 76, 70 76, 80 106 S 96 116, 98 66" fill="none" stroke-width="5" stroke-linecap="round"/>
+    <circle class="amber" cx="98" cy="66" r="8"/>
+    <rect class="accent" x="20" y="152" width="78" height="20" rx="10"/>
+    <text x="59" y="166" font-size="10" font-weight="700" text-anchor="middle" fill="#ffffff" letter-spacing="0.5">CONTROLLER</text>
+  </g>
+  </g>
+</svg>
