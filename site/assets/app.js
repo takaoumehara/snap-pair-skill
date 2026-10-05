@@ -83,7 +83,9 @@
     }
 
     document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
-      btn.textContent = currentLang === 'ja' ? 'EN' : '日本語';
+      btn.innerHTML = currentLang === 'ja'
+        ? '<span class="lang-long">EN</span><span class="lang-short" aria-hidden="true">EN</span>'
+        : '<span class="lang-long">日本語</span><span class="lang-short" aria-hidden="true">JA</span>';
       btn.setAttribute('aria-label', currentLang === 'ja' ? 'Switch to English' : '日本語に切り替え');
       btn.setAttribute('lang', currentLang === 'ja' ? 'en' : 'ja');
     });
