@@ -14,7 +14,7 @@
   var JOIN_TIMEOUT_MS = 1500;
   var CLAIM_WINDOW_MS = 150;
   var MAX_PEERS = 8;
-  var COLORS = ['#4f46e5', '#db2777', '#0d9488', '#ea580c', '#7c3aed', '#0284c7', '#16a34a', '#ca8a04'];
+  var COLORS = ['#0062cc', '#0b6e4f', '#b45309', '#b42318', '#475569', '#0e7490', '#1d4ed8', '#3f3f46'];
 
   var $ = function (id) { return document.getElementById(id); };
   var t = function (key, vars) {

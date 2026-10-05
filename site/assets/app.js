@@ -263,20 +263,74 @@
     });
   }
 
-  /* ---------- Preset cards select the matching code tab ---------- */
+  /* ---------- Preset rows: select the code tab and swap the preview ---------- */
+  function showPreset(key) {
+    var row = null;
+    document.querySelectorAll('[data-preset]').forEach(function (r) {
+      var on = r.getAttribute('data-preset') === key;
+      r.setAttribute('aria-pressed', String(on));
+      if (on) row = r;
+    });
+    var img = document.querySelector('#preset-preview img');
+    if (row && img && row.getAttribute('data-preview')) {
+      img.src = row.getAttribute('data-preview');
+      img.alt = row.getAttribute('data-alt') || '';
+    }
+  }
+
   function initPresetCards() {
-    document.querySelectorAll('[data-preset]').forEach(function (card) {
-      card.addEventListener('click', function () {
-        var key = card.getAttribute('data-preset');
+    document.querySelectorAll('[data-preset]').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var key = row.getAttribute('data-preset');
         var tab = document.querySelector('#preset-tabs [role="tab"][data-key="' + key + '"]');
-        if (tab) {
-          selectTab(tab, false);
-          document.querySelectorAll('[data-preset]').forEach(function (c) { c.setAttribute('aria-pressed', String(c === card)); });
-          var code = document.getElementById('preset-code');
-          if (code) code.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        if (tab) selectTab(tab, false);
+        showPreset(key);
       });
     });
+    var list = document.getElementById('preset-tabs');
+    if (list) {
+      list.addEventListener('click', function (e) {
+        var tab = e.target.closest('[role="tab"]');
+        if (tab) showPreset(tab.getAttribute('data-key'));
+      });
+      list.addEventListener('keyup', function () {
+        var sel = list.querySelector('[aria-selected="true"]');
+        if (sel) showPreset(sel.getAttribute('data-key'));
+      });
+    }
+  }
+
+  /* ---------- Quiet motion: nav hairline on scroll, section reveal ---------- */
+  function initMotion() {
+    var nav = document.querySelector('.nav');
+    if (nav) {
+      var ticking = false;
+      var update = function () { nav.classList.toggle('is-scrolled', window.scrollY > 8); ticking = false; };
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+      update();
+    }
+
+    var loader = document.querySelector('.loader');
+    if (loader) {
+      loader.addEventListener('animationend', function (e) {
+        if (e.animationName === 'loader-out') root.classList.remove('is-loading');
+      });
+    }
+
+    if (!root.classList.contains('js-reveal')) return;
+    var targets = document.querySelectorAll('[data-reveal]');
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('is-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { entry.target.classList.add('is-in'); io.unobserve(entry.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.01 });
+    targets.forEach(function (el) { io.observe(el); });
   }
 
   /* ---------- Boot ---------- */
@@ -289,6 +343,7 @@
     initCopy();
     initNav();
     initPresetCards();
+    initMotion();
     document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var next = currentLang === 'ja' ? 'en' : 'ja';

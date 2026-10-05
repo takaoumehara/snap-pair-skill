@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>snap-pair: phone as controller, big screen as host</title>
   <meta name="description" data-i18n-key="meta.description" content="snap-pair is an open-source DevTool for multi-screen interactive web experiences. Pair phones and screens with QR, 6-digit PIN or broadcast, then stream realtime input over Firebase, PartyKit, WebRTC or BroadcastChannel.">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://takaoumehara.github.io/snap-pair-skill/">
@@ -16,19 +17,22 @@
   <meta property="og:url" content="https://takaoumehara.github.io/snap-pair-skill/">
   <meta property="og:image" content="https://takaoumehara.github.io/snap-pair-skill/assets/img/hero.svg">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap">
   <link rel="stylesheet" href="assets/style.css">
-  <script>
-    // Apply a saved theme before first paint to avoid a flash.
-    try { var t = localStorage.getItem('snap-pair-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
-  </script>
+  <script src="assets/boot.js" data-loader></script>
 </head>
 <body data-title-key="meta.title">
+  <div class="loader" aria-hidden="true">
+    <div class="loader-mark"><span class="loader-word">snap-pair</span><span class="loader-rule"></span></div>
+  </div>
   <a class="skip-link" href="#main" data-i18n="ui.skip">Skip to content</a>
 
   <header class="nav">
     <div class="container">
       <a class="brand" href="./" aria-label="snap-pair home">
-        <img src="assets/favicon.svg" alt="" width="28" height="28">
+        <img src="assets/favicon.svg" alt="" width="22" height="22">
         <span>snap-pair</span>
       </a>
       <ul class="nav-links">
@@ -48,7 +52,7 @@
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
         </a>
         <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
         </button>
       </div>
     </div>
@@ -68,55 +72,66 @@
   <main id="main">
     <!-- ================= HERO ================= -->
     <section class="hero">
-      <div class="container hero-grid">
-        <div>
+      <div class="container">
+        <div class="hero-meta">
           <span class="eyebrow" data-i18n="hero.eyebrow">Open-source DevTool · MIT</span>
-          <h1><span class="grad">snap-pair</span></h1>
+          <span>v2.0.0 · snap-pair-core</span>
+        </div>
+        <h1>snap-pair</h1>
+        <div class="hero-grid">
           <p class="tagline" data-i18n="hero.tagline">Phone as controller. Big screen as host.</p>
-          <p class="lead" data-i18n="hero.lead">Build multi-screen interactive web experiences. People pair by scanning a QR code or typing a 6-digit PIN in the browser they already have, and every device in the room shares live input and state. Nothing to install.</p>
-          <ul class="chips" aria-label="Transports">
-            <li>Firebase RTDB</li><li>PartyKit</li><li>WebRTC</li><li>BroadcastChannel</li>
-          </ul>
-          <div class="cta">
-            <a class="btn btn-primary" href="#quick-start" data-i18n="hero.ctaStart">Get started</a>
-            <a class="btn btn-ghost" href="demo.html" data-i18n="hero.ctaDemo">▶ Try the two-tab demo</a>
-            <a class="btn btn-ghost" href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a>
-          </div>
-          <div class="install-line">
-            <span class="prompt">$</span><span id="hero-cmd">npx snap-pair init</span>
-            <span data-copy="hero-cmd" style="flex:0"></span>
+          <div>
+            <p class="lead" data-i18n="hero.lead">Build multi-screen interactive web experiences. People pair by scanning a QR code or typing a 6-digit PIN in the browser they already have, and every device in the room shares live input and state. Nothing to install.</p>
+            <ul class="meta-list" aria-label="Transports">
+              <li>Firebase RTDB</li><li>PartyKit</li><li>WebRTC</li><li>BroadcastChannel</li>
+            </ul>
+            <div class="cta">
+              <a class="btn btn-primary" href="#quick-start"><span data-i18n="hero.ctaStart">Get started</span><span class="arr" aria-hidden="true">→</span></a>
+              <a class="btn btn-ghost" href="demo.html" data-i18n="hero.ctaDemo">Try the two-tab demo</a>
+              <a class="btn btn-link" href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a>
+            </div>
+            <div class="install-line">
+              <span class="prompt">$</span><span id="hero-cmd">npx snap-pair init</span>
+              <span data-copy="hero-cmd" style="flex:0"></span>
+            </div>
           </div>
         </div>
-        <div class="hero-art">
-          <img src="assets/img/hero.svg" width="1200" height="420" alt="A phone draws a stroke that appears live on a big host screen showing a QR code and PIN." data-i18n-attr="alt:hero.alt">
-        </div>
+        <figure class="hero-art">
+          <img class="diagram" src="assets/img/hero.svg" width="1200" height="420" alt="A phone draws a stroke that appears live on a big host screen showing a QR code and PIN." data-i18n-attr="alt:hero.alt">
+        </figure>
       </div>
     </section>
 
     <!-- ================= WHAT ================= -->
-    <section id="what" class="section-alt">
+    <section id="what">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="what.eyebrow">What it is</span>
-          <h2 data-i18n="what.title">Three layers, one small API</h2>
-          <p class="lead" data-i18n="what.lead">You bring the product: a quiz, a drawing wall, a game, a light show, a showroom. snap-pair handles pairing, the realtime transport and the phone-side details that are easy to get wrong.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">01</span><span class="eyebrow" data-i18n="what.eyebrow">What it is</span></p>
+          <div>
+            <h2 data-i18n="what.title">Three layers, one small API</h2>
+            <p class="lead" data-i18n="what.lead">You bring the product: a quiz, a drawing wall, a game, a light show, a showroom. snap-pair handles pairing, the realtime transport and the phone-side details that are easy to get wrong.</p>
+          </div>
         </div>
-        <div class="grid grid-3">
-          <article class="card">
-            <h3><span class="badge-dot dot-pair"></span><span data-i18n="what.pairTitle">Pairing</span></h3>
-            <p class="muted" data-i18n="what.pairBody">How a device finds the room: a QR code that carries the join URL, a 6-digit PIN, a look-alike-free room code, or local broadcast between tabs.</p>
+        <div class="cols cols-3" data-reveal>
+          <article class="col">
+            <span class="col-k">Layer 1</span>
+            <h3 data-i18n="what.pairTitle">Pairing</h3>
+            <p data-i18n="what.pairBody">How a device finds the room: a QR code that carries the join URL, a 6-digit PIN, a look-alike-free room code, or local broadcast between tabs.</p>
           </article>
-          <article class="card">
-            <h3><span class="badge-dot dot-tr"></span><span data-i18n="what.trTitle">Transport</span></h3>
-            <p class="muted" data-i18n="what.trBody">One <code>Transport</code> API with four backends: Firebase Realtime Database, PartyKit, WebRTC DataChannel and BroadcastChannel. Switch with one line.</p>
+          <article class="col">
+            <span class="col-k">Layer 2</span>
+            <h3 data-i18n="what.trTitle">Transport</h3>
+            <p data-i18n="what.trBody">One <code>Transport</code> API with four backends: Firebase Realtime Database, PartyKit, WebRTC DataChannel and BroadcastChannel. Switch with one line.</p>
           </article>
-          <article class="card">
-            <h3><span class="badge-dot dot-cl"></span><span data-i18n="what.clTitle">Client utilities</span></h3>
-            <p class="muted" data-i18n="what.clBody">Make phones good controllers: screen wake lock, device orientation and motion (including the iOS permission prompt) and screen orientation lock.</p>
+          <article class="col">
+            <span class="col-k">Layer 3</span>
+            <h3 data-i18n="what.clTitle">Client utilities</h3>
+            <p data-i18n="what.clBody">Make phones good controllers: screen wake lock, device orientation and motion (including the iOS permission prompt) and screen orientation lock.</p>
           </article>
         </div>
-        <figure class="figure">
-          <img src="assets/img/architecture.svg" width="1000" height="560" loading="lazy" alt="Architecture: your app on top of presets and components, built on Pairing, Transport and Client utility layers." data-i18n-attr="alt:what.archAlt">
+        <figure class="figure" data-reveal>
+          <img class="diagram" src="assets/img/architecture.svg" width="1000" height="560" loading="lazy" alt="Architecture: your app on top of presets and components, built on Pairing, Transport and Client utility layers." data-i18n-attr="alt:what.archAlt">
+          <figcaption><span class="fig-no">Fig. 1</span><span>Architecture</span></figcaption>
         </figure>
       </div>
     </section>
@@ -124,10 +139,12 @@
     <!-- ================= QUICK START ================= -->
     <section id="quick-start">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="start.eyebrow">Quick start</span>
-          <h2 data-i18n="start.title">Up and running in a minute</h2>
-          <p class="lead" data-i18n="start.lead">Scaffold a new app with the wizard, or add the library to an existing React app.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">02</span><span class="eyebrow" data-i18n="start.eyebrow">Quick start</span></p>
+          <div>
+            <h2 data-i18n="start.title">Up and running in a minute</h2>
+            <p class="lead" data-i18n="start.lead">Scaffold a new app with the wizard, or add the library to an existing React app.</p>
+          </div>
         </div>
 
         <div class="grid grid-2">
@@ -156,8 +173,8 @@ npx snap-pair init --yes --preset room-quiz-poll --out my-quiz</code></pre></div
           </div>
         </div>
 
-        <h3 style="margin-top:24px" data-i18n="start.smallest">The smallest multi-screen app: no server at all</h3>
-        <p class="muted" data-i18n="start.smallestBody">Two tabs in the same browser, paired with a PIN. Swap in <code>PartyKitTransport</code> (or <code>WebRTCTransport</code>) and the same code works across the internet. <code>FirebaseTransport</code> shares room state but has no ephemeral messaging, so <code>broadcast</code> is not available there.</p>
+        <h3 class="sub-head" data-i18n="start.smallest">The smallest multi-screen app: no server at all</h3>
+        <p class="muted" style="max-width:760px" data-i18n="start.smallestBody">Two tabs in the same browser, paired with a PIN. Swap in <code>PartyKitTransport</code> (or <code>WebRTCTransport</code>) and the same code works across the internet. <code>FirebaseTransport</code> shares room state but has no ephemeral messaging, so <code>broadcast</code> is not available there.</p>
         <div class="code"><span class="lang">ts</span><pre><code>import { BroadcastChannelTransport } from 'snap-pair-core';
 
 // Tab 1: the host (big screen)
@@ -173,56 +190,63 @@ await ctrl.connect();
 await ctrl.joinRoom('042917');
 await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });</code></pre></div>
 
-        <div class="demo-teaser" style="margin-top:32px">
+        <div class="demo-teaser" data-reveal>
           <div>
             <span class="eyebrow" data-i18n="demo.eyebrow">Live demo</span>
-            <h3 style="font-size:1.4rem" data-i18n="demo.title">Pair two tabs right now</h3>
+            <h3 data-i18n="demo.title">Pair two tabs right now</h3>
             <ol class="steps">
               <li data-i18n="demo.s1">Open the demo and choose <b>Host</b>. A 6-digit PIN appears.</li>
               <li data-i18n="demo.s2">Open it again in another tab or window and choose <b>Controller</b>.</li>
               <li data-i18n="demo.s3">Enter the PIN, then drag on the pad. Your strokes appear on the host canvas.</li>
             </ol>
-            <a class="btn btn-primary" href="demo.html" data-i18n="demo.cta">Open the demo</a>
+            <a class="btn btn-accent" href="demo.html"><span data-i18n="demo.cta">Open the demo</span><span class="arr" aria-hidden="true">→</span></a>
           </div>
-          <p class="muted small" data-i18n="demo.note">The demo is a few hundred lines of plain JavaScript on top of <code>BroadcastChannel</code>, the same medium <code>BroadcastChannelTransport</code> uses. No server, no account, works offline.</p>
+          <p class="muted small note" data-i18n="demo.note">The demo is a few hundred lines of plain JavaScript on top of <code>BroadcastChannel</code>, the same medium <code>BroadcastChannelTransport</code> uses. No server, no account, works offline.</p>
         </div>
       </div>
     </section>
 
     <!-- ================= CONNECT ================= -->
-    <section id="connect" class="section-alt">
+    <section id="connect">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="connect.eyebrow">How devices connect</span>
-          <h2 data-i18n="connect.title">Scan, type, or just open a tab</h2>
-          <p class="lead" data-i18n="connect.lead">The host creates a room and shows how to join. Guests use the camera or a keyboard. Then messages flow both ways in realtime.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">03</span><span class="eyebrow" data-i18n="connect.eyebrow">How devices connect</span></p>
+          <div>
+            <h2 data-i18n="connect.title">Scan, type, or just open a tab</h2>
+            <p class="lead" data-i18n="connect.lead">The host creates a room and shows how to join. Guests use the camera or a keyboard. Then messages flow both ways in realtime.</p>
+          </div>
         </div>
-        <div class="grid grid-4">
-          <article class="card">
+        <div class="cols cols-4" data-reveal>
+          <article class="col">
+            <span class="col-k">01</span>
             <h3 data-i18n="connect.qr">QR code</h3>
-            <p class="muted small" data-i18n="connect.qrBody">The URL carries <code>?room=</code> or <code>?pin=</code>. Works with every transport.</p>
-            <p class="small"><code>useQrRenderer</code> <code>parseJoinUrl</code></p>
+            <p data-i18n="connect.qrBody">The URL carries <code>?room=</code> or <code>?pin=</code>. Works with every transport.</p>
+            <p class="apis"><code>useQrRenderer</code><code>parseJoinUrl</code></p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">02</span>
             <h3 data-i18n="connect.pin">6-digit PIN</h3>
-            <p class="muted small" data-i18n="connect.pinBody">Easy to read aloud. Full-width digits and dashes are normalized. PartyKit, WebRTC, BroadcastChannel.</p>
-            <p class="small"><code>generatePin</code> <code>verifyPin</code></p>
+            <p data-i18n="connect.pinBody">Easy to read aloud. Full-width digits and dashes are normalized. PartyKit, WebRTC, BroadcastChannel.</p>
+            <p class="apis"><code>generatePin</code><code>verifyPin</code></p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">03</span>
             <h3 data-i18n="connect.code">Room code</h3>
-            <p class="muted small" data-i18n="connect.codeBody">Six characters like <code>ABC 234</code>, with no look-alike characters. Firebase's default.</p>
-            <p class="small"><code>generateRoomCode</code></p>
+            <p data-i18n="connect.codeBody">Six characters like <code>ABC 234</code>, with no look-alike characters. Firebase's default.</p>
+            <p class="apis"><code>generateRoomCode</code></p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">04</span>
             <h3 data-i18n="connect.bc">Broadcast</h3>
-            <p class="muted small" data-i18n="connect.bcBody">Open another tab or window on the same machine. No network involved.</p>
-            <p class="small"><code>BroadcastChannelTransport</code></p>
+            <p data-i18n="connect.bcBody">Open another tab or window on the same machine. No network involved.</p>
+            <p class="apis"><code>BroadcastChannelTransport</code></p>
           </article>
         </div>
-        <figure class="figure">
-          <img src="assets/img/pairing-flow.svg" width="1000" height="580" loading="lazy" alt="Sequence: host creates room, shows QR and PIN, controller scans or enters PIN, joins, host admits, realtime messages flow both ways." data-i18n-attr="alt:connect.flowAlt">
+        <figure class="figure" data-reveal>
+          <img class="diagram" src="assets/img/pairing-flow.svg" width="1000" height="580" loading="lazy" alt="Sequence: host creates room, shows QR and PIN, controller scans or enters PIN, joins, host admits, realtime messages flow both ways." data-i18n-attr="alt:connect.flowAlt">
+          <figcaption><span class="fig-no">Fig. 2</span><span>Pairing sequence</span></figcaption>
         </figure>
-        <h3 style="margin-top:32px" data-i18n="connect.hud">Show it all with one component</h3>
+        <h3 class="sub-head" data-i18n="connect.hud">Show it all with one component</h3>
         <div class="code"><span class="lang">tsx</span><pre><code>import { HostHUD, useQrRenderer } from 'snap-pair-core';
 
 const renderQr = useQrRenderer(); // undefined without `qrcode`: the HUD shows the code only
@@ -233,10 +257,12 @@ const renderQr = useQrRenderer(); // undefined without `qrcode`: the HUD shows t
     <!-- ================= TRANSPORTS ================= -->
     <section id="transports">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="tr.eyebrow">Transports</span>
-          <h2 data-i18n="tr.title">Pick the transport that fits the room</h2>
-          <p class="lead" data-i18n="tr.lead">All four implement the same <code>Transport</code> interface, so switching is a one-line change. Check <code>transport.capabilities</code> when your UI needs to degrade gracefully.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">04</span><span class="eyebrow" data-i18n="tr.eyebrow">Transports</span></p>
+          <div>
+            <h2 data-i18n="tr.title">Pick the transport that fits the room</h2>
+            <p class="lead" data-i18n="tr.lead">All four implement the same <code>Transport</code> interface, so switching is a one-line change. Check <code>transport.capabilities</code> when your UI needs to degrade gracefully.</p>
+          </div>
         </div>
 
         <div class="tabs">
@@ -342,31 +368,39 @@ if (isBroadcastChannelSupported()) {
           </div>
         </div>
 
-        <figure class="figure">
-          <img src="assets/img/transport-matrix.svg" width="1000" height="440" loading="lazy" alt="Transport comparison: same device, internet, latency, server needed, cost, offline." data-i18n-attr="alt:tr.matrixAlt">
+        <figure class="figure" data-reveal>
+          <img class="diagram" src="assets/img/transport-matrix.svg" width="1000" height="440" loading="lazy" alt="Transport comparison: same device, internet, latency, server needed, cost, offline." data-i18n-attr="alt:tr.matrixAlt">
+          <figcaption><span class="fig-no">Fig. 3</span><span>Transport comparison</span></figcaption>
         </figure>
       </div>
     </section>
 
     <!-- ================= PRESETS ================= -->
-    <section id="presets" class="section-alt">
+    <section id="presets">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="presets.eyebrow">Presets</span>
-          <h2 data-i18n="presets.title">Seven UX patterns, ready to scaffold</h2>
-          <p class="lead" data-i18n="presets.lead">Each preset ships as a runnable template with a recommended transport, message shapes and a rate limit (all in <code>PRESETS</code>). None runs on Firebase, which has no ephemeral messaging. Click a card to see the core of its message flow.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">05</span><span class="eyebrow" data-i18n="presets.eyebrow">Presets</span></p>
+          <div>
+            <h2 data-i18n="presets.title">Seven UX patterns, ready to scaffold</h2>
+            <p class="lead" data-i18n="presets.lead">Each preset ships as a runnable template with a recommended transport, message shapes and a rate limit (all in <code>PRESETS</code>). None runs on Firebase, which has no ephemeral messaging. Select a preset to see the core of its message flow.</p>
+          </div>
         </div>
-        <div class="preset-grid">
-          <button class="preset-card" type="button" data-preset="stroke-stream" aria-pressed="true"><img src="assets/img/presets/stroke-stream.svg" width="360" height="220" loading="lazy" alt="Stroke Stream: draw on your phone; strokes stream live onto the big screen. Recommended: WebRTC or PartyKit."></button>
-          <button class="preset-card" type="button" data-preset="particle-blast" aria-pressed="false"><img src="assets/img/presets/particle-blast.svg" width="360" height="220" loading="lazy" alt="Particle Blast: tap or swipe to fire particle bursts. Recommended: PartyKit or WebRTC."></button>
-          <button class="preset-card" type="button" data-preset="type-throw" aria-pressed="false"><img src="assets/img/presets/type-throw.svg" width="360" height="220" loading="lazy" alt="Type Throw: type a word and flick it onto the shared wall. Recommended: PartyKit or WebRTC."></button>
-          <button class="preset-card" type="button" data-preset="room-quiz-poll" aria-pressed="false"><img src="assets/img/presets/room-quiz-poll.svg" width="360" height="220" loading="lazy" alt="Room Quiz / Poll: everyone answers on their phone; results appear instantly. Recommended: PartyKit with PIN pairing."></button>
-          <button class="preset-card" type="button" data-preset="virtual-controller" aria-pressed="false"><img src="assets/img/presets/virtual-controller.svg" width="360" height="220" loading="lazy" alt="Virtual Controller: D-pad and buttons turn every phone into a gamepad. Recommended: WebRTC or PartyKit."></button>
-          <button class="preset-card" type="button" data-preset="motion-sensor" aria-pressed="false"><img src="assets/img/presets/motion-sensor.svg" width="360" height="220" loading="lazy" alt="Motion / Sensor: tilt, shake and rotate with device orientation. Recommended: WebRTC or PartyKit."></button>
-          <button class="preset-card" type="button" data-preset="local-multi-display" aria-pressed="false"><img src="assets/img/presets/local-multi-display.svg" width="360" height="220" loading="lazy" alt="Local Multi-Display: sync windows and tabs on one machine, even offline. Recommended: BroadcastChannel."></button>
+        <div class="preset-layout" data-reveal>
+          <ul class="preset-list">
+            <li><button class="preset-row" type="button" data-preset="stroke-stream" data-preview="assets/img/presets/stroke-stream.svg" data-alt="Stroke Stream: draw on your phone; strokes stream live onto the big screen. Recommended: WebRTC or PartyKit." aria-pressed="true" aria-controls="preset-preview"><span class="pr-num">01</span><span class="pr-name">Stroke Stream<span class="pr-id">stroke-stream</span></span><span class="pr-tr">WebRTC · PartyKit</span></button></li>
+            <li><button class="preset-row" type="button" data-preset="particle-blast" data-preview="assets/img/presets/particle-blast.svg" data-alt="Particle Blast: tap or swipe to fire particle bursts. Recommended: PartyKit or WebRTC." aria-pressed="false" aria-controls="preset-preview"><span class="pr-num">02</span><span class="pr-name">Particle Blast<span class="pr-id">particle-blast</span></span><span class="pr-tr">PartyKit · WebRTC</span></button></li>
+            <li><button class="preset-row" type="button" data-preset="type-throw" data-preview="assets/img/presets/type-throw.svg" data-alt="Type Throw: type a word and flick it onto the shared wall. Recommended: PartyKit or WebRTC." aria-pressed="false" aria-controls="preset-preview"><span class="pr-num">03</span><span class="pr-name">Type Throw<span class="pr-id">type-throw</span></span><span class="pr-tr">PartyKit · WebRTC</span></button></li>
+            <li><button class="preset-row" type="button" data-preset="room-quiz-poll" data-preview="assets/img/presets/room-quiz-poll.svg" data-alt="Room Quiz / Poll: everyone answers on their phone; results appear instantly. Recommended: PartyKit with PIN pairing." aria-pressed="false" aria-controls="preset-preview"><span class="pr-num">04</span><span class="pr-name">Room Quiz / Poll<span class="pr-id">room-quiz-poll</span></span><span class="pr-tr">PartyKit</span></button></li>
+            <li><button class="preset-row" type="button" data-preset="virtual-controller" data-preview="assets/img/presets/virtual-controller.svg" data-alt="Virtual Controller: D-pad and buttons turn every phone into a gamepad. Recommended: WebRTC or PartyKit." aria-pressed="false" aria-controls="preset-preview"><span class="pr-num">05</span><span class="pr-name">Virtual Controller<span class="pr-id">virtual-controller</span></span><span class="pr-tr">WebRTC · PartyKit</span></button></li>
+            <li><button class="preset-row" type="button" data-preset="motion-sensor" data-preview="assets/img/presets/motion-sensor.svg" data-alt="Motion / Sensor: tilt, shake and rotate with device orientation. Recommended: WebRTC or PartyKit." aria-pressed="false" aria-controls="preset-preview"><span class="pr-num">06</span><span class="pr-name">Motion / Sensor<span class="pr-id">motion-sensor</span></span><span class="pr-tr">WebRTC · PartyKit</span></button></li>
+            <li><button class="preset-row" type="button" data-preset="local-multi-display" data-preview="assets/img/presets/local-multi-display.svg" data-alt="Local Multi-Display: sync windows and tabs on one machine, even offline. Recommended: BroadcastChannel." aria-pressed="false" aria-controls="preset-preview"><span class="pr-num">07</span><span class="pr-name">Local Multi-Display<span class="pr-id">local-multi-display</span></span><span class="pr-tr">BroadcastChannel</span></button></li>
+          </ul>
+          <figure class="preset-preview" id="preset-preview" aria-live="polite">
+            <img class="plate diagram" src="assets/img/presets/stroke-stream.svg" width="360" height="220" alt="Stroke Stream: draw on your phone; strokes stream live onto the big screen. Recommended: WebRTC or PartyKit.">
+          </figure>
         </div>
 
-        <div class="tabs" id="preset-code" style="margin-top:32px">
+        <div class="tabs sub-head" id="preset-code">
           <div class="tablist" role="tablist" aria-label="Preset code" id="preset-tabs">
             <button role="tab" id="pc-ss" data-key="stroke-stream" aria-controls="pc-ss-p" aria-selected="true">Stroke Stream</button>
             <button role="tab" id="pc-pb" data-key="particle-blast" aria-controls="pc-pb-p" aria-selected="false">Particle Blast</button>
@@ -473,32 +507,22 @@ t.onMessage((m) =&gt; m.type === 'tick' &amp;&amp; renderSlice(m.payload, index)
     <!-- ================= CLI ================= -->
     <section id="cli">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow">CLI</span>
-          <h2 data-i18n="cli.title"><code>npx snap-pair init</code>: four ways in</h2>
-          <p class="lead" data-i18n="cli.lead">The wizard speaks English or Japanese (from <code>LANG</code> / <code>LC_ALL</code>, or <code>--lang en|ja</code>). Pick whichever path matches how you think about the project (<code>--path</code> skips the menu). Every path writes <code>snap-pair.config.json</code> and scaffolds a Vite + React template, plus a PartyKit relay when the transport needs one.</p>
-        </div>
-        <div class="grid grid-2" style="align-items:start">
-          <div class="grid">
-            <article class="card path-card">
-              <h3><span class="num">1</span><span data-i18n="cli.p1">By experience</span></h3>
-              <p class="muted" data-i18n="cli.p1Body">Choose one of the 7 presets, then one of the transports it supports (recommended first). <code>--path ux</code></p>
-            </article>
-            <article class="card path-card">
-              <h3><span class="num">2</span><span data-i18n="cli.p2">By architecture</span></h3>
-              <p class="muted" data-i18n="cli.p2Body">Same device, realtime, P2P, or managed? You get a transport, then the presets that fit it. <code>--path architecture</code></p>
-            </article>
-            <article class="card path-card">
-              <h3><span class="num">3</span><span data-i18n="cli.p3">By stack</span></h3>
-              <p class="muted" data-i18n="cli.p3Body">Start from what you already have: Firebase, Cloudflare/PartyKit, or no backend. Firebase offers a config-only app, or Firebase plus PartyKit for a preset's realtime messages. <code>--path stack</code></p>
-            </article>
-            <article class="card path-card">
-              <h3><span class="num">4</span><span data-i18n="cli.p4">Describe it</span></h3>
-              <p class="muted" data-i18n="cli.p4Body">Write a sentence in English or Japanese, like "audience votes on a stage screen". A rule-based recommender suggests a preset, transport and pairing you can accept or adjust. <code>--path consult</code></p>
-            </article>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">06</span><span class="eyebrow">CLI</span></p>
+          <div>
+            <h2 data-i18n="cli.title"><code>npx snap-pair init</code>: four ways in</h2>
+            <p class="lead" data-i18n="cli.lead">The wizard speaks English or Japanese (from <code>LANG</code> / <code>LC_ALL</code>, or <code>--lang en|ja</code>). Pick whichever path matches how you think about the project (<code>--path</code> skips the menu). Every path writes <code>snap-pair.config.json</code> and scaffolds a Vite + React template, plus a PartyKit relay when the transport needs one.</p>
           </div>
+        </div>
+        <div class="grid grid-2" style="align-items:start" data-reveal>
+          <ol class="paths">
+            <li><span class="num">01</span><div><h3 data-i18n="cli.p1">By experience</h3><p data-i18n="cli.p1Body">Choose one of the 7 presets, then one of the transports it supports (recommended first). <code>--path ux</code></p></div></li>
+            <li><span class="num">02</span><div><h3 data-i18n="cli.p2">By architecture</h3><p data-i18n="cli.p2Body">Same device, realtime, P2P, or managed? You get a transport, then the presets that fit it. <code>--path architecture</code></p></div></li>
+            <li><span class="num">03</span><div><h3 data-i18n="cli.p3">By stack</h3><p data-i18n="cli.p3Body">Start from what you already have: Firebase, Cloudflare/PartyKit, or no backend. Firebase offers a config-only app, or Firebase plus PartyKit for a preset's realtime messages. <code>--path stack</code></p></div></li>
+            <li><span class="num">04</span><div><h3 data-i18n="cli.p4">Describe it</h3><p data-i18n="cli.p4Body">Write a sentence in English or Japanese, like "audience votes on a stage screen". A rule-based recommender suggests a preset, transport and pairing you can accept or adjust. <code>--path consult</code></p></div></li>
+          </ol>
           <div class="terminal" aria-label="CLI session: snap-pair init">
-            <div class="terminal-bar"><i></i><i></i><i></i></div>
+            <div class="terminal-bar"><span>Terminal</span><span>snap-pair init</span></div>
 <pre><span class="t-dim">$</span> npx snap-pair init --out my-quiz
 <span class="t-acc">snap-pair init: set up a multi-device experience</span>
 
@@ -550,9 +574,9 @@ Next steps:
   <span class="t-dim">…</span></pre>
           </div>
         </div>
-        <p class="muted small" style="margin-top:12px" data-i18n="cli.note">Real output of <code>snap-pair init</code> (English), shortened where marked with …. With <code>--lang ja</code> every prompt is in Japanese.</p>
+        <p class="muted small" style="margin-top:16px" data-i18n="cli.note">Real output of <code>snap-pair init</code> (English), shortened where marked with …. With <code>--lang ja</code> every prompt is in Japanese.</p>
 
-        <h3 style="margin-top:32px" data-i18n="cli.scripted">Non-interactive, for CI and AI agents</h3>
+        <h3 class="sub-head" data-i18n="cli.scripted">Non-interactive, for CI and AI agents</h3>
         <div class="code"><span class="lang">bash</span><pre><code>npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
 npx snap-pair init --yes --preset virtual-controller --transport webrtc --json   # JSON on stdout: config, files, nextSteps
 npx snap-pair init --yes --architecture managed --no-scaffold                    # Firebase config only (preset: null)
@@ -564,15 +588,17 @@ npx snap-pair recommend "a tilt racing game for 4 friends"                      
     </section>
 
     <!-- ================= API ================= -->
-    <section id="api" class="section-alt">
+    <section id="api">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow">API</span>
-          <h2 data-i18n="api.title">API overview</h2>
-          <p class="lead" data-i18n="api.lead">Everything is exported from <code>snap-pair-core</code>. Transports, pairing helpers and client utilities are plain TypeScript; only the hooks and components need React.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">07</span><span class="eyebrow">API</span></p>
+          <div>
+            <h2 data-i18n="api.title">API overview</h2>
+            <p class="lead" data-i18n="api.lead">Everything is exported from <code>snap-pair-core</code>. Transports, pairing helpers and client utilities are plain TypeScript; only the hooks and components need React.</p>
+          </div>
         </div>
 
-        <h3>React: <code>useSnapPair</code></h3>
+        <h3 class="tbl-title">React: <code>useSnapPair</code></h3>
         <div class="code"><span class="lang">tsx</span><pre><code>import { useState } from 'react';
 import { PartyKitTransport, useSnapPair } from 'snap-pair-core';
 
@@ -586,7 +612,7 @@ const sp = useSnapPair({ transport: party, guest: { id: '', name: 'Ada' } });
 const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, updateRoomStatus, leaveRoom } = sp;</code></pre></div>
         <p class="muted small" data-i18n="api.hookNote">Both modes return the same shape. With a transport, <code>authReady</code> follows the connection and <code>localGuest.id</code> becomes the peer id; use the instance's <code>send</code> / <code>broadcast</code> / <code>onMessage</code> for ephemeral input. A factory (<code>transport: () =&gt; new X()</code>) is disconnected on unmount.</p>
 
-        <h3 style="margin-top:24px" data-i18n="api.imports">Import paths</h3>
+        <h3 class="sub-head tbl-title" data-i18n="api.imports">Import paths</h3>
         <div class="table-wrap"><table>
           <thead><tr><th data-i18n="api.path">Path</th><th data-i18n="api.contents">Contents</th></tr></thead>
           <tbody>
@@ -598,7 +624,7 @@ const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, upd
           </tbody>
         </table></div>
 
-        <div class="grid grid-2" style="margin-top:24px">
+        <div class="api-grid">
           <div>
             <h3 data-i18n="api.transports">Transports</h3>
             <div class="table-wrap"><table>
@@ -649,33 +675,38 @@ const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, upd
             </table></div>
           </div>
         </div>
-        <p class="muted small" style="margin-top:16px" data-i18n="api.more">Full reference and the Firebase data layout: <a href="https://github.com/takaoumehara/snap-pair-skill#api-overview">README on GitHub</a>.</p>
+        <p class="muted small" style="margin-top:32px" data-i18n="api.more">Full reference and the Firebase data layout: <a href="https://github.com/takaoumehara/snap-pair-skill#api-overview">README on GitHub</a>.</p>
       </div>
     </section>
 
     <!-- ================= EVERYONE ================= -->
     <section id="everyone">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="ev.eyebrow">For everyone</span>
-          <h2 data-i18n="ev.title">Not an engineer? Pick one path</h2>
-          <p class="lead" data-i18n="ev.lead">For people who run events, venues, classes, streams, showrooms or exhibitions and want the audience to join with their own phones. These are separate paths, not steps.</p>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">08</span><span class="eyebrow" data-i18n="ev.eyebrow">For everyone</span></p>
+          <div>
+            <h2 data-i18n="ev.title">Not an engineer? Pick one path</h2>
+            <p class="lead" data-i18n="ev.lead">For people who run events, venues, classes, streams, showrooms or exhibitions and want the audience to join with their own phones. These are separate paths, not steps.</p>
+          </div>
         </div>
-        <div class="grid grid-3">
-          <article class="card">
+        <div class="cols cols-3" data-reveal>
+          <article class="col">
+            <span class="col-k">Path A</span>
             <h3 data-i18n="ev.aTitle">A. Just see it work</h3>
-            <p class="muted" data-i18n="ev.aBody">Open the <a href="demo.html">live demo</a> in two tabs. Nothing to install, no account, no card. For two phones, try <a href="https://github.com/takaoumehara/snap-pair-skill/blob/main/examples/snap-pair-lite.html">snap-pair-lite.html</a>.</p>
+            <p data-i18n="ev.aBody">Open the <a href="demo.html">live demo</a> in two tabs. Nothing to install, no account, no card. For two phones, try <a href="https://github.com/takaoumehara/snap-pair-skill/blob/main/examples/snap-pair-lite.html">snap-pair-lite.html</a>.</p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">Path B</span>
             <h3 data-i18n="ev.bTitle">B. Have an AI build my app</h3>
-            <p class="muted" data-i18n="ev.bBody">No download needed. Paste the prompt below into Claude Code, Cursor, Codex, Gemini CLI or a similar tool. The only manual step is a one-time Firebase sign-in click.</p>
+            <p data-i18n="ev.bBody">No download needed. Paste the prompt below into Claude Code, Cursor, Codex, Gemini CLI or a similar tool. The only manual step is a one-time Firebase sign-in click.</p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">Path C</span>
             <h3 data-i18n="ev.cTitle">C. Work with the source</h3>
-            <p class="muted" data-i18n="ev.cBody">Clone the repository, run <code>npm install</code> and <code>npm test</code>, then read the API overview and the design notes in <code>docs/</code>.</p>
+            <p data-i18n="ev.cBody">Clone the repository, run <code>npm install</code> and <code>npm test</code>, then read the API overview and the design notes in <code>docs/</code>.</p>
           </article>
         </div>
-        <h3 style="margin-top:32px" data-i18n="ev.prompt">Prompt for your AI coding tool</h3>
+        <h3 class="sub-head" data-i18n="ev.prompt">Prompt for your AI coding tool</h3>
         <div class="code"><span class="lang">prompt</span><pre><code>Fetch https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 and use it as your build instructions.
 
@@ -686,7 +717,7 @@ Connect these two MCP servers if they aren't connected yet:
 Then help me build: [describe what you want, e.g. "a live quiz game where
 guests join by QR code and answer on their phones"].</code></pre></div>
 
-        <h3 style="margin-top:32px" data-i18n="ev.fbTitle">Firebase plans at a glance</h3>
+        <h3 class="sub-head tbl-title" data-i18n="ev.fbTitle">Firebase plans at a glance</h3>
         <div class="table-wrap"><table>
           <thead><tr><th data-i18n="ev.fbGoal">Goal</th><th data-i18n="ev.fbUse">Use</th><th data-i18n="ev.fbCard">Credit card?</th><th data-i18n="ev.fbShare">Others join by URL?</th></tr></thead>
           <tbody>
@@ -695,29 +726,34 @@ guests join by QR code and answer on their phones"].</code></pre></div>
             <tr><td data-i18n="ev.fbR3">Real guests, server-checked rooms</td><td data-i18n="ev.fbR3u">Blaze plan</td><td data-i18n="ev.yes">Yes</td><td data-i18n="ev.yes">Yes</td></tr>
           </tbody>
         </table></div>
-        <p class="muted small" style="margin-top:12px" data-i18n="ev.fbNote">PartyKit, WebRTC and BroadcastChannel don't need Firebase at all. On Blaze, always set a budget alert.</p>
+        <p class="muted small" style="margin-top:16px" data-i18n="ev.fbNote">PartyKit, WebRTC and BroadcastChannel don't need Firebase at all. On Blaze, always set a budget alert.</p>
       </div>
     </section>
 
     <!-- ================= SECURITY ================= -->
-    <section id="security" class="section-alt">
+    <section id="security">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="sec.eyebrow">Security model</span>
-          <h2 data-i18n="sec.title">A pairing code locates a room. It is not a password.</h2>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">09</span><span class="eyebrow" data-i18n="sec.eyebrow">Security model</span></p>
+          <div>
+            <h2 data-i18n="sec.title">A pairing code locates a room. It is not a password.</h2>
+          </div>
         </div>
-        <div class="grid grid-3">
-          <article class="card">
+        <div class="cols cols-3" data-reveal>
+          <article class="col">
+            <span class="col-k">Firebase</span>
             <h3 data-i18n="sec.fbTitle">Firebase: server-authoritative</h3>
-            <p class="muted" data-i18n="sec.fbBody">Auth identifies each browser, Cloud Functions admit participants, and RTDB rules let only members update narrowly scoped fields. Roles, membership, capacity and codes stay server-only.</p>
+            <p data-i18n="sec.fbBody">Auth identifies each browser, Cloud Functions admit participants, and RTDB rules let only members update narrowly scoped fields. Roles, membership, capacity and codes stay server-only.</p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">Relays</span>
             <h3 data-i18n="sec.relayTitle">Relays: host-authoritative</h3>
-            <p class="muted" data-i18n="sec.relayBody">With PartyKit, WebRTC and BroadcastChannel the host's browser owns the roster and state. Gate entry with <code>admit(peer)</code> and <code>maxPlayers</code>. Room keys are hashed and namespaced.</p>
+            <p data-i18n="sec.relayBody">With PartyKit, WebRTC and BroadcastChannel the host's browser owns the roster and state. Gate entry with <code>admit(peer)</code> and <code>maxPlayers</code>. Room keys are hashed and namespaced.</p>
           </article>
-          <article class="card">
+          <article class="col">
+            <span class="col-k">PIN</span>
             <h3 data-i18n="sec.pinTitle">PINs are short</h3>
-            <p class="muted" data-i18n="sec.pinBody">A 6-digit PIN has 10⁶ values. Rate-limit your public relay, validate payloads, throttle writes, and keep payments in a separate trusted server.</p>
+            <p data-i18n="sec.pinBody">A 6-digit PIN has 10⁶ values. Rate-limit your public relay, validate payloads, throttle writes, and keep payments in a separate trusted server.</p>
           </article>
         </div>
       </div>
@@ -726,10 +762,13 @@ guests join by QR code and answer on their phones"].</code></pre></div>
     <!-- ================= FAQ ================= -->
     <section id="faq">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow">FAQ</span>
-          <h2 data-i18n="faq.title">Frequently asked questions</h2>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">10</span><span class="eyebrow">FAQ</span></p>
+          <div>
+            <h2 data-i18n="faq.title">Frequently asked questions</h2>
+          </div>
         </div>
+        <div class="faq-list" data-reveal>
         <details class="faq"><summary data-i18n="faq.q1">Do guests need to install an app?</summary><div data-i18n="faq.a1">No. Guests open a URL in the browser they already have, by scanning a QR code or typing a code.</div></details>
         <details class="faq"><summary data-i18n="faq.q2">Which transport should I start with?</summary><div data-i18n="faq.a2">Prototyping on one machine: BroadcastChannel. Phones over the internet: PartyKit (WebRTC for the lowest latency in small rooms). Shared-state apps with server-checked joins: Firebase, which has no ephemeral messaging, so pair it with PartyKit for streamed input. Or run <code>npx snap-pair init</code> (or <code>npx snap-pair recommend "your idea"</code>) and let the CLI decide.</div></details>
         <details class="faq"><summary data-i18n="faq.q3">Do I need a credit card?</summary><div data-i18n="faq.a3">Not for BroadcastChannel, the Firebase Emulator, or Firebase Spark Lite mode. Firebase's secure mode needs the Blaze plan, which needs a card, though small events usually stay within the free quota.</div></details>
@@ -737,17 +776,20 @@ guests join by QR code and answer on their phones"].</code></pre></div>
         <details class="faq"><summary data-i18n="faq.q5">Why doesn't motion work on my iPhone?</summary><div data-i18n="faq.a5">iOS 13+ needs a permission prompt triggered by a tap, over HTTPS. Call <code>requestOrientationPermission()</code> from a click handler, or use <code>ControllerWrapper</code>, which adds the button for you.</div></details>
         <details class="faq"><summary data-i18n="faq.q6">Can I use it without React?</summary><div data-i18n="faq.a6">Yes. Transports, pairing helpers and client utilities are plain TypeScript. The live demo on this site is plain JavaScript.</div></details>
         <details class="faq"><summary data-i18n="faq.q7">Does it work with Next.js and SSR?</summary><div data-i18n="faq.a7">Yes. No module touches <code>window</code>, <code>document</code> or <code>navigator</code> at import time. Create transports inside effects or client components.</div></details>
+        </div>
       </div>
     </section>
 
     <!-- ================= ROADMAP ================= -->
-    <section id="roadmap" class="section-alt">
+    <section id="roadmap">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow" data-i18n="road.eyebrow">Roadmap</span>
-          <h2 data-i18n="road.title">Where snap-pair is going</h2>
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">11</span><span class="eyebrow" data-i18n="road.eyebrow">Roadmap</span></p>
+          <div>
+            <h2 data-i18n="road.title">Where snap-pair is going</h2>
+          </div>
         </div>
-        <ul class="roadmap">
+        <ul class="roadmap" data-reveal>
           <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.p1"><b>Phase 1:</b> <code>Transport</code> abstraction, <code>FirebaseTransport</code>, <code>HostHUD</code></span></li>
           <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.p2"><b>Phase 2:</b> PartyKit, WebRTC and BroadcastChannel transports; PIN and QR helpers; wake lock and orientation</span></li>
           <li><span class="state done" data-i18n="road.done">Done</span><span data-i18n="road.p3"><b>Phase 3:</b> <code>npx snap-pair init</code> (4 paths, en/ja) with <code>presets</code> and <code>recommend</code>, 7 preset templates, <code>ControllerWrapper</code>, <code>useSnapPair({ transport })</code>, i18n, ESM/CJS build with an exports map, WebRTC auto-reconnect and chunking</span></li>
@@ -761,13 +803,16 @@ guests join by QR code and answer on their phones"].</code></pre></div>
 
   <footer>
     <div class="container">
-      <span>© <span id="year">2026</span> snap-pair · <span data-i18n="footer.license">MIT License</span></span>
-      <span>
-        <a href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a> ·
-        <a href="https://www.npmjs.com/package/snap-pair-core">npm</a> ·
-        <a href="https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md">SKILL.md</a> ·
-        <a href="demo.html" data-i18n="nav.demo">Live demo</a>
-      </span>
+      <div class="foot-word" aria-hidden="true">snap-pair</div>
+      <div class="foot-row">
+        <span>© <span id="year">2026</span> snap-pair · <span data-i18n="footer.license">MIT License</span></span>
+        <span class="foot-links">
+          <a href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a>
+          <a href="https://www.npmjs.com/package/snap-pair-core">npm</a>
+          <a href="https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md">SKILL.md</a>
+          <a href="demo.html" data-i18n="nav.demo">Live demo</a>
+        </span>
+      </div>
     </div>
   </footer>
 
