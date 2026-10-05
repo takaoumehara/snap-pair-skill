@@ -64,6 +64,9 @@ The npm package is **`snap-pair-core`** (MIT).
 # 1. Scaffold a new app with the interactive wizard (en/ja)
 npx snap-pair init
 
+#    …or non-interactively (CI, AI agents)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+
 # 2. Or add the library to an existing React app
 npm i snap-pair-core
 ```
@@ -79,8 +82,9 @@ bun add snap-pair-core
 
 </details>
 
-Optional peer dependencies: `qrcode` (QR rendering in `HostHUD`) and
-`partysocket` (a sturdier PartyKit socket). Neither is required.
+Peer dependencies: `react` (18.2+). Optional: `qrcode` (QR rendering in
+`HostHUD`), `partysocket` (a sturdier PartyKit socket) and `react-dom` (only
+the generated templates use it).
 
 The smallest possible multi-screen app needs no server at all. It pairs two
 tabs in the same browser with a PIN:
@@ -102,8 +106,10 @@ await ctrl.joinRoom('042917');
 await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
 ```
 
-Swap `BroadcastChannelTransport` for `PartyKitTransport` or
-`FirebaseTransport` and the same code works across the internet.
+Swap `BroadcastChannelTransport` for `PartyKitTransport` (or
+`WebRTCTransport`) and the same code works across the internet.
+`FirebaseTransport` shares room state but has no ephemeral messaging, so
+`broadcast` is not available there (see [Transports](#transports-and-when-to-use-which)).
 [Try it live in two tabs →](https://takaoumehara.github.io/snap-pair-skill/demo.html)
 
 ---
@@ -144,8 +150,8 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 
 | If you need… | Use | Why |
 |---|---|---|
-| Large public rooms (up to 300), server-checked joins, persistence | **Firebase** (default) | Cloud Functions admit every guest; RTDB rules limit what members can write |
-| Low-latency input from phones over the internet, simple deploy | **PartyKit** | A tiny WebSocket relay ([`examples/partykit/`](./examples/partykit/)); the host's browser owns the room |
+| Shared-state apps (turn-based games, checklists, lobbies) with server-checked joins (up to 300), auth and persistence | **Firebase** (`useSnapPair` default) | Cloud Functions admit every guest; RTDB rules limit what members can write. Shared state only: no ephemeral messaging |
+| Input from phones over the internet, rooms up to hundreds, simple deploy | **PartyKit** | A tiny WebSocket relay ([`examples/partykit/`](./examples/partykit/)); the host's browser owns the room |
 | The lowest latency (drawing, games, motion) | **WebRTC** | Peer-to-peer DataChannels; signaling rides on PartyKit (or any transport with messaging) |
 | Several windows or displays on **one** machine, offline | **BroadcastChannel** | No network, no server, no account |
 
@@ -153,38 +159,50 @@ All four implement the same `Transport` interface (`connect`, `createRoom`,
 `joinRoom`, `setState`, `send`, `broadcast`, `onMessage`, `onPeers`,
 `onState`, `onStatus`…), so switching is a one-line change. Check
 `transport.capabilities` (`messaging`, `presence`, `serverAuthoritativeJoin`)
-when your UI needs to degrade gracefully. For example, Firebase has no
-ephemeral messaging (`messaging: false`), so presets running on it send input
-through shared state instead.
+when your UI needs to degrade gracefully.
+
+> **Firebase has no ephemeral messaging.** `FirebaseTransport` reports
+> `capabilities.messaging === false` and rejects `send`/`broadcast`, and
+> `setState` replaces the whole state object, so concurrent writers would
+> clobber each other. All seven presets stream input, so none of them runs on
+> Firebase. When you pick Firebase, `npx snap-pair init` offers two options: a
+> config-only Firebase app (`preset: null`, shared state through
+> `useSnapPair`), or Firebase for your app plus PartyKit for the preset's
+> realtime messages.
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
 
 const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' });
 const p2p = new WebRTCTransport({ signaling: party }); // DataChannel star, host in the middle
-const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms
+const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms, shared state only
 ```
+
+WebRTC reconnects on its own (ICE restart on the same connection, then
+re-offers with exponential backoff) and splits frames over 16 KiB into chunks
+(up to 1 MiB per message). Pass `reconnect: false` to turn recovery off.
 
 ---
 
 ## Presets
 
 Seven ready-made UX patterns. Each one has a template you can scaffold with
-`npx snap-pair init` and a recommended transport.
+`npx snap-pair init`, a recommended transport, message shapes and a rate
+limit the template stays under (`PRESETS` / `getPreset(id)` expose all of it).
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="./docs/assets/presets/stroke-stream.svg" alt="Stroke Stream: draw on your phone; strokes stream live onto the big screen. Recommended: PartyKit or WebRTC." width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/particle-blast.svg" alt="Particle Blast: tap or swipe to fire particle bursts across the host canvas. Recommended: WebRTC or PartyKit." width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/type-throw.svg" alt="Type Throw: type a word and flick it onto the shared wall. Recommended: Firebase or PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/stroke-stream.svg" alt="Stroke Stream: draw on your phone; strokes stream live onto the big screen. Recommended: WebRTC or PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/particle-blast.svg" alt="Particle Blast: tap or swipe to fire particle bursts across the host canvas. Recommended: PartyKit or WebRTC." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/type-throw.svg" alt="Type Throw: type a word and flick it onto the shared wall. Recommended: PartyKit or WebRTC." width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: everyone answers on their phone; results appear instantly. Recommended: Firebase." width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/virtual-controller.svg" alt="Virtual Controller: D-pad and buttons turn every phone into a gamepad. Recommended: WebRTC or PartyKit." width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/motion-sensor.svg" alt="Motion / Sensor: tilt, shake and rotate with device orientation. Recommended: WebRTC or PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: everyone answers on their phone; results appear instantly. Recommended: PartyKit with PIN pairing." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/virtual-controller.svg" alt="Virtual Controller: D-pad and buttons turn every phone into a gamepad. Recommended: WebRTC or PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/motion-sensor.svg" alt="Motion / Sensor: tilt, shake and rotate with device orientation. Recommended: WebRTC or PartyKit." width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/local-multi-display.svg" alt="Local Multi-Display: sync windows and tabs on one machine, even offline. Recommended: BroadcastChannel." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/local-multi-display.svg" alt="Local Multi-Display: sync windows and tabs on one machine, even offline. Recommended: BroadcastChannel." width="100%"></td>
     <td colspan="2" valign="middle">
       <b>Preset ids</b> (for the CLI and <code>snap-pair.config.json</code>):<br><br>
       <code>stroke-stream</code> · <code>particle-blast</code> · <code>type-throw</code> · <code>room-quiz-poll</code> · <code>virtual-controller</code> · <code>motion-sensor</code> · <code>local-multi-display</code>
@@ -192,61 +210,125 @@ Seven ready-made UX patterns. Each one has a template you can scaffold with
   </tr>
 </table>
 
-| Preset | id | Host shows | Phone sends | Transport |
-|---|---|---|---|---|
-| Stroke Stream | `stroke-stream` | Shared canvas | Pointer strokes | PartyKit · WebRTC |
-| Particle Blast | `particle-blast` | Particle field | Taps / swipes | WebRTC · PartyKit |
-| Type Throw | `type-throw` | Word wall | Short text | Firebase · PartyKit |
-| Room Quiz / Poll | `room-quiz-poll` | Question + live results | Answers | Firebase |
-| Virtual Controller | `virtual-controller` | The game | D-pad / button state | WebRTC · PartyKit |
-| Motion / Sensor | `motion-sensor` | Scene driven by tilt | Orientation / motion | WebRTC · PartyKit |
-| Local Multi-Display | `local-multi-display` | Synced windows | Window state | BroadcastChannel |
+| Preset | id | Host shows | Phone sends (rate limit) | Transports (**recommended** first) | Pairing (default first) |
+|---|---|---|---|---|---|
+| Stroke Stream | `stroke-stream` | Shared canvas | `stroke` batches (≤30/s) | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Particle Blast | `particle-blast` | Particle field | `blast` taps / swipes (≤10/s) | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Type Throw | `type-throw` | Word wall | `throw` short text (≤2/s) | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Room Quiz / Poll | `room-quiz-poll` | Question + live tally | `vote` (once per question) | **PartyKit** · BroadcastChannel · WebRTC | PIN · QR · code |
+| Virtual Controller | `virtual-controller` | The game | `input` d-pad / buttons (≤60/s, on change) | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Motion / Sensor | `motion-sensor` | Scene driven by tilt | `motion` orientation (≤30/s) | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Local Multi-Display | `local-multi-display` | One scene across windows | `tick`, `hello` (≤60/s) | **BroadcastChannel** | broadcast |
+
+Firebase is not listed for any preset; see the note under
+[Transports](#transports-and-when-to-use-which). Templates send controller
+input to the host only (`send({ to: hostId })`), keep the host as the only
+state writer (`allowGuestState: false`) and clamp every payload on the host.
 
 ---
 
 ## CLI
 
 ```bash
-npx snap-pair init
+npx snap-pair init                                    # interactive wizard (default command)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+npx snap-pair init --yes --preset virtual-controller --transport webrtc --json
+npx snap-pair init --yes --architecture managed --no-scaffold   # Firebase config only
+npx snap-pair presets                                 # list the 7 presets (--json for the registry)
+npx snap-pair recommend "a tilt racing game for 4 friends"
 ```
 
-The wizard speaks English or Japanese (detected from your OS language) and
-offers four ways in. Pick whichever matches how you think about the project:
+The wizard speaks English or Japanese (from `LANG` / `LC_ALL`, or `--lang
+en|ja`) and offers four ways in (`--path` skips the menu):
 
-| Path | You answer | You get |
+| Path (`--path`) | You answer | You get |
 |---|---|---|
-| **1. By UX** | Which of the 7 presets feels right | That preset's template plus its recommended transport |
-| **2. By architecture** | How many screens and phones, same room or remote, need persistence? | A transport and pairing method that fit |
-| **3. By stack** | What you already use (Firebase, PartyKit, plain WebRTC, nothing) | A setup built around your stack |
-| **4. Describe it** | A sentence in plain words, e.g. "audience votes on a stage screen" | A rule-based recommendation you can accept or change |
+| **1. By experience** (`ux`) | Which of the 7 presets feels right | That preset, then a transport it supports (recommended first) |
+| **2. By architecture** (`architecture`) | Same device, realtime, P2P, or managed | A transport, then the presets that fit it |
+| **3. By stack** (`stack`) | What you already have: Firebase, Cloudflare/PartyKit, or no backend | A transport built around your stack |
+| **4. Describe it** (`consult`) | A sentence in English or Japanese, e.g. "audience votes on a stage screen" | A rule-based recommendation you can accept or adjust |
 
-Every path ends by writing **`snap-pair.config.json`** (preset, transport,
-pairing method) and scaffolding the matching template. Re-run the command
-any time to change your choices.
+Each transport option prints a summary, pros, cons and a cost line with
+free-tier notes. Picking Firebase offers a config-only Firebase app or
+Firebase plus PartyKit for the preset's realtime messages. Non-interactively:
+`--yes --architecture managed --no-scaffold` writes the Firebase-only config,
+and `--yes --stack firebase --preset <id>` keeps your Firebase app and puts
+the preset on PartyKit (`--transport firebase --preset <id>` is rejected).
+
+Every path writes **`snap-pair.config.json`** and scaffolds a Vite + React
+template (host and controller in one app, picked by URL), plus a PartyKit
+relay (`party/server.ts`) when the transport needs one:
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+| Flag | Meaning |
+|---|---|
+| `--preset <id\|none>` | One of the 7 preset ids, or `none` |
+| `--transport <t>` | `broadcast` \| `partykit` \| `webrtc` \| `firebase` |
+| `--pairing <m>` | `qr` \| `code` \| `pin` \| `broadcast` |
+| `--architecture <a>` | `same-device` \| `realtime` \| `p2p` \| `managed` |
+| `--stack <s>` | `firebase` \| `cloudflare` \| `none` |
+| `--describe <text>` | Free-text idea for the `consult` path |
+| `--out <dir>` | Target folder (default: `./snap-pair-<preset>`) |
+| `--partykit-host <h>`, `--max-players <n>` | Written into the config (`maxPlayers`: 2–300) |
+| `--no-scaffold`, `--force` | Config only; overwrite existing files |
+| `-y, --yes` | Accept every default (non-interactive) |
+| `--json` | JSON result on stdout (`config`, `files`, `nextSteps`); messages go to stderr |
+| `--lang <en\|ja>` | Language |
+
+Re-run the command any time to change your choices.
 
 ---
 
 ## API overview
 
-Everything is exported from `snap-pair-core`.
+Everything is exported from `snap-pair-core` (ESM and CJS, with types).
+Subpath entries share the same classes as the root:
+
+| Import path | Contents |
+|---|---|
+| `snap-pair-core` | Everything below, plus presets, i18n and the room server |
+| `snap-pair-core/hooks/useSnapPair` | `useSnapPair` only (the old `snap-pair-core/src/hooks/useSnapPair` path still works) |
+| `snap-pair-core/transports/{base,firebase,partykit,webrtc,broadcast}` | One transport each |
+| `snap-pair-core/config.schema.json` | JSON Schema for `snap-pair.config.json` |
+| `snap-pair` (bin) | The CLI: `npx snap-pair` |
 
 ### React: `useSnapPair`
 
 ```tsx
-import { useSnapPair } from 'snap-pair-core';
+import { useState } from 'react';
+import { PartyKitTransport, useSnapPair } from 'snap-pair-core';
 
 // Firebase (default): server-assisted rooms
 const sp = useSnapPair({ db, auth, functions, guest: { id: '', name: 'Ada' }, maxPlayers: 8 });
 
-// Any other transport (Phase 3)
+// Any other transport: pass an instance (you own it) or a factory (the hook owns it)
+const [party] = useState(() => new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' }));
 const sp = useSnapPair({ transport: party, guest: { id: '', name: 'Ada' } });
 
 const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, updateRoomStatus, leaveRoom } = sp;
 ```
 
-With Firebase, wait for `authReady` before calling `createRoom(initialState)`
-or `joinRoom(code)`. Members may update shared `state`, their own `name`,
-`connected` and `lastSeenAt`. Only the host may change the room status.
+Wait for `authReady` before calling `createRoom(initialState)` or
+`joinRoom(code)`. Both modes return the same shape. With a transport,
+`authReady` follows the connection, `localGuest.id` becomes the transport's
+peer id, and you use the instance's `send` / `broadcast` / `onMessage` for
+ephemeral input. Keep an instance stable (`useState(() => new X())`); a
+factory (`transport: () => new X()`) is created once and disconnected on
+unmount. The mode is fixed for a component's lifetime. With Firebase, members
+may update shared `state`, their own `name`, `connected` and `lastSeenAt`, and
+only the host may change the room status.
 
 ### Transports
 
@@ -255,7 +337,7 @@ or `joinRoom(code)`. Members may update shared `state`, their own `name`,
 | `Transport` | Abstract base: `connect` / `disconnect`, `createRoom` / `joinRoom` / `leaveRoom`, `setState`, `send` / `broadcast`, `on*` subscriptions that return an idempotent unsubscribe, and `capabilities` |
 | `FirebaseTransport`, `FirebaseRoomStore` | RTDB + callable Cloud Functions; `serverAuthoritativeJoin: true` |
 | `PartyKitTransport` | Options: `host`, `party`, `pairing`, `socketFactory` (inject `partysocket` in bundled apps), `connectTimeoutMs`. Falls back to `WebSocket` with backoff |
-| `WebRTCTransport` | Options: `signaling` (any transport with messaging), `iceServers` (default: one public STUN), `connectTimeoutMs` |
+| `WebRTCTransport` | Options: `signaling` (any transport with messaging), `iceServers` (default: one public STUN), `connectTimeoutMs`, `reconnect` (`false` or `{ maxAttempts, baseDelayMs, maxDelayMs, iceRestartGraceMs }`), `maxMessageBytes` (16 KiB), `maxReassembledBytes` (1 MiB) |
 | `BroadcastChannelTransport` | Same-origin tabs/windows; `isBroadcastChannelSupported()` |
 | `RelayTransport` | Shared host-authoritative engine behind the last three. Common options: `pairing: 'code' \| 'pin'`, `maxPlayers`, `admit(peer)`, `namespace`, `joinBaseUrl`, `heartbeatMs`, `peerTimeoutMs`, `allowGuestState` |
 
@@ -292,8 +374,34 @@ it is safe to import during SSR.
 
 | Export | Notes |
 |---|---|
-| `HostHUD` | Host pairing panel: QR (via `renderQr`), room code, PIN, join link with copy button, peer count, status. Every string can be overridden with `labels` |
-| `ControllerWrapper` | Guest-side shell: wake lock, motion permission button, orientation lock and reconnect UI around your controller (Phase 3) |
+| `HostHUD` | Host pairing panel: QR (via `renderQr`), room code, PIN, join link with copy button, peer count, status. `locale="en" \| "ja" \| "auto"`; every string can be overridden with `labels` |
+| `ControllerWrapper` | Phone-side shell: status bar, reconnect banner, wake lock toggle, iOS motion permission button, fullscreen + orientation lock. Each control hides itself where the browser lacks the API |
+
+```tsx
+import { ControllerWrapper } from 'snap-pair-core';
+
+<ControllerWrapper
+  transport={party}            // or status={status}
+  roomCode={room?.code}
+  onReconnect={() => joinRoom(code)}
+  motion                       // shows the iOS permission button until granted
+  orientation="portrait"       // fullscreen button that also locks orientation
+  locale="auto"                // 'en' | 'ja' | 'auto'; override strings with labels
+>
+  {({ status, motionPermission }) => <Pad disabled={status !== 'connected' || motionPermission !== 'granted'} />}
+</ControllerWrapper>;
+```
+
+`wakeLock` defaults to `true`; `onMotionPermission`, `className` and `style`
+are also accepted.
+
+### Presets and i18n
+
+`PRESETS`, `getPreset(id)`, `supportedTransports(preset)`, `pairingFor(preset,
+transport)` and `presetsForTransport(transport)` expose the preset registry
+the CLI uses. `createTranslator(locale)`, `t()`, `detectLocale()` and
+`SUPPORTED_LOCALES` (`en`, `ja`) are the bundled dictionaries behind the CLI,
+`HostHUD` and `ControllerWrapper`.
 
 <details>
 <summary><b>Firebase data layout and room server</b></summary>
@@ -317,7 +425,8 @@ rooms/{roomId}/joinState            # Admin SDK only
   payload limits and throttling before going to production.
 
 Design notes: [docs/plan-phase1.md](./docs/plan-phase1.md),
-[docs/plan-phase2.md](./docs/plan-phase2.md).
+[docs/plan-phase2.md](./docs/plan-phase2.md),
+[docs/plan-phase3.md](./docs/plan-phase3.md).
 
 </details>
 
@@ -517,10 +626,12 @@ or typing a code.
 <details>
 <summary><b>Which transport should I start with?</b></summary>
 
-Prototyping on one machine: BroadcastChannel. Phones over the internet with
-low latency: PartyKit (add WebRTC later for the lowest latency). Big public
-rooms where joins must be checked on a server: Firebase. Or run
-`npx snap-pair init` and let the wizard decide.
+Prototyping on one machine: BroadcastChannel. Phones over the internet:
+PartyKit (WebRTC for the lowest latency in small rooms, ≈2–16 people).
+Shared-state apps where joins must be checked on a server: Firebase (it has
+no ephemeral messaging, so pair it with PartyKit for streamed input). Or run
+`npx snap-pair init` (or `npx snap-pair recommend "<your idea>"`) and let the
+CLI decide.
 </details>
 
 <details>
@@ -572,17 +683,31 @@ Create transports inside effects or client components.
 - [x] **Phase 1:** `Transport` abstraction, `FirebaseTransport`, `HostHUD`
 - [x] **Phase 2:** PartyKit, WebRTC and BroadcastChannel transports; PIN and
       QR helpers; wake lock and orientation utilities
-- [ ] **Phase 3:** `npx snap-pair init` wizard (4 paths, en/ja), 7 preset
-      templates, `ControllerWrapper`, `useSnapPair({ transport })`, build with
-      an `exports` map, WebRTC auto-reconnect and message chunking
-- [ ] Later: numeric PINs and messaging on Firebase, WebRTC mesh topology and
-      TURN guidance, real-browser end-to-end tests, more locales
+- [x] **Phase 3:** `npx snap-pair init` wizard (4 paths, en/ja) with
+      `presets` and `recommend` commands, 7 preset templates,
+      `ControllerWrapper`, `useSnapPair({ transport })`, i18n, ESM/CJS build
+      with an `exports` map, WebRTC auto-reconnect and message chunking
+
+Still to do:
+
+- [ ] **WebRTC:** renegotiation (extra channels, media tracks), binary
+      payloads, backpressure (`bufferedAmount`), mesh topology, host
+      migration, TURN guidance, real-browser end-to-end tests
+- [ ] **Bundle size:** the root `useSnapPair` imports `firebase/auth`
+      statically, so non-Firebase apps still bundle it; a Firebase-free hook
+      entry or lazy loading
+- [ ] **Firebase:** numeric PINs and ephemeral messaging
+      (`rooms/$roomId/messages`), so presets can run on it
+- [ ] **i18n:** more locales; transport errors and template UI strings in
+      Japanese
 
 ## Development
 
 ```bash
 npm test
-npm run typecheck
+npm run typecheck   # library + templates
+npm run build       # dist/ (ESM + CJS + d.ts), dist/cli, templates/
+node dist/cli/index.js --help
 npm --prefix functions test
 npm --prefix functions run typecheck
 npm run test:rules-emulator

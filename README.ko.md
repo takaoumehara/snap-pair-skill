@@ -45,6 +45,9 @@ npm 패키지 이름은 **`snap-pair-core`**(MIT)입니다.
 # 1. Scaffold a new app with the interactive wizard (en/ja)
 npx snap-pair init
 
+#    …or non-interactively (CI, AI agents)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+
 # 2. Or add the library to an existing React app
 npm i snap-pair-core
 ```
@@ -60,7 +63,7 @@ bun add snap-pair-core
 
 </details>
 
-선택적 peer 의존성: `qrcode`(`HostHUD`에서 QR 렌더링)와 `partysocket`(더 견고한 PartyKit 소켓). 둘 다 필수는 아닙니다.
+peer 의존성: `react`(18.2+). 선택 사항: `qrcode`(`HostHUD`에서 QR 렌더링), `partysocket`(더 견고한 PartyKit 소켓), `react-dom`(생성된 템플릿에서만 사용).
 
 가장 작은 멀티스크린 앱은 서버가 전혀 필요 없습니다. 같은 브라우저의 두 탭을 PIN으로 페어링하는 예시입니다.
 
@@ -81,7 +84,7 @@ await ctrl.joinRoom('042917');
 await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
 ```
 
-`BroadcastChannelTransport`를 `PartyKitTransport`나 `FirebaseTransport`로 바꾸면 같은 코드가 인터넷 너머에서도 동작합니다.
+`BroadcastChannelTransport`를 `PartyKitTransport`(또는 `WebRTCTransport`)로 바꾸면 같은 코드가 인터넷 너머에서도 동작합니다. `FirebaseTransport`는 방 상태를 공유하지만 일회성 메시징(ephemeral messaging)이 없으므로 `broadcast`를 쓸 수 없습니다([전송 방식](#전송-방식과-선택-기준) 참고).
 [두 탭에서 라이브로 체험하기 →](https://takaoumehara.github.io/snap-pair-skill/demo.html)
 
 ---
@@ -122,40 +125,44 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 
 | 이런 것이 필요하다면… | 사용 | 이유 |
 |---|---|---|
-| 대규모 공개 방(최대 300명), 서버에서 검증하는 참가, 영속성 | **Firebase**(기본값) | Cloud Functions가 모든 게스트를 승인하고, RTDB 규칙이 멤버가 쓸 수 있는 범위를 제한 |
-| 인터넷을 통한 휴대폰의 저지연 입력, 간단한 배포 | **PartyKit** | 아주 작은 WebSocket 릴레이([`examples/partykit/`](./examples/partykit/)); 방은 호스트 브라우저가 소유 |
+| 공유 상태 앱(턴제 게임, 체크리스트, 로비), 서버에서 검증하는 참가(최대 300명), 인증, 영속성 | **Firebase**(`useSnapPair` 기본값) | Cloud Functions가 모든 게스트를 승인하고, RTDB 규칙이 멤버가 쓸 수 있는 범위를 제한. 공유 상태 전용이며 일회성 메시징 없음 |
+| 인터넷을 통한 휴대폰 입력, 최대 수백 명 규모의 방, 간단한 배포 | **PartyKit** | 아주 작은 WebSocket 릴레이([`examples/partykit/`](./examples/partykit/)); 방은 호스트 브라우저가 소유 |
 | 가장 낮은 지연 시간(드로잉, 게임, 모션) | **WebRTC** | P2P DataChannel; 시그널링은 PartyKit(또는 메시징을 지원하는 모든 전송)을 이용 |
 | **한 대의** 기기에서 여러 창이나 디스플레이, 오프라인 | **BroadcastChannel** | 네트워크도, 서버도, 계정도 필요 없음 |
 
 네 가지 모두 같은 `Transport` 인터페이스(`connect`, `createRoom`, `joinRoom`, `setState`, `send`, `broadcast`, `onMessage`, `onPeers`, `onState`, `onStatus`…)를 구현하므로 한 줄만 바꾸면 전환할 수 있습니다. UI가 기능에 따라 우아하게 축소되어야 할 때는 `transport.capabilities`(`messaging`, `presence`, `serverAuthoritativeJoin`)를 확인하세요.
+
+> **Firebase에는 일회성 메시징이 없습니다.** `FirebaseTransport`는 `capabilities.messaging === false`를 보고하고 `send`/`broadcast`를 거부하며, `setState`는 상태 객체 전체를 교체하므로 여러 작성자가 동시에 쓰면 서로 덮어씁니다. 7가지 프리셋은 모두 입력을 스트리밍하므로 어느 것도 Firebase에서 동작하지 않습니다. Firebase를 고르면 `npx snap-pair init`이 두 가지 선택지를 제시합니다. 설정만 있는 Firebase 앱(`preset: null`, `useSnapPair`로 상태 공유), 또는 앱에는 Firebase를 쓰고 프리셋의 실시간 메시지에는 PartyKit을 쓰는 구성입니다.
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
 
 const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' });
 const p2p = new WebRTCTransport({ signaling: party }); // DataChannel star, host in the middle
-const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms
+const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms, shared state only
 ```
+
+WebRTC는 스스로 재연결하며(같은 연결에서 ICE restart를 시도한 뒤 지수 백오프로 다시 offer), 16 KiB를 넘는 프레임은 청크로 나눠 보냅니다(메시지당 최대 1 MiB). 복구를 끄려면 `reconnect: false`를 전달하세요.
 
 ---
 
 ## 프리셋
 
-바로 쓸 수 있는 7가지 UX 패턴입니다. 각 프리셋에는 `npx snap-pair init`으로 생성할 수 있는 템플릿과 권장 전송 방식이 있습니다.
+바로 쓸 수 있는 7가지 UX 패턴입니다. 각 프리셋에는 `npx snap-pair init`으로 생성할 수 있는 템플릿, 권장 전송 방식, 메시지 형식, 템플릿이 지키는 전송 빈도 제한이 있습니다(`PRESETS` / `getPreset(id)`로 모두 조회 가능).
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="./docs/assets/presets/stroke-stream.svg" alt="Stroke Stream: 휴대폰에 그리면 획이 대형 화면으로 실시간 전송됩니다. 권장: PartyKit 또는 WebRTC." width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/particle-blast.svg" alt="Particle Blast: 탭하거나 스와이프해서 호스트 캔버스에 파티클을 터뜨립니다. 권장: WebRTC 또는 PartyKit." width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/type-throw.svg" alt="Type Throw: 단어를 입력하고 공유 벽으로 휙 던집니다. 권장: Firebase 또는 PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/stroke-stream.svg" alt="Stroke Stream: 휴대폰에 그리면 획이 대형 화면으로 실시간 전송됩니다. 권장: WebRTC 또는 PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/particle-blast.svg" alt="Particle Blast: 탭하거나 스와이프해서 호스트 캔버스에 파티클을 터뜨립니다. 권장: PartyKit 또는 WebRTC." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/type-throw.svg" alt="Type Throw: 단어를 입력하고 공유 벽으로 휙 던집니다. 권장: PartyKit 또는 WebRTC." width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: 모두가 휴대폰으로 답하고 결과가 즉시 표시됩니다. 권장: Firebase." width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/virtual-controller.svg" alt="Virtual Controller: 방향 패드와 버튼으로 모든 휴대폰이 게임패드가 됩니다. 권장: WebRTC 또는 PartyKit." width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/motion-sensor.svg" alt="Motion / Sensor: 기기 방향을 이용해 기울이고, 흔들고, 회전합니다. 권장: WebRTC 또는 PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: 모두가 휴대폰으로 답하고 결과가 즉시 표시됩니다. 권장: PartyKit + PIN 페어링." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/virtual-controller.svg" alt="Virtual Controller: 방향 패드와 버튼으로 모든 휴대폰이 게임패드가 됩니다. 권장: WebRTC 또는 PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/motion-sensor.svg" alt="Motion / Sensor: 기기 방향을 이용해 기울이고, 흔들고, 회전합니다. 권장: WebRTC 또는 PartyKit." width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/local-multi-display.svg" alt="Local Multi-Display: 한 대의 기기에서 창과 탭을 오프라인에서도 동기화합니다. 권장: BroadcastChannel." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/local-multi-display.svg" alt="Local Multi-Display: 한 대의 기기에서 창과 탭을 오프라인에서도 동기화합니다. 권장: BroadcastChannel." width="100%"></td>
     <td colspan="2" valign="middle">
       <b>프리셋 ID</b>(CLI 및 <code>snap-pair.config.json</code>용):<br><br>
       <code>stroke-stream</code> · <code>particle-blast</code> · <code>type-throw</code> · <code>room-quiz-poll</code> · <code>virtual-controller</code> · <code>motion-sensor</code> · <code>local-multi-display</code>
@@ -163,34 +170,69 @@ const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritati
   </tr>
 </table>
 
-| 프리셋 | id | 호스트 화면 | 휴대폰이 보내는 것 | 전송 |
-|---|---|---|---|---|
-| Stroke Stream | `stroke-stream` | 공유 캔버스 | 포인터 획 | PartyKit · WebRTC |
-| Particle Blast | `particle-blast` | 파티클 필드 | 탭 / 스와이프 | WebRTC · PartyKit |
-| Type Throw | `type-throw` | 단어 벽 | 짧은 텍스트 | Firebase · PartyKit |
-| Room Quiz / Poll | `room-quiz-poll` | 질문 + 실시간 결과 | 답변 | Firebase |
-| Virtual Controller | `virtual-controller` | 게임 화면 | 방향 패드 / 버튼 상태 | WebRTC · PartyKit |
-| Motion / Sensor | `motion-sensor` | 기울기로 움직이는 장면 | 방향 / 모션 | WebRTC · PartyKit |
-| Local Multi-Display | `local-multi-display` | 동기화된 창 | 창 상태 | BroadcastChannel |
+| 프리셋 | id | 호스트 화면 | 휴대폰이 보내는 것 | 전송(**권장**이 먼저) | 페어링(기본값이 먼저) |
+|---|---|---|---|---|---|
+| Stroke Stream | `stroke-stream` | 공유 캔버스 | 포인터 획 | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Particle Blast | `particle-blast` | 파티클 필드 | 탭 / 스와이프 | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Type Throw | `type-throw` | 단어 벽 | 짧은 텍스트 | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Room Quiz / Poll | `room-quiz-poll` | 질문 + 실시간 집계 | 투표 | **PartyKit** · BroadcastChannel · WebRTC | PIN · QR · code |
+| Virtual Controller | `virtual-controller` | 게임 화면 | 방향 패드 / 버튼 상태 | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Motion / Sensor | `motion-sensor` | 기울기로 움직이는 장면 | 방향 / 모션 | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Local Multi-Display | `local-multi-display` | 여러 창에 걸친 하나의 장면 | 창 상태 | **BroadcastChannel** | broadcast |
+
+어떤 프리셋도 Firebase를 지원하지 않습니다. [전송 방식](#전송-방식과-선택-기준)의 안내를 참고하세요.
 
 ---
 
 ## CLI
 
 ```bash
-npx snap-pair init
+npx snap-pair init                                    # interactive wizard (default command)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+npx snap-pair init --yes --architecture managed --no-scaffold   # Firebase config only
+npx snap-pair presets                                 # list the 7 presets (--json for the registry)
+npx snap-pair recommend "a tilt racing game for 4 friends"
 ```
 
-마법사는 영어 또는 일본어로 진행되며(OS 언어로 자동 감지), 네 가지 진입 경로를 제공합니다. 프로젝트를 생각하는 방식에 맞는 것을 고르세요.
+마법사는 영어 또는 일본어로 진행되며(`LANG` / `LC_ALL`로 감지하거나 `--lang en|ja`로 지정), 네 가지 진입 경로를 제공합니다(`--path`로 메뉴를 건너뛸 수 있음).
 
-| 경로 | 답하는 내용 | 얻는 것 |
+| 경로(`--path`) | 답하는 내용 | 얻는 것 |
 |---|---|---|
-| **1. UX 기준** | 7가지 프리셋 중 어느 것이 맞는지 | 해당 프리셋의 템플릿과 권장 전송 |
-| **2. 아키텍처 기준** | 화면과 휴대폰은 몇 대인지, 같은 공간인지 원격인지, 영속성이 필요한지 | 적합한 전송과 페어링 방식 |
-| **3. 스택 기준** | 이미 쓰고 있는 것(Firebase, PartyKit, 순수 WebRTC, 없음) | 여러분의 스택에 맞춘 구성 |
-| **4. 설명하기** | 평범한 한 문장, 예: "관객이 무대 화면에서 투표" | 수락하거나 바꿀 수 있는 규칙 기반 추천 |
+| **1. 경험 기준**(`ux`) | 7가지 프리셋 중 어느 것이 맞는지 | 해당 프리셋과 그 프리셋이 지원하는 전송(권장이 먼저) |
+| **2. 아키텍처 기준**(`architecture`) | 같은 기기, 실시간, P2P, 매니지드 중 무엇인지 | 전송 방식과 그에 맞는 프리셋 |
+| **3. 스택 기준**(`stack`) | 이미 가진 것: Firebase, Cloudflare/PartyKit, 백엔드 없음 | 여러분의 스택에 맞춘 전송 방식 |
+| **4. 설명하기**(`consult`) | 영어나 일본어로 된 한 문장, 예: "관객이 무대 화면에서 투표" | 수락하거나 조정할 수 있는 규칙 기반 추천 |
 
-모든 경로는 마지막에 **`snap-pair.config.json`**(프리셋, 전송, 페어링 방식)을 작성하고 해당 템플릿을 생성합니다. 선택을 바꾸고 싶으면 언제든 명령을 다시 실행하세요.
+Firebase를 고르면 설정만 있는 Firebase 앱, 또는 Firebase + 프리셋 실시간 메시지용 PartyKit 중에서 선택할 수 있습니다. 모든 경로는 **`snap-pair.config.json`** 파일을 작성하고 Vite + React 템플릿(호스트와 컨트롤러가 하나의 앱에 있고 URL로 구분)을 생성하며, 전송에 필요하면 PartyKit 릴레이(`party/server.ts`)도 생성합니다.
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+| 플래그 | 의미 |
+|---|---|
+| `--preset <id\|none>` | 7가지 프리셋 id 중 하나 또는 `none` |
+| `--transport <t>` | `broadcast` \| `partykit` \| `webrtc` \| `firebase` |
+| `--pairing <m>` | `qr` \| `code` \| `pin` \| `broadcast` |
+| `--architecture <a>` | `same-device` \| `realtime` \| `p2p` \| `managed` |
+| `--stack <s>` | `firebase` \| `cloudflare` \| `none` |
+| `--describe <text>` | `consult` 경로에 쓰는 자유 설명 |
+| `--out <dir>` | 대상 폴더(기본값: `./snap-pair-<preset>`) |
+| `--no-scaffold`, `--force` | 설정만 작성; 기존 파일 덮어쓰기 |
+| `-y, --yes` | 모든 기본값 수락(비대화형) |
+| `--json` | stdout에 JSON 결과(`config`, `files`, `nextSteps`) 출력 |
+| `--lang <en\|ja>` | 언어 |
+
+선택을 바꾸고 싶으면 언제든 명령을 다시 실행하세요.
 
 ---
 

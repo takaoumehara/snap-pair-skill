@@ -45,6 +45,9 @@ El paquete de npm es **`snap-pair-core`** (MIT).
 # 1. Scaffold a new app with the interactive wizard (en/ja)
 npx snap-pair init
 
+#    …or non-interactively (CI, AI agents)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+
 # 2. Or add the library to an existing React app
 npm i snap-pair-core
 ```
@@ -60,7 +63,7 @@ bun add snap-pair-core
 
 </details>
 
-Dependencias peer opcionales: `qrcode` (renderizado de QR en `HostHUD`) y `partysocket` (un socket de PartyKit más robusto). Ninguna es obligatoria.
+Dependencias peer: `react` (18.2+). Opcionales: `qrcode` (renderizado de QR en `HostHUD`), `partysocket` (un socket de PartyKit más robusto) y `react-dom` (solo lo usan las plantillas generadas).
 
 La app multipantalla más pequeña posible no necesita ningún servidor. Empareja dos pestañas del mismo navegador con un PIN:
 
@@ -81,7 +84,7 @@ await ctrl.joinRoom('042917');
 await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
 ```
 
-Cambia `BroadcastChannelTransport` por `PartyKitTransport` o `FirebaseTransport` y el mismo código funciona a través de internet.
+Cambia `BroadcastChannelTransport` por `PartyKitTransport` (o `WebRTCTransport`) y el mismo código funciona a través de internet. `FirebaseTransport` comparte el estado de la sala pero no tiene mensajería efímera, así que `broadcast` no está disponible ahí (consulta [Transportes](#transportes-y-cuándo-usar-cada-uno)).
 [Pruébalo en vivo en dos pestañas →](https://takaoumehara.github.io/snap-pair-skill/demo.html)
 
 ---
@@ -122,40 +125,44 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 
 | Si necesitas… | Usa | Por qué |
 |---|---|---|
-| Salas públicas grandes (hasta 300), uniones verificadas en el servidor, persistencia | **Firebase** (predeterminado) | Cloud Functions admite a cada invitado; las reglas de RTDB limitan lo que pueden escribir los miembros |
-| Entrada de baja latencia desde teléfonos por internet, despliegue sencillo | **PartyKit** | Un relay WebSocket diminuto ([`examples/partykit/`](./examples/partykit/)); el navegador del anfitrión es dueño de la sala |
+| Apps de estado compartido (juegos por turnos, checklists, lobbies) con uniones verificadas en el servidor (hasta 300), autenticación y persistencia | **Firebase** (predeterminado de `useSnapPair`) | Cloud Functions admite a cada invitado; las reglas de RTDB limitan lo que pueden escribir los miembros. Solo estado compartido: sin mensajería efímera |
+| Entrada desde teléfonos por internet, salas de hasta cientos de personas, despliegue sencillo | **PartyKit** | Un relay WebSocket diminuto ([`examples/partykit/`](./examples/partykit/)); el navegador del anfitrión es dueño de la sala |
 | La latencia más baja (dibujo, juegos, movimiento) | **WebRTC** | DataChannels peer-to-peer; la señalización va por PartyKit (o cualquier transporte con mensajería) |
 | Varias ventanas o pantallas en **una** sola máquina, sin conexión | **BroadcastChannel** | Sin red, sin servidor, sin cuenta |
 
 Los cuatro implementan la misma interfaz `Transport` (`connect`, `createRoom`, `joinRoom`, `setState`, `send`, `broadcast`, `onMessage`, `onPeers`, `onState`, `onStatus`…), así que cambiar es cuestión de una línea. Consulta `transport.capabilities` (`messaging`, `presence`, `serverAuthoritativeJoin`) cuando tu interfaz necesite degradarse con elegancia.
+
+> **Firebase no tiene mensajería efímera.** `FirebaseTransport` informa `capabilities.messaging === false` y rechaza `send`/`broadcast`, y `setState` reemplaza el objeto de estado completo, así que varios escritores simultáneos se pisarían entre sí. Los siete presets transmiten entrada en tiempo real, por lo que ninguno funciona sobre Firebase. Si eliges Firebase, `npx snap-pair init` ofrece dos opciones: una app de Firebase solo con configuración (`preset: null`, estado compartido mediante `useSnapPair`), o Firebase para tu app más PartyKit para los mensajes en tiempo real del preset.
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
 
 const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' });
 const p2p = new WebRTCTransport({ signaling: party }); // DataChannel star, host in the middle
-const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms
+const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms, shared state only
 ```
+
+WebRTC se reconecta solo (primero un ICE restart sobre la misma conexión, luego nuevas ofertas con backoff exponencial) y divide en fragmentos los frames de más de 16 KiB (hasta 1 MiB por mensaje). Pasa `reconnect: false` para desactivar la recuperación.
 
 ---
 
 ## Presets
 
-Siete patrones de UX listos para usar. Cada uno tiene una plantilla que puedes generar con `npx snap-pair init` y un transporte recomendado.
+Siete patrones de UX listos para usar. Cada uno tiene una plantilla que puedes generar con `npx snap-pair init`, un transporte recomendado, formatos de mensaje y un límite de frecuencia que la plantilla respeta (`PRESETS` / `getPreset(id)` lo exponen todo).
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="./docs/assets/presets/stroke-stream.svg" alt="Stroke Stream: dibuja en tu teléfono y los trazos llegan en vivo a la pantalla grande. Recomendado: PartyKit o WebRTC." width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/particle-blast.svg" alt="Particle Blast: toca o desliza para lanzar ráfagas de partículas sobre el lienzo del anfitrión. Recomendado: WebRTC o PartyKit." width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/type-throw.svg" alt="Type Throw: escribe una palabra y lánzala al muro compartido. Recomendado: Firebase o PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/stroke-stream.svg" alt="Stroke Stream: dibuja en tu teléfono y los trazos llegan en vivo a la pantalla grande. Recomendado: WebRTC o PartyKit." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/particle-blast.svg" alt="Particle Blast: toca o desliza para lanzar ráfagas de partículas sobre el lienzo del anfitrión. Recomendado: PartyKit o WebRTC." width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/type-throw.svg" alt="Type Throw: escribe una palabra y lánzala al muro compartido. Recomendado: PartyKit o WebRTC." width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: todos responden en su teléfono y los resultados aparecen al instante. Recomendado: Firebase." width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/virtual-controller.svg" alt="Virtual Controller: una cruceta y botones convierten cada teléfono en un mando de juego. Recomendado: WebRTC o PartyKit." width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/motion-sensor.svg" alt="Motion / Sensor: inclina, agita y gira usando la orientación del dispositivo. Recomendado: WebRTC o PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/room-quiz-poll.svg" alt="Room Quiz / Poll: todos responden en su teléfono y los resultados aparecen al instante. Recomendado: PartyKit con emparejamiento por PIN." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/virtual-controller.svg" alt="Virtual Controller: una cruceta y botones convierten cada teléfono en un mando de juego. Recomendado: WebRTC o PartyKit." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/motion-sensor.svg" alt="Motion / Sensor: inclina, agita y gira usando la orientación del dispositivo. Recomendado: WebRTC o PartyKit." width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/local-multi-display.svg" alt="Local Multi-Display: sincroniza ventanas y pestañas en una sola máquina, incluso sin conexión. Recomendado: BroadcastChannel." width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/local-multi-display.svg" alt="Local Multi-Display: sincroniza ventanas y pestañas en una sola máquina, incluso sin conexión. Recomendado: BroadcastChannel." width="100%"></td>
     <td colspan="2" valign="middle">
       <b>Ids de los presets</b> (para la CLI y <code>snap-pair.config.json</code>):<br><br>
       <code>stroke-stream</code> · <code>particle-blast</code> · <code>type-throw</code> · <code>room-quiz-poll</code> · <code>virtual-controller</code> · <code>motion-sensor</code> · <code>local-multi-display</code>
@@ -163,34 +170,69 @@ Siete patrones de UX listos para usar. Cada uno tiene una plantilla que puedes g
   </tr>
 </table>
 
-| Preset | id | El anfitrión muestra | El teléfono envía | Transporte |
-|---|---|---|---|---|
-| Stroke Stream | `stroke-stream` | Lienzo compartido | Trazos del puntero | PartyKit · WebRTC |
-| Particle Blast | `particle-blast` | Campo de partículas | Toques / deslizamientos | WebRTC · PartyKit |
-| Type Throw | `type-throw` | Muro de palabras | Texto corto | Firebase · PartyKit |
-| Room Quiz / Poll | `room-quiz-poll` | Pregunta + resultados en vivo | Respuestas | Firebase |
-| Virtual Controller | `virtual-controller` | El juego | Estado de la cruceta / botones | WebRTC · PartyKit |
-| Motion / Sensor | `motion-sensor` | Escena controlada por la inclinación | Orientación / movimiento | WebRTC · PartyKit |
-| Local Multi-Display | `local-multi-display` | Ventanas sincronizadas | Estado de la ventana | BroadcastChannel |
+| Preset | id | El anfitrión muestra | El teléfono envía | Transportes (**recomendado** primero) | Emparejamiento (predeterminado primero) |
+|---|---|---|---|---|---|
+| Stroke Stream | `stroke-stream` | Lienzo compartido | Trazos del puntero | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Particle Blast | `particle-blast` | Campo de partículas | Toques / deslizamientos | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Type Throw | `type-throw` | Muro de palabras | Texto corto | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Room Quiz / Poll | `room-quiz-poll` | Pregunta + recuento en vivo | Votos | **PartyKit** · BroadcastChannel · WebRTC | PIN · QR · code |
+| Virtual Controller | `virtual-controller` | El juego | Estado de la cruceta / botones | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Motion / Sensor | `motion-sensor` | Escena controlada por la inclinación | Orientación / movimiento | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Local Multi-Display | `local-multi-display` | Una escena repartida entre ventanas | Estado de la ventana | **BroadcastChannel** | broadcast |
+
+Ningún preset admite Firebase; consulta la nota en [Transportes](#transportes-y-cuándo-usar-cada-uno).
 
 ---
 
 ## CLI
 
 ```bash
-npx snap-pair init
+npx snap-pair init                                    # interactive wizard (default command)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+npx snap-pair init --yes --architecture managed --no-scaffold   # Firebase config only
+npx snap-pair presets                                 # list the 7 presets (--json for the registry)
+npx snap-pair recommend "a tilt racing game for 4 friends"
 ```
 
-El asistente habla inglés o japonés (según el idioma de tu sistema operativo) y ofrece cuatro puntos de entrada. Elige el que encaje con tu forma de pensar el proyecto:
+El asistente habla inglés o japonés (según `LANG` / `LC_ALL`, o con `--lang en|ja`) y ofrece cuatro puntos de entrada (`--path` se salta el menú):
 
-| Camino | Respondes | Obtienes |
+| Camino (`--path`) | Respondes | Obtienes |
 |---|---|---|
-| **1. Por UX** | Cuál de los 7 presets encaja mejor | La plantilla de ese preset y su transporte recomendado |
-| **2. Por arquitectura** | ¿Cuántas pantallas y teléfonos? ¿Misma sala o remoto? ¿Necesitas persistencia? | Un transporte y un método de emparejamiento adecuados |
-| **3. Por stack** | Lo que ya usas (Firebase, PartyKit, WebRTC puro, nada) | Una configuración construida alrededor de tu stack |
-| **4. Descríbelo** | Una frase en lenguaje llano, p. ej. "el público vota en una pantalla del escenario" | Una recomendación basada en reglas que puedes aceptar o cambiar |
+| **1. Por experiencia** (`ux`) | Cuál de los 7 presets encaja mejor | Ese preset y luego un transporte que admita (el recomendado primero) |
+| **2. Por arquitectura** (`architecture`) | Mismo dispositivo, tiempo real, P2P o gestionado | Un transporte y luego los presets que encajan con él |
+| **3. Por stack** (`stack`) | Lo que ya tienes: Firebase, Cloudflare/PartyKit o ningún backend | Un transporte construido alrededor de tu stack |
+| **4. Descríbelo** (`consult`) | Una frase en inglés o japonés, p. ej. "el público vota en una pantalla del escenario" | Una recomendación basada en reglas que puedes aceptar o ajustar |
 
-Todos los caminos terminan escribiendo **`snap-pair.config.json`** (preset, transporte, método de emparejamiento) y generando la plantilla correspondiente. Vuelve a ejecutar el comando cuando quieras cambiar tus elecciones.
+Si eliges Firebase, se ofrece una app de Firebase solo con configuración o Firebase más PartyKit para los mensajes en tiempo real del preset. Todos los caminos escriben **`snap-pair.config.json`** y generan una plantilla Vite + React (anfitrión y mando en una sola app, elegidos por URL), además de un relay de PartyKit (`party/server.ts`) cuando el transporte lo necesita:
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+| Opción | Significado |
+|---|---|
+| `--preset <id\|none>` | Uno de los 7 ids de preset, o `none` |
+| `--transport <t>` | `broadcast` \| `partykit` \| `webrtc` \| `firebase` |
+| `--pairing <m>` | `qr` \| `code` \| `pin` \| `broadcast` |
+| `--architecture <a>` | `same-device` \| `realtime` \| `p2p` \| `managed` |
+| `--stack <s>` | `firebase` \| `cloudflare` \| `none` |
+| `--describe <text>` | Idea en texto libre para el camino `consult` |
+| `--out <dir>` | Carpeta de destino (predeterminada: `./snap-pair-<preset>`) |
+| `--no-scaffold`, `--force` | Solo configuración; sobrescribir archivos existentes |
+| `-y, --yes` | Aceptar todos los valores predeterminados (no interactivo) |
+| `--json` | Resultado JSON en stdout (`config`, `files`, `nextSteps`) |
+| `--lang <en\|ja>` | Idioma |
+
+Vuelve a ejecutar el comando cuando quieras cambiar tus elecciones.
 
 ---
 

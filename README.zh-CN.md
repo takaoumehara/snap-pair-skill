@@ -45,6 +45,9 @@ npm 包名为 **`snap-pair-core`**（MIT 许可）。
 # 1. Scaffold a new app with the interactive wizard (en/ja)
 npx snap-pair init
 
+#    …or non-interactively (CI, AI agents)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+
 # 2. Or add the library to an existing React app
 npm i snap-pair-core
 ```
@@ -60,7 +63,7 @@ bun add snap-pair-core
 
 </details>
 
-可选的 peer 依赖：`qrcode`（用于在 `HostHUD` 中渲染二维码）和 `partysocket`（更健壮的 PartyKit 套接字）。两者都不是必需的。
+peer 依赖：`react`（18.2+）。可选：`qrcode`（用于在 `HostHUD` 中渲染二维码）、`partysocket`（更健壮的 PartyKit 套接字）和 `react-dom`（仅生成的模板会用到）。
 
 最小的多屏应用完全不需要服务器。下面的代码通过 PIN 将同一浏览器中的两个标签页配对：
 
@@ -81,7 +84,7 @@ await ctrl.joinRoom('042917');
 await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
 ```
 
-把 `BroadcastChannelTransport` 换成 `PartyKitTransport` 或 `FirebaseTransport`，同样的代码就能跨互联网运行。
+把 `BroadcastChannelTransport` 换成 `PartyKitTransport`（或 `WebRTCTransport`），同样的代码就能跨互联网运行。`FirebaseTransport` 共享房间状态，但没有临时消息（ephemeral messaging），因此不能使用 `broadcast`（见[传输方式](#传输方式及其适用场景)）。
 [在两个标签页中在线体验 →](https://takaoumehara.github.io/snap-pair-skill/demo.html)
 
 ---
@@ -122,40 +125,44 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 
 | 如果你需要… | 使用 | 原因 |
 |---|---|---|
-| 大型公开房间（最多 300 人）、服务端校验加入、数据持久化 | **Firebase**（默认） | Cloud Functions 对每位来宾进行准入；RTDB 规则限制成员可写入的内容 |
-| 手机通过互联网进行低延迟输入，部署简单 | **PartyKit** | 一个极小的 WebSocket 中继（[`examples/partykit/`](./examples/partykit/)）；房间由主机浏览器掌控 |
+| 共享状态型应用（回合制游戏、清单、大厅），需要服务端校验加入（最多 300 人）、认证和持久化 | **Firebase**（`useSnapPair` 的默认） | Cloud Functions 对每位来宾进行准入；RTDB 规则限制成员可写入的内容。仅共享状态，没有临时消息 |
+| 手机通过互联网输入，房间可达数百人，部署简单 | **PartyKit** | 一个极小的 WebSocket 中继（[`examples/partykit/`](./examples/partykit/)）；房间由主机浏览器掌控 |
 | 最低延迟（绘画、游戏、体感） | **WebRTC** | 点对点 DataChannel；信令通过 PartyKit（或任何支持消息的传输）进行 |
 | **一台**机器上的多个窗口或显示器，可离线 | **BroadcastChannel** | 无网络、无服务器、无账号 |
 
 四种传输都实现了相同的 `Transport` 接口（`connect`、`createRoom`、`joinRoom`、`setState`、`send`、`broadcast`、`onMessage`、`onPeers`、`onState`、`onStatus`…），因此切换只需改一行代码。当 UI 需要优雅降级时，可检查 `transport.capabilities`（`messaging`、`presence`、`serverAuthoritativeJoin`）。
+
+> **Firebase 没有临时消息。** `FirebaseTransport` 的 `capabilities.messaging === false`，会拒绝 `send`/`broadcast`，并且 `setState` 会替换整个状态对象，多个写入方同时写入会互相覆盖。七种预设都需要流式输入，因此没有一种能在 Firebase 上运行。在 `npx snap-pair init` 中选择 Firebase 时，会提供两个选项：仅配置的 Firebase 应用（`preset: null`，通过 `useSnapPair` 共享状态），或者应用使用 Firebase、预设的实时消息使用 PartyKit。
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
 
 const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' });
 const p2p = new WebRTCTransport({ signaling: party }); // DataChannel star, host in the middle
-const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms
+const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms, shared state only
 ```
+
+WebRTC 会自动重连（先在同一连接上进行 ICE restart，再以指数退避重新发起 offer），并把超过 16 KiB 的帧拆分成块发送（每条消息最大 1 MiB）。传入 `reconnect: false` 可关闭自动恢复。
 
 ---
 
 ## 预设
 
-七种现成的 UX 模式。每种都有可通过 `npx snap-pair init` 生成的模板，以及推荐的传输方式。
+七种现成的 UX 模式。每种都有可通过 `npx snap-pair init` 生成的模板、推荐的传输方式、消息格式以及模板遵守的速率限制（`PRESETS` / `getPreset(id)` 可获取全部信息）。
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="./docs/assets/presets/stroke-stream.svg" alt="Stroke Stream：在手机上绘画，笔画实时流向大屏幕。推荐：PartyKit 或 WebRTC。" width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/particle-blast.svg" alt="Particle Blast：点按或滑动，在主机画布上发射粒子爆发效果。推荐：WebRTC 或 PartyKit。" width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/type-throw.svg" alt="Type Throw：输入一个词并把它甩到共享墙上。推荐：Firebase 或 PartyKit。" width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/stroke-stream.svg" alt="Stroke Stream：在手机上绘画，笔画实时流向大屏幕。推荐：WebRTC 或 PartyKit。" width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/particle-blast.svg" alt="Particle Blast：点按或滑动，在主机画布上发射粒子爆发效果。推荐：PartyKit 或 WebRTC。" width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/type-throw.svg" alt="Type Throw：输入一个词并把它甩到共享墙上。推荐：PartyKit 或 WebRTC。" width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/room-quiz-poll.svg" alt="Room Quiz / Poll：每个人在手机上作答，结果即时显示。推荐：Firebase。" width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/virtual-controller.svg" alt="Virtual Controller：方向键和按钮让每部手机都变成游戏手柄。推荐：WebRTC 或 PartyKit。" width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/motion-sensor.svg" alt="Motion / Sensor：利用设备方向进行倾斜、摇晃和旋转操作。推荐：WebRTC 或 PartyKit。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/room-quiz-poll.svg" alt="Room Quiz / Poll：每个人在手机上作答，结果即时显示。推荐：PartyKit + PIN 配对。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/virtual-controller.svg" alt="Virtual Controller：方向键和按钮让每部手机都变成游戏手柄。推荐：WebRTC 或 PartyKit。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/motion-sensor.svg" alt="Motion / Sensor：利用设备方向进行倾斜、摇晃和旋转操作。推荐：WebRTC 或 PartyKit。" width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/local-multi-display.svg" alt="Local Multi-Display：同步同一台机器上的窗口和标签页，离线也可用。推荐：BroadcastChannel。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/local-multi-display.svg" alt="Local Multi-Display：同步同一台机器上的窗口和标签页，离线也可用。推荐：BroadcastChannel。" width="100%"></td>
     <td colspan="2" valign="middle">
       <b>预设 ID</b>（用于 CLI 和 <code>snap-pair.config.json</code>）：<br><br>
       <code>stroke-stream</code> · <code>particle-blast</code> · <code>type-throw</code> · <code>room-quiz-poll</code> · <code>virtual-controller</code> · <code>motion-sensor</code> · <code>local-multi-display</code>
@@ -163,34 +170,69 @@ const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritati
   </tr>
 </table>
 
-| 预设 | id | 主机显示 | 手机发送 | 传输 |
-|---|---|---|---|---|
-| Stroke Stream | `stroke-stream` | 共享画布 | 指针笔画 | PartyKit · WebRTC |
-| Particle Blast | `particle-blast` | 粒子场 | 点按 / 滑动 | WebRTC · PartyKit |
-| Type Throw | `type-throw` | 文字墙 | 短文本 | Firebase · PartyKit |
-| Room Quiz / Poll | `room-quiz-poll` | 题目 + 实时结果 | 答案 | Firebase |
-| Virtual Controller | `virtual-controller` | 游戏画面 | 方向键 / 按钮状态 | WebRTC · PartyKit |
-| Motion / Sensor | `motion-sensor` | 由倾斜驱动的场景 | 方向 / 运动数据 | WebRTC · PartyKit |
-| Local Multi-Display | `local-multi-display` | 同步的窗口 | 窗口状态 | BroadcastChannel |
+| 预设 | id | 主机显示 | 手机发送 | 传输（**推荐**在前） | 配对（默认在前） |
+|---|---|---|---|---|---|
+| Stroke Stream | `stroke-stream` | 共享画布 | 指针笔画 | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Particle Blast | `particle-blast` | 粒子场 | 点按 / 滑动 | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Type Throw | `type-throw` | 文字墙 | 短文本 | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · code |
+| Room Quiz / Poll | `room-quiz-poll` | 题目 + 实时统计 | 投票 | **PartyKit** · BroadcastChannel · WebRTC | PIN · QR · code |
+| Virtual Controller | `virtual-controller` | 游戏画面 | 方向键 / 按钮状态 | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Motion / Sensor | `motion-sensor` | 由倾斜驱动的场景 | 方向 / 运动数据 | **WebRTC** · PartyKit · BroadcastChannel | QR · code · PIN |
+| Local Multi-Display | `local-multi-display` | 跨窗口的同一场景 | 窗口状态 | **BroadcastChannel** | broadcast |
+
+所有预设都不支持 Firebase，原因见[传输方式](#传输方式及其适用场景)中的说明。
 
 ---
 
 ## CLI
 
 ```bash
-npx snap-pair init
+npx snap-pair init                                    # interactive wizard (default command)
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+npx snap-pair init --yes --architecture managed --no-scaffold   # Firebase config only
+npx snap-pair presets                                 # list the 7 presets (--json for the registry)
+npx snap-pair recommend "a tilt racing game for 4 friends"
 ```
 
-向导支持英语和日语（根据操作系统语言自动检测），并提供四种入口。选择最符合你思考项目方式的那一种：
+向导支持英语和日语（根据 `LANG` / `LC_ALL` 检测，或使用 `--lang en|ja`），并提供四种入口（用 `--path` 可跳过菜单）：
 
-| 路径 | 你需要回答 | 你会得到 |
+| 路径（`--path`） | 你需要回答 | 你会得到 |
 |---|---|---|
-| **1. 按 UX** | 7 种预设中哪一种最合适 | 该预设的模板及其推荐传输 |
-| **2. 按架构** | 有几块屏幕和几部手机？同一房间还是远程？是否需要持久化？ | 合适的传输和配对方式 |
-| **3. 按技术栈** | 你已经在用什么（Firebase、PartyKit、原生 WebRTC，或什么都没有） | 围绕你的技术栈搭建的配置 |
-| **4. 直接描述** | 用一句大白话描述，例如"观众在舞台大屏上投票" | 基于规则的推荐，可接受或修改 |
+| **1. 按体验**（`ux`） | 7 种预设中哪一种最合适 | 该预设，以及它支持的传输（推荐的在前） |
+| **2. 按架构**（`architecture`） | 同一设备、实时、P2P 还是托管 | 一种传输，以及适合它的预设 |
+| **3. 按技术栈**（`stack`） | 你已有的环境：Firebase、Cloudflare/PartyKit，或没有后端 | 围绕你的技术栈选择的传输 |
+| **4. 直接描述**（`consult`） | 用英语或日语一句话描述，例如"观众在舞台大屏上投票" | 基于规则的推荐，可接受或调整 |
 
-每条路径最后都会写入 **`snap-pair.config.json`**（预设、传输、配对方式），并生成对应的模板。随时可以重新运行该命令来修改选择。
+选择 Firebase 时，会提供仅配置的 Firebase 应用，或 Firebase + PartyKit（用于预设的实时消息）两种选项。每条路径都会写入 **`snap-pair.config.json`**，并生成 Vite + React 模板（主机和控制器在同一个应用中，按 URL 区分）；传输需要时还会生成 PartyKit 中继（`party/server.ts`）：
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+| 参数 | 含义 |
+|---|---|
+| `--preset <id\|none>` | 7 个预设 id 之一，或 `none` |
+| `--transport <t>` | `broadcast` \| `partykit` \| `webrtc` \| `firebase` |
+| `--pairing <m>` | `qr` \| `code` \| `pin` \| `broadcast` |
+| `--architecture <a>` | `same-device` \| `realtime` \| `p2p` \| `managed` |
+| `--stack <s>` | `firebase` \| `cloudflare` \| `none` |
+| `--describe <text>` | `consult` 路径使用的自由描述 |
+| `--out <dir>` | 输出目录（默认：`./snap-pair-<preset>`） |
+| `--no-scaffold`, `--force` | 只写配置；覆盖已有文件 |
+| `-y, --yes` | 接受所有默认值（非交互） |
+| `--json` | 在 stdout 输出 JSON 结果（`config`、`files`、`nextSteps`） |
+| `--lang <en\|ja>` | 语言 |
+
+随时可以重新运行该命令来修改选择。
 
 ---
 

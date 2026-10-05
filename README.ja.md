@@ -58,6 +58,9 @@ npmパッケージ名は **`snap-pair-core`**（MIT）です。
 # 1. 対話型ウィザードで新しいアプリを生成（英語/日本語対応）
 npx snap-pair init
 
+#    …または非対話モードで（CI、AIエージェント向け）
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+
 # 2. または既存のReactアプリにライブラリを追加
 npm i snap-pair-core
 ```
@@ -73,7 +76,7 @@ bun add snap-pair-core
 
 </details>
 
-任意のピア依存関係として、`qrcode`（`HostHUD`でのQRコード描画）と`partysocket`（より堅牢なPartyKitソケット）があります。どちらも必須ではありません。
+ピア依存関係は`react`（18.2以上）です。任意で`qrcode`（`HostHUD`でのQRコード描画）、`partysocket`（より堅牢なPartyKitソケット）、`react-dom`（生成されるテンプレートのみが使用）を追加できます。
 
 最小構成のマルチスクリーンアプリなら、サーバーは一切不要です。同じブラウザの2つのタブをPINでペアリングできます。
 
@@ -94,7 +97,7 @@ await ctrl.joinRoom('042917');
 await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });
 ```
 
-`BroadcastChannelTransport`を`PartyKitTransport`や`FirebaseTransport`に差し替えるだけで、同じコードがインターネット越しに動作します。
+`BroadcastChannelTransport`を`PartyKitTransport`（または`WebRTCTransport`）に差し替えるだけで、同じコードがインターネット越しに動作します。`FirebaseTransport`はルームのstateを共有できますが、一時的なメッセージング機能がないため`broadcast`は使えません（[Transportの選び方](#transportの選び方)を参照）。
 [2つのタブでライブデモを試す →](https://takaoumehara.github.io/snap-pair-skill/demo.html)
 
 ---
@@ -135,40 +138,44 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 
 | 必要なもの | 使うもの | 理由 |
 |---|---|---|
-| 大規模な公開ルーム（最大300人）、サーバー側での参加チェック、永続化 | **Firebase**（デフォルト） | Cloud Functionsがすべてのゲストの参加を受け入れ、RTDBルールでメンバーが書き込める範囲を制限します |
-| インターネット越しのスマートフォンからの低遅延入力、シンプルなデプロイ | **PartyKit** | 小さなWebSocketリレー（[`examples/partykit/`](./examples/partykit/)）で、ルームはホストのブラウザが管理します |
+| 共有stateのアプリ（ターン制ゲーム、チェックリスト、ロビー）で、サーバー側での参加チェック（最大300人）、認証、永続化が必要 | **Firebase**（`useSnapPair`のデフォルト） | Cloud Functionsがすべてのゲストの参加を受け入れ、RTDBルールでメンバーが書き込める範囲を制限します。共有stateのみで、一時的なメッセージングはありません |
+| インターネット越しのスマートフォンからの入力、数百人規模のルーム、シンプルなデプロイ | **PartyKit** | 小さなWebSocketリレー（[`examples/partykit/`](./examples/partykit/)）で、ルームはホストのブラウザが管理します |
 | 最小のレイテンシ（お絵描き、ゲーム、モーション） | **WebRTC** | ピアツーピアのDataChannel。シグナリングはPartyKit（またはメッセージング対応の任意のTransport）上で行います |
 | **1台**のマシン上の複数ウィンドウ／ディスプレイ、オフライン | **BroadcastChannel** | ネットワークもサーバーもアカウントも不要です |
 
-4つすべてが同じ`Transport`インターフェース（`connect`、`createRoom`、`joinRoom`、`setState`、`send`、`broadcast`、`onMessage`、`onPeers`、`onState`、`onStatus`など）を実装しているため、切り替えは1行の変更で済みます。UIを状況に応じて縮退させたい場合は、`transport.capabilities`（`messaging`、`presence`、`serverAuthoritativeJoin`）を確認してください。たとえばFirebaseには一時的なメッセージング機能がない（`messaging: false`）ため、Firebase上で動くプリセットは共有stateを通じて入力を送ります。
+4つすべてが同じ`Transport`インターフェース（`connect`、`createRoom`、`joinRoom`、`setState`、`send`、`broadcast`、`onMessage`、`onPeers`、`onState`、`onStatus`など）を実装しているため、切り替えは1行の変更で済みます。UIを状況に応じて縮退させたい場合は、`transport.capabilities`（`messaging`、`presence`、`serverAuthoritativeJoin`）を確認してください。
+
+> **Firebaseには一時的なメッセージング機能がありません。** `FirebaseTransport`は`capabilities.messaging === false`を返し、`send`/`broadcast`を拒否します。また`setState`はstateオブジェクト全体を置き換えるため、複数人が同時に書き込むと互いに上書きしてしまいます。7つのプリセットはすべて入力をストリーミングするため、どれもFirebase上では動きません。Firebaseを選ぶと、`npx snap-pair init`は2つの選択肢を提示します。設定のみのFirebaseアプリ（`preset: null`、`useSnapPair`による共有state）か、アプリにはFirebaseを使いつつ、プリセットのリアルタイムメッセージにはPartyKitを使う構成です。
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
 
 const party = new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' });
 const p2p = new WebRTCTransport({ signaling: party }); // DataChannel star, host in the middle
-const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms
+const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritative rooms, shared state only
 ```
+
+WebRTCは自動で再接続し（同じ接続でのICEリスタート、続いて指数バックオフ付きの再オファー）、16 KiBを超えるフレームを分割して送ります（1メッセージ最大1 MiB）。復旧処理を無効にするには`reconnect: false`を渡してください。
 
 ---
 
 ## プリセット
 
-すぐに使える7種類のUXパターンです。それぞれに`npx snap-pair init`で生成できるテンプレートと、推奨Transportが用意されています。
+すぐに使える7種類のUXパターンです。それぞれに`npx snap-pair init`で生成できるテンプレート、推奨Transport、メッセージの形、テンプレートが守る送信レート上限が用意されています（すべて`PRESETS` / `getPreset(id)`で取得できます）。
 
 <table>
   <tr>
-    <td width="33%" align="center"><img src="./docs/assets/presets/stroke-stream.svg" alt="Stroke Stream：スマートフォンで描いた線が、大画面にリアルタイムで流れます。推奨：PartyKitまたはWebRTC。" width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/particle-blast.svg" alt="Particle Blast：タップやスワイプで、ホストのキャンバスにパーティクルを放ちます。推奨：WebRTCまたはPartyKit。" width="100%"></td>
-    <td width="33%" align="center"><img src="./docs/assets/presets/type-throw.svg" alt="Type Throw：言葉を入力し、フリックで共有ウォールに投げ込みます。推奨：FirebaseまたはPartyKit。" width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/stroke-stream.svg" alt="Stroke Stream：スマートフォンで描いた線が、大画面にリアルタイムで流れます。推奨：WebRTCまたはPartyKit。" width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/particle-blast.svg" alt="Particle Blast：タップやスワイプで、ホストのキャンバスにパーティクルを放ちます。推奨：PartyKitまたはWebRTC。" width="100%"></td>
+    <td width="33%" align="center"><img src="./site/assets/img/presets/type-throw.svg" alt="Type Throw：言葉を入力し、フリックで共有ウォールに投げ込みます。推奨：PartyKitまたはWebRTC。" width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/room-quiz-poll.svg" alt="Room Quiz / Poll：全員がスマートフォンで回答し、結果が即座に表示されます。推奨：Firebase。" width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/virtual-controller.svg" alt="Virtual Controller：十字キーとボタンで、すべてのスマートフォンがゲームパッドになります。推奨：WebRTCまたはPartyKit。" width="100%"></td>
-    <td align="center"><img src="./docs/assets/presets/motion-sensor.svg" alt="Motion / Sensor：デバイスの向きを使って、傾け・振り・回転で操作します。推奨：WebRTCまたはPartyKit。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/room-quiz-poll.svg" alt="Room Quiz / Poll：全員がスマートフォンで回答し、結果が即座に表示されます。推奨：PartyKit（PINでペアリング）。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/virtual-controller.svg" alt="Virtual Controller：十字キーとボタンで、すべてのスマートフォンがゲームパッドになります。推奨：WebRTCまたはPartyKit。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/motion-sensor.svg" alt="Motion / Sensor：デバイスの向きを使って、傾け・振り・回転で操作します。推奨：WebRTCまたはPartyKit。" width="100%"></td>
   </tr>
   <tr>
-    <td align="center"><img src="./docs/assets/presets/local-multi-display.svg" alt="Local Multi-Display：1台のマシン上のウィンドウやタブを、オフラインでも同期します。推奨：BroadcastChannel。" width="100%"></td>
+    <td align="center"><img src="./site/assets/img/presets/local-multi-display.svg" alt="Local Multi-Display：1台のマシン上のウィンドウやタブを、オフラインでも同期します。推奨：BroadcastChannel。" width="100%"></td>
     <td colspan="2" valign="middle">
       <b>プリセットID</b>（CLIおよび<code>snap-pair.config.json</code>で使用）：<br><br>
       <code>stroke-stream</code> · <code>particle-blast</code> · <code>type-throw</code> · <code>room-quiz-poll</code> · <code>virtual-controller</code> · <code>motion-sensor</code> · <code>local-multi-display</code>
@@ -176,56 +183,105 @@ const fb = new FirebaseTransport({ db, auth, functions }); // server-authoritati
   </tr>
 </table>
 
-| プリセット | id | ホストに表示されるもの | スマートフォンが送るもの | Transport |
-|---|---|---|---|---|
-| Stroke Stream | `stroke-stream` | 共有キャンバス | ポインターのストローク | PartyKit · WebRTC |
-| Particle Blast | `particle-blast` | パーティクルフィールド | タップ／スワイプ | WebRTC · PartyKit |
-| Type Throw | `type-throw` | ワードウォール | 短いテキスト | Firebase · PartyKit |
-| Room Quiz / Poll | `room-quiz-poll` | 問題とリアルタイムの結果 | 回答 | Firebase |
-| Virtual Controller | `virtual-controller` | ゲーム画面 | 十字キー／ボタンの状態 | WebRTC · PartyKit |
-| Motion / Sensor | `motion-sensor` | 傾きで動くシーン | 向き／モーション | WebRTC · PartyKit |
-| Local Multi-Display | `local-multi-display` | 同期されたウィンドウ | ウィンドウの状態 | BroadcastChannel |
+| プリセット | id | ホストに表示されるもの | スマートフォンが送るもの（レート上限） | Transport（**推奨**が先頭） | ペアリング（先頭がデフォルト） |
+|---|---|---|---|---|---|
+| Stroke Stream | `stroke-stream` | 共有キャンバス | `stroke`のバッチ（毎秒30回以下） | **WebRTC** · PartyKit · BroadcastChannel | QR · コード · PIN |
+| Particle Blast | `particle-blast` | パーティクルフィールド | `blast`タップ／スワイプ（毎秒10回以下） | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · コード |
+| Type Throw | `type-throw` | ワードウォール | `throw`短いテキスト（毎秒2回以下） | **PartyKit** · WebRTC · BroadcastChannel | QR · PIN · コード |
+| Room Quiz / Poll | `room-quiz-poll` | 問題とリアルタイムの集計 | `vote`（1問につき1回） | **PartyKit** · BroadcastChannel · WebRTC | PIN · QR · コード |
+| Virtual Controller | `virtual-controller` | ゲーム画面 | `input`十字キー／ボタン（変化時、毎秒60回以下） | **WebRTC** · PartyKit · BroadcastChannel | QR · コード · PIN |
+| Motion / Sensor | `motion-sensor` | 傾きで動くシーン | `motion`向き（毎秒30回以下） | **WebRTC** · PartyKit · BroadcastChannel | QR · コード · PIN |
+| Local Multi-Display | `local-multi-display` | ウィンドウをまたぐ1つのシーン | `tick`、`hello`（毎秒60回以下） | **BroadcastChannel** | broadcast |
+
+どのプリセットにもFirebaseは含まれていません（[Transportの選び方](#transportの選び方)の注記を参照）。テンプレートは、コントローラーの入力をホストにだけ送り（`send({ to: hostId })`）、stateを書き込めるのはホストのみ（`allowGuestState: false`）とし、すべてのペイロードをホスト側で範囲チェックします。
 
 ---
 
 ## CLI
 
 ```bash
-npx snap-pair init
+npx snap-pair init                                    # 対話型ウィザード（デフォルトのコマンド）
+npx snap-pair init --yes --preset room-quiz-poll --out my-quiz
+npx snap-pair init --yes --preset virtual-controller --transport webrtc --json
+npx snap-pair init --yes --architecture managed --no-scaffold   # Firebaseの設定のみ
+npx snap-pair presets                                 # 7つのプリセットを一覧表示（--jsonでレジストリ全体）
+npx snap-pair recommend "スマホを傾けて遊ぶレースゲーム"
 ```
 
-ウィザードは英語と日本語に対応しており（OSの言語設定から自動判定）、4通りの入り口を用意しています。プロジェクトの考え方に合うものを選んでください。
+ウィザードは英語と日本語に対応しており（`LANG` / `LC_ALL`から判定、または`--lang en|ja`）、4通りの入り口を用意しています（`--path`で最初のメニューを飛ばせます）。
 
-| 入り口 | 答えること | 得られるもの |
+| 入り口（`--path`） | 答えること | 得られるもの |
 |---|---|---|
-| **1. UXから選ぶ** | 7つのプリセットのうち、どれがしっくりくるか | そのプリセットのテンプレートと推奨Transport |
-| **2. アーキテクチャから選ぶ** | 画面とスマートフォンの台数、同じ場所か遠隔か、永続化が必要か | 条件に合ったTransportとペアリング方式 |
-| **3. 技術スタックから選ぶ** | すでに使っているもの（Firebase、PartyKit、素のWebRTC、何もなし） | お使いのスタックに合わせたセットアップ |
-| **4. 言葉で説明する** | 「ステージの画面で観客が投票する」のような、普段の言葉での一文 | 受け入れることも変更することもできる、ルールベースの推奨構成 |
+| **1. 体験から選ぶ**（`ux`） | 7つのプリセットのうち、どれがしっくりくるか | そのプリセットと、対応するTransport（推奨が先頭） |
+| **2. アーキテクチャから選ぶ**（`architecture`） | 同一デバイス、リアルタイム、P2P、マネージドのどれか | Transportと、それに合うプリセット |
+| **3. 技術スタックから選ぶ**（`stack`） | すでにあるもの：Firebase、Cloudflare/PartyKit、バックエンドなし | お使いのスタックに合わせたTransport |
+| **4. 言葉で説明する**（`consult`） | 「ステージの画面で観客が投票する」のような、英語か日本語での一文 | 受け入れることも調整することもできる、ルールベースの推奨構成 |
 
-どの入り口も、最後に **`snap-pair.config.json`**（プリセット、Transport、ペアリング方式）を書き出し、対応するテンプレートを生成して完了します。選択を変えたいときは、いつでもコマンドを再実行してください。
+Transportの各選択肢には、概要、長所、短所、無料枠の注記付きのコストが表示されます。Firebaseを選ぶと、設定のみのFirebaseアプリか、Firebase＋プリセットのリアルタイムメッセージ用のPartyKitかを選べます。非対話モードでは、`--yes --architecture managed --no-scaffold`でFirebaseのみの設定を書き出し、`--yes --stack firebase --preset <id>`でFirebaseアプリはそのままにプリセットをPartyKit上で動かします（`--transport firebase --preset <id>`はエラーになります）。
+
+どの入り口も **`snap-pair.config.json`** を書き出し、Vite + Reactのテンプレート（ホストとコントローラーを1つのアプリにまとめ、URLで切り替え）を生成します。リレーが必要なTransportでは、PartyKitリレー（`party/server.ts`）も含まれます。
+
+```json
+{
+  "$schema": "./node_modules/snap-pair-core/dist/config.schema.json",
+  "version": 1,
+  "preset": "room-quiz-poll",
+  "transport": "partykit",
+  "pairing": "pin",
+  "locale": "en",
+  "maxPlayers": 300,
+  "partykit": { "host": "", "party": "main" }
+}
+```
+
+| フラグ | 意味 |
+|---|---|
+| `--preset <id\|none>` | 7つのプリセットIDのいずれか、または`none` |
+| `--transport <t>` | `broadcast` \| `partykit` \| `webrtc` \| `firebase` |
+| `--pairing <m>` | `qr` \| `code` \| `pin` \| `broadcast` |
+| `--architecture <a>` | `same-device` \| `realtime` \| `p2p` \| `managed` |
+| `--stack <s>` | `firebase` \| `cloudflare` \| `none` |
+| `--describe <text>` | `consult`の入り口に渡すアイデアの文章 |
+| `--out <dir>` | 出力先フォルダー（デフォルト：`./snap-pair-<preset>`） |
+| `--partykit-host <h>`, `--max-players <n>` | 設定ファイルに書き込む値（`maxPlayers`は2〜300） |
+| `--no-scaffold`, `--force` | 設定ファイルのみ書き出す／既存ファイルを上書きする |
+| `-y, --yes` | すべてデフォルトで進める（非対話） |
+| `--json` | 結果をJSONでstdoutに出力（`config`、`files`、`nextSteps`）。メッセージはstderrへ |
+| `--lang <en\|ja>` | 表示言語 |
+
+選択を変えたいときは、いつでもコマンドを再実行してください。
 
 ---
 
 ## API概要
 
-すべて`snap-pair-core`からエクスポートされています。
+すべて`snap-pair-core`からエクスポートされています（ESMとCJS、型定義付き）。サブパスのエントリーはルートと同じクラスを共有します。
+
+| インポートパス | 内容 |
+|---|---|
+| `snap-pair-core` | 以下のすべて＋プリセット、i18n、ルームサーバー |
+| `snap-pair-core/hooks/useSnapPair` | `useSnapPair`のみ（旧パス`snap-pair-core/src/hooks/useSnapPair`も引き続き使えます） |
+| `snap-pair-core/transports/{base,firebase,partykit,webrtc,broadcast}` | Transportを個別に |
+| `snap-pair-core/config.schema.json` | `snap-pair.config.json`のJSON Schema |
+| `snap-pair`（bin） | CLI：`npx snap-pair` |
 
 ### React: `useSnapPair`
 
 ```tsx
-import { useSnapPair } from 'snap-pair-core';
+import { useState } from 'react';
+import { PartyKitTransport, useSnapPair } from 'snap-pair-core';
 
 // Firebase (default): server-assisted rooms
 const sp = useSnapPair({ db, auth, functions, guest: { id: '', name: 'Ada' }, maxPlayers: 8 });
 
-// Any other transport (Phase 3)
+// Any other transport: pass an instance (you own it) or a factory (the hook owns it)
+const [party] = useState(() => new PartyKitTransport({ host: 'my-relay.me.partykit.dev', pairing: 'pin' }));
 const sp = useSnapPair({ transport: party, guest: { id: '', name: 'Ada' } });
 
 const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, updateRoomStatus, leaveRoom } = sp;
 ```
 
-Firebaseを使う場合は、`createRoom(initialState)`や`joinRoom(code)`を呼び出す前に`authReady`を待ってください。メンバーは、共有される`state`、自分自身の`name`、`connected`、`lastSeenAt`を更新できます。ルームのステータスを変更できるのはホストのみです。
+`createRoom(initialState)`や`joinRoom(code)`を呼び出す前に`authReady`を待ってください。どちらのモードでも戻り値の形は同じです。Transportを渡した場合、`authReady`は接続状態に追従し、`localGuest.id`はTransportのピアIDになります。一時的な入力にはインスタンスの`send` / `broadcast` / `onMessage`を使います。インスタンスは安定させてください（`useState(() => new X())`）。ファクトリー（`transport: () => new X()`）は一度だけ生成され、アンマウント時に切断されます。モードはコンポーネントの存続中は固定です。Firebaseでは、メンバーは共有される`state`、自分自身の`name`、`connected`、`lastSeenAt`を更新でき、ルームのステータスを変更できるのはホストのみです。
 
 ### Transport
 
@@ -234,7 +290,7 @@ Firebaseを使う場合は、`createRoom(initialState)`や`joinRoom(code)`を呼
 | `Transport` | 抽象基底クラス：`connect` / `disconnect`、`createRoom` / `joinRoom` / `leaveRoom`、`setState`、`send` / `broadcast`、冪等な購読解除関数を返す`on*`系の購読、そして`capabilities` |
 | `FirebaseTransport`, `FirebaseRoomStore` | RTDB＋呼び出し可能なCloud Functions。`serverAuthoritativeJoin: true` |
 | `PartyKitTransport` | オプション：`host`、`party`、`pairing`、`socketFactory`（バンドルしたアプリでは`partysocket`を注入）、`connectTimeoutMs`。バックオフ付きの`WebSocket`にフォールバックします |
-| `WebRTCTransport` | オプション：`signaling`（メッセージング対応の任意のTransport）、`iceServers`（デフォルト：公開STUNサーバー1つ）、`connectTimeoutMs` |
+| `WebRTCTransport` | オプション：`signaling`（メッセージング対応の任意のTransport）、`iceServers`（デフォルト：公開STUNサーバー1つ）、`connectTimeoutMs`、`reconnect`（`false`または`{ maxAttempts, baseDelayMs, maxDelayMs, iceRestartGraceMs }`）、`maxMessageBytes`（16 KiB）、`maxReassembledBytes`（1 MiB） |
 | `BroadcastChannelTransport` | 同一オリジンのタブ／ウィンドウ間。`isBroadcastChannelSupported()` |
 | `RelayTransport` | 上記3つの背後にある、ホスト権威型の共通エンジン。共通オプション：`pairing: 'code' \| 'pin'`、`maxPlayers`、`admit(peer)`、`namespace`、`joinBaseUrl`、`heartbeatMs`、`peerTimeoutMs`、`allowGuestState` |
 
@@ -270,8 +326,29 @@ button.onclick = async () => {
 
 | エクスポート | 説明 |
 |---|---|
-| `HostHUD` | ホスト側のペアリングパネル：QRコード（`renderQr`経由）、ルームコード、PIN、コピーボタン付きの参加リンク、接続人数、ステータス。すべての文言は`labels`で上書きできます |
-| `ControllerWrapper` | ゲスト側のシェル：コントローラーの周囲に、Wake Lock、モーション許可ボタン、画面の向きのロック、再接続UIを提供します（Phase 3） |
+| `HostHUD` | ホスト側のペアリングパネル：QRコード（`renderQr`経由）、ルームコード、PIN、コピーボタン付きの参加リンク、接続人数、ステータス。`locale="en" \| "ja" \| "auto"`に対応し、すべての文言は`labels`で上書きできます |
+| `ControllerWrapper` | スマートフォン側のシェル：ステータスバー、再接続バナー、Wake Lockの切り替え、iOSのモーション許可ボタン、全画面表示＋画面の向きのロック。ブラウザが対応していない機能のボタンは自動で非表示になります |
+
+```tsx
+import { ControllerWrapper } from 'snap-pair-core';
+
+<ControllerWrapper
+  transport={party}            // or status={status}
+  roomCode={room?.code}
+  onReconnect={() => joinRoom(code)}
+  motion                       // shows the iOS permission button until granted
+  orientation="portrait"       // fullscreen button that also locks orientation
+  locale="auto"                // 'en' | 'ja' | 'auto'; override strings with labels
+>
+  {({ status, motionPermission }) => <Pad disabled={status !== 'connected' || motionPermission !== 'granted'} />}
+</ControllerWrapper>;
+```
+
+`wakeLock`のデフォルトは`true`です。ほかに`onMotionPermission`、`className`、`style`も指定できます。
+
+### プリセットとi18n
+
+`PRESETS`、`getPreset(id)`、`supportedTransports(preset)`、`pairingFor(preset, transport)`、`presetsForTransport(transport)`で、CLIが使っているプリセットのレジストリを参照できます。`createTranslator(locale)`、`t()`、`detectLocale()`、`SUPPORTED_LOCALES`（`en`、`ja`）は、CLI・`HostHUD`・`ControllerWrapper`が使う同梱の辞書です。
 
 <details>
 <summary><b>Firebaseのデータレイアウトとルームサーバー</b></summary>
@@ -291,7 +368,8 @@ rooms/{roomId}/joinState            # Admin SDK only
 - `state`は意図的に汎用的な設計になっており、プロダクト固有のスキーマの検証や、ペイロードサイズ・書き込み頻度の制限は行いません。各プロダクトは、本番運用の前に検証、ペイロード制限、スロットリングを必ず追加してください。
 
 設計メモ：[docs/plan-phase1.md](./docs/plan-phase1.md)、
-[docs/plan-phase2.md](./docs/plan-phase2.md)。
+[docs/plan-phase2.md](./docs/plan-phase2.md)、
+[docs/plan-phase3.md](./docs/plan-phase3.md)。
 
 </details>
 
@@ -434,7 +512,7 @@ https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md
 <details>
 <summary><b>どのTransportから始めればよいですか？</b></summary>
 
-1台のマシンで試作するならBroadcastChannel。インターネット越しのスマートフォンで低遅延を求めるならPartyKit（最小のレイテンシが必要になったら後からWebRTCを追加）。参加をサーバー側でチェックする必要がある大規模な公開ルームならFirebaseです。または、`npx snap-pair init`を実行してウィザードに決めてもらうこともできます。
+1台のマシンで試作するならBroadcastChannel。インターネット越しのスマートフォンならPartyKit（少人数、およそ2〜16人で最小のレイテンシが必要ならWebRTC）。参加をサーバー側でチェックする必要がある共有stateのアプリならFirebaseです（一時的なメッセージング機能はないため、入力のストリーミングにはPartyKitを組み合わせます）。または、`npx snap-pair init`（あるいは`npx snap-pair recommend "作りたいもの"`）を実行してCLIに決めてもらうこともできます。
 </details>
 
 <details>
@@ -473,14 +551,22 @@ iOS 13以降では、タップをきっかけにした許可ダイアログが�
 
 - [x] **Phase 1：** `Transport`の抽象化、`FirebaseTransport`、`HostHUD`
 - [x] **Phase 2：** PartyKit、WebRTC、BroadcastChannelの各Transport、PINとQRコードのヘルパー、Wake Lockと画面の向きのユーティリティ
-- [ ] **Phase 3：** `npx snap-pair init`ウィザード（4つの入り口、英語/日本語）、7種類のプリセットテンプレート、`ControllerWrapper`、`useSnapPair({ transport })`、`exports`マップ付きのビルド、WebRTCの自動再接続とメッセージの分割送信
-- [ ] 今後：Firebaseでの数字PINとメッセージング、WebRTCのメッシュ構成とTURNのガイド、実ブラウザでのE2Eテスト、対応言語の追加
+- [x] **Phase 3：** `npx snap-pair init`ウィザード（4つの入り口、英語/日本語）と`presets`・`recommend`コマンド、7種類のプリセットテンプレート、`ControllerWrapper`、`useSnapPair({ transport })`、i18n、`exports`マップ付きのESM/CJSビルド、WebRTCの自動再接続とメッセージの分割送信
+
+今後の課題：
+
+- [ ] **WebRTC：** 再ネゴシエーション（チャネルやメディアトラックの追加）、バイナリペイロード、バックプレッシャー（`bufferedAmount`）、メッシュ構成、ホストの引き継ぎ、TURNのガイド、実ブラウザでのE2Eテスト
+- [ ] **バンドルサイズ：** ルートの`useSnapPair`が`firebase/auth`を静的にインポートしているため、Firebase以外のTransportを使うアプリにも含まれてしまいます。Firebaseを含まないフックのエントリー、または遅延読み込みで解消する予定です
+- [ ] **Firebase：** 数字PINと一時的なメッセージング（`rooms/$roomId/messages`）。これによりプリセットをFirebase上でも動かせるようにします
+- [ ] **i18n：** 対応言語の追加。TransportのエラーメッセージとテンプレートのUI文言の日本語化
 
 ## 開発
 
 ```bash
 npm test
-npm run typecheck
+npm run typecheck   # library + templates
+npm run build       # dist/ (ESM + CJS + d.ts), dist/cli, templates/
+node dist/cli/index.js --help
 npm --prefix functions test
 npm --prefix functions run typecheck
 npm run test:rules-emulator
