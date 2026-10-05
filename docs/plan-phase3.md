@@ -123,7 +123,7 @@ chunking, and a real build with an `exports` map.
   397 tests passed, 2 skipped. Phase 2 had 263 passing.
 - `npm run build`: ESM + CJS + d.ts for 7 entries, plus `dist/cli/index.js`
   and `dist/config.schema.json`.
-- `npm publish --dry-run`: 99 files, 228.4 kB packed, 794.9 kB unpacked. The
+- `npm publish --dry-run`: 99 files, 232.6 kB packed, 806.2 kB unpacked. The
   tarball contains only `dist/`, `templates/`, `references/`, `README*`,
   `LICENSE`, `CHANGELOG.md`, `SKILL.md`, and `package.json`: no tests,
   `functions/`, `tools/`, `examples/`, or `.claude`. `prepublishOnly`
