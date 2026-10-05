@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440" width="1000" height="440" role="img" aria-labelledby="title desc">
+  <title id="title">Transport comparison</title>
+  <desc id="desc">Firebase RTDB: works across devices and the internet, medium latency, managed backend, free Spark tier or Blaze for Cloud Functions, no offline. PartyKit: internet, low latency, small relay server, free to start, no offline. WebRTC: peer-to-peer lowest latency, needs signaling and STUN or TURN, free with STUN, LAN possible. BroadcastChannel: same browser only, instant, no server, free, works offline.</desc>
+  <style>
+    .bg{fill:#f8fafc}.card{fill:#ffffff}.edge{stroke:#e2e8f0}.zebra{fill:#f8fafc}
+    .ink{fill:#0f172a}.muted{fill:#64748b}.head{fill:#eef2ff}.head-t{fill:#3730a3}
+    .yes{fill:#10b981}.no{fill:#ef4444}.part{fill:#f59e0b}
+    .bar0{fill:#e2e8f0}.bar1{fill:#4f46e5}
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Hiragino Sans","Noto Sans JP",sans-serif}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#0b1020}.card{fill:#131a2e}.edge{stroke:#26304a}.zebra{fill:#10172b}
+      .ink{fill:#e2e8f0}.muted{fill:#94a3b8}.head{fill:#1a2042}.head-t{fill:#c7d2fe}
+      .yes{fill:#34d399}.no{fill:#f87171}.part{fill:#fbbf24}
+      .bar0{fill:#26304a}.bar1{fill:#818cf8}
+    }
+  </style>
+  <defs>
+    <g id="yes"><circle class="yes" r="10"/><path d="M-4.5 0.5 L-1.2 3.8 L4.8 -3.2" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="no"><circle class="no" r="10"/><path d="M-3.6 -3.6 L3.6 3.6 M3.6 -3.6 L-3.6 3.6" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/></g>
+    <g id="part"><circle class="part" r="10"/><path d="M-4.5 0 H4.5" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/></g>
+  </defs>
+
+  <rect class="bg" width="1000" height="440" rx="20"/>
+  <rect class="card edge" x="24" y="24" width="952" height="392" rx="14" stroke-width="1.5"/>
+
+  <!-- header -->
+  <path class="head" d="M24 38 a14 14 0 0 1 14 -14 H962 a14 14 0 0 1 14 14 V84 H24 z"/>
+  <g class="head-t" font-size="13" font-weight="700" text-anchor="middle">
+    <text x="56" y="59" text-anchor="start">Transport</text>
+    <text x="352" y="59">Same device</text>
+    <text x="462" y="59">Internet</text>
+    <text x="572" y="59">Latency</text>
+    <text x="704" y="59">Server needed</text>
+    <text x="840" y="59">Cost / free tier</text>
+    <text x="940" y="59">Offline</text>
+  </g>
+  <g class="muted" font-size="11" text-anchor="middle">
+    <text x="352" y="75">tabs / windows</text>
+    <text x="462" y="75">phone ↔ screen</text>
+    <text x="572" y="75">typical</text>
+  </g>
+
+  <!-- rows: y centers 120, 200, 280, 360 -->
+  <rect class="zebra" x="25" y="164" width="950" height="80"/>
+  <rect class="zebra" x="25" y="324" width="950" height="80"/>
+  <g class="edge" stroke-width="1">
+    <path d="M24 164 H976 M24 244 H976 M24 324 H976"/>
+  </g>
+
+  <!-- Firebase -->
+  <g transform="translate(0 124)">
+    <text class="ink" x="56" y="-4" font-size="17" font-weight="700">Firebase RTDB</text>
+    <text class="muted" x="56" y="16" font-size="12">default · secure rooms up to 300</text>
+    <use href="#yes" x="352" y="0"/>
+    <use href="#yes" x="462" y="0"/>
+    <g transform="translate(540 -6)"><rect class="bar1" width="20" height="12" rx="3"/><rect class="bar1" x="22" width="20" height="12" rx="3"/><rect class="bar0" x="44" width="20" height="12" rx="3"/></g>
+    <text class="muted" x="572" y="22" font-size="11" text-anchor="middle">~100–300 ms</text>
+    <text class="ink" x="704" y="-2" font-size="13" text-anchor="middle">Managed (Google)</text>
+    <text class="muted" x="704" y="16" font-size="11" text-anchor="middle">+ Cloud Functions</text>
+    <text class="ink" x="840" y="-2" font-size="13" text-anchor="middle">Spark free</text>
+    <text class="muted" x="840" y="16" font-size="11" text-anchor="middle">Blaze for Functions</text>
+    <use href="#no" x="940" y="0"/>
+  </g>
+
+  <!-- PartyKit -->
+  <g transform="translate(0 204)">
+    <text class="ink" x="56" y="-4" font-size="17" font-weight="700">PartyKit</text>
+    <text class="muted" x="56" y="16" font-size="12">WebSocket relay · Cloudflare</text>
+    <use href="#yes" x="352" y="0"/>
+    <use href="#yes" x="462" y="0"/>
+    <g transform="translate(540 -6)"><rect class="bar1" width="20" height="12" rx="3"/><rect class="bar1" x="22" width="20" height="12" rx="3"/><rect class="bar1" x="44" width="20" height="12" rx="3"/></g>
+    <text class="muted" x="572" y="22" font-size="11" text-anchor="middle">~30–120 ms</text>
+    <text class="ink" x="704" y="-2" font-size="13" text-anchor="middle">Tiny relay</text>
+    <text class="muted" x="704" y="16" font-size="11" text-anchor="middle">examples/partykit</text>
+    <text class="ink" x="840" y="-2" font-size="13" text-anchor="middle">Free to start</text>
+    <text class="muted" x="840" y="16" font-size="11" text-anchor="middle">usage-based</text>
+    <use href="#no" x="940" y="0"/>
+  </g>
+
+  <!-- WebRTC -->
+  <g transform="translate(0 284)">
+    <text class="ink" x="56" y="-4" font-size="17" font-weight="700">WebRTC</text>
+    <text class="muted" x="56" y="16" font-size="12">DataChannel star · P2P</text>
+    <use href="#yes" x="352" y="0"/>
+    <use href="#yes" x="462" y="0"/>
+    <g transform="translate(518 -6)"><rect class="bar1" width="20" height="12" rx="3"/><rect class="bar1" x="22" width="20" height="12" rx="3"/><rect class="bar1" x="44" width="20" height="12" rx="3"/><rect class="bar1" x="66" width="20" height="12" rx="3"/></g>
+    <text class="muted" x="572" y="22" font-size="11" text-anchor="middle">lowest · direct</text>
+    <text class="ink" x="704" y="-2" font-size="13" text-anchor="middle">Signaling only</text>
+    <text class="muted" x="704" y="16" font-size="11" text-anchor="middle">+ STUN / TURN</text>
+    <text class="ink" x="840" y="-2" font-size="13" text-anchor="middle">Free (STUN)</text>
+    <text class="muted" x="840" y="16" font-size="11" text-anchor="middle">TURN may cost</text>
+    <use href="#part" x="940" y="0"/>
+    <text class="muted" x="940" y="26" font-size="11" text-anchor="middle">LAN</text>
+  </g>
+
+  <!-- BroadcastChannel -->
+  <g transform="translate(0 364)">
+    <text class="ink" x="56" y="-4" font-size="17" font-weight="700">BroadcastChannel</text>
+    <text class="muted" x="56" y="16" font-size="12">same browser · multi-display</text>
+    <use href="#yes" x="352" y="0"/>
+    <use href="#no" x="462" y="0"/>
+    <g transform="translate(518 -6)"><rect class="bar1" width="20" height="12" rx="3"/><rect class="bar1" x="22" width="20" height="12" rx="3"/><rect class="bar1" x="44" width="20" height="12" rx="3"/><rect class="bar1" x="66" width="20" height="12" rx="3"/></g>
+    <text class="muted" x="572" y="22" font-size="11" text-anchor="middle">&lt; 1 ms</text>
+    <text class="ink" x="704" y="-2" font-size="13" text-anchor="middle">None</text>
+    <text class="muted" x="704" y="16" font-size="11" text-anchor="middle">same origin</text>
+    <text class="ink" x="840" y="-2" font-size="13" text-anchor="middle">Free</text>
+    <text class="muted" x="840" y="16" font-size="11" text-anchor="middle">no account</text>
+    <use href="#yes" x="940" y="0"/>
+  </g>
+</svg>
