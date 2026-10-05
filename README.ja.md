@@ -140,7 +140,7 @@ const renderQr = useQrRenderer(); // undefined if `qrcode` isn't available, so t
 | 最小のレイテンシ（お絵描き、ゲーム、モーション） | **WebRTC** | ピアツーピアのDataChannel。シグナリングはPartyKit（またはメッセージング対応の任意のTransport）上で行います |
 | **1台**のマシン上の複数ウィンドウ／ディスプレイ、オフライン | **BroadcastChannel** | ネットワークもサーバーもアカウントも不要です |
 
-4つすべてが同じ`Transport`インターフェース（`connect`、`createRoom`、`joinRoom`、`setState`、`send`、`broadcast`、`onMessage`、`onPeers`、`onState`、`onStatus`など）を実装しているため、切り替えは1行の変更で済みます。UIを状況に応じて縮退させたい場合は、`transport.capabilities`（`messaging`、`presence`、`serverAuthoritativeJoin`）を確認してください。
+4つすべてが同じ`Transport`インターフェース（`connect`、`createRoom`、`joinRoom`、`setState`、`send`、`broadcast`、`onMessage`、`onPeers`、`onState`、`onStatus`など）を実装しているため、切り替えは1行の変更で済みます。UIを状況に応じて縮退させたい場合は、`transport.capabilities`（`messaging`、`presence`、`serverAuthoritativeJoin`）を確認してください。たとえばFirebaseには一時的なメッセージング機能がない（`messaging: false`）ため、Firebase上で動くプリセットは共有stateを通じて入力を送ります。
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';

@@ -153,7 +153,9 @@ All four implement the same `Transport` interface (`connect`, `createRoom`,
 `joinRoom`, `setState`, `send`, `broadcast`, `onMessage`, `onPeers`,
 `onState`, `onStatus`…), so switching is a one-line change. Check
 `transport.capabilities` (`messaging`, `presence`, `serverAuthoritativeJoin`)
-when your UI needs to degrade gracefully.
+when your UI needs to degrade gracefully. For example, Firebase has no
+ephemeral messaging (`messaging: false`), so presets running on it send input
+through shared state instead.
 
 ```ts
 import { PartyKitTransport, WebRTCTransport, FirebaseTransport } from 'snap-pair-core';
