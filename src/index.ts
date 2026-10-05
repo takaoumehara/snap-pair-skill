@@ -126,6 +126,42 @@ export {
   type HostHUDProps,
 } from './components/HostHUD';
 
+export {
+  ControllerWrapper,
+  getControllerLabels,
+  type ControllerContext,
+  type ControllerWrapperLabels,
+  type ControllerWrapperProps,
+  type MotionPermissionState,
+  type StatusSource,
+} from './components/ControllerWrapper';
+export {
+  enterFullscreen,
+  exitFullscreen,
+  isFullscreen,
+  isFullscreenSupported,
+  onFullscreenChange,
+} from './client/fullscreen';
+
+// Presets
+export {
+  getPreset,
+  isPresetId,
+  pairingFor,
+  PRESET_IDS,
+  PRESETS,
+  presetName,
+  presetsForTransport,
+  presetText,
+  supportedTransports,
+  TRANSPORT_PAIRING,
+  type LocalizedText,
+  type PresetDescriptor,
+  type PresetId,
+  type PresetMessageShape,
+  type PresetRateLimit,
+} from './presets';
+
 // i18n
 export {
   createTranslator,
