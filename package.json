@@ -1,6 +1,6 @@
 {
   "name": "snap-pair-core",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Pair phones and screens by QR code, room code, or PIN: React hooks, components, and transports (Firebase, PartyKit, WebRTC, BroadcastChannel) for multi-device experiences, plus the `snap-pair` setup CLI",
   "license": "MIT",
   "author": "Takao Umehara",
