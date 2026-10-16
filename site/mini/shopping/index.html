@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Shake Shopping List - snap-pair</title>
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../mini-style.css">
+  <style>
+    .add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .add-form input {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="shake-screen" class="shake-prompt">
+    <div class="shake-icon">📱</div>
+    <h1>Shopping List</h1>
+    <p>Shake to pair with another device!</p>
+    <button id="enable-shake-btn" class="btn btn-accent">Tap to enable shake</button>
+    <p id="shake-status" class="status waiting">Waiting for shake...</p>
+    
+    <div class="fallback-section">
+      <h2>Or join with code</h2>
+      <div class="btn-group">
+        <input type="text" id="room-input" class="input" placeholder="ABC 234" maxlength="7" style="max-width: 200px;">
+        <button id="join-btn" class="btn btn-primary">Join</button>
+      </div>
+      <p id="debug-hint" style="display:none; margin-top:12px; font-family: var(--mono); font-size: 0.8rem; color: var(--muted);">
+        Debug mode: Use simulate shake button
+      </p>
+      <button id="simulate-shake-btn" class="btn btn-ghost" style="display:none;">Simulate Shake (Debug)</button>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app-container" style="display:none;">
+    <div class="section">
+      <h1>🛒 Shopping List</h1>
+      <p id="room-code-display"></p>
+      <p id="connection-status" class="status">Connecting...</p>
+    </div>
+
+    <div class="section">
+      <form id="add-form" class="add-form">
+        <input type="text" id="item-input" class="input" placeholder="Add item..." autocomplete="off">
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+
+    <div class="section" style="flex: 1;">
+      <h2>Items (<span id="item-count">0</span>)</h2>
+      <div id="items-list" class="list-container">
+        <p style="padding: 24px; text-align: center; color: var(--muted);">No items yet. Add something above!</p>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top: 16px;">
+      <button id="leave-btn" class="btn btn-ghost">Leave</button>
+    </div>
+  </div>
+
+  <script src="../shake-bundle.js"></script>
+  <script>
+    (function() {
+      const { ShakeDetector, ShakeLobby, SimpleBroadcastTransport, requestMotionPermission, 
+              formatRoomCode, normalizeRoomCode, getUrlParam, buildJoinUrl, randomId } = window.ShakePairing;
+      
+      const APP_ID = 'shopping-list';
+      const DEBUG = getUrlParam('debug') === '1';
+      
+      let transport = null;
+      let items = new Map(); // id -> {text, checked, addedBy}
+      
+      // UI elements
+      const shakeScreen = document.getElementById('shake-screen');
+      const appScreen = document.getElementById('app-screen');
+      const enableShakeBtn = document.getElementById('enable-shake-btn');
+      const shakeStatus = document.getElementById('shake-status');
+      const simulateShakeBtn = document.getElementById('simulate-shake-btn');
+      const debugHint = document.getElementById('debug-hint');
+      const roomInput = document.getElementById('room-input');
+      const joinBtn = document.getElementById('join-btn');
+      const roomCodeDisplay = document.getElementById('room-code-display');
+      const connectionStatus = document.getElementById('connection-status');
+      const addForm = document.getElementById('add-form');
+      const itemInput = document.getElementById('item-input');
+      const itemsList = document.getElementById('items-list');
+      const itemCount = document.getElementById('item-count');
+      const leaveBtn = document.getElementById('leave-btn');
+
+      if (DEBUG) {
+        simulateShakeBtn.style.display = 'inline-flex';
+        debugHint.style.display = 'block';
+      }
+
+      // Check if joining with a room code
+      const joinCode = getUrlParam('room');
+      if (joinCode) {
+        joinRoom(normalizeRoomCode(joinCode));
+        return;
+      }
+
+      // Setup shake pairing
+      const detector = new ShakeDetector();
+      const lobby = new ShakeLobby({ appId: APP_ID });
+
+      let shaking = false;
+
+      enableShakeBtn.addEventListener('click', async () => {
+        const permission = await requestMotionPermission();
+        
+        if (permission === 'denied') {
+          shakeStatus.textContent = 'Motion permission denied. Use manual code below.';
+          shakeStatus.className = 'status';
+          return;
+        }
+
+        enableShakeBtn.style.display = 'none';
+        shakeStatus.textContent = 'Shake your device now!';
+        shakeStatus.className = 'status waiting';
+        
+        try {
+          await lobby.connect();
+          
+          lobby.onPaired = (roomCode) => {
+            detector.stop();
+            lobby.disconnect();
+            joinRoom(normalizeRoomCode(roomCode));
+          };
+
+          lobby.onWaiting = () => {
+            shakeStatus.textContent = 'Shake detected! Waiting for partner...';
+          };
+
+          lobby.onAmbiguous = () => {
+            shakeStatus.textContent = 'Too many shakes! Try again.';
+            shaking = false;
+          };
+
+          detector.onShake = (event) => {
+            if (shaking) return;
+            shaking = true;
+            shakeStatus.textContent = 'Shake detected! Looking for partner...';
+            lobby.sendShake(event);
+            setTimeout(() => { shaking = false; }, 2000);
+          };
+
+          detector.start();
+        } catch (e) {
+          shakeStatus.textContent = 'Connection failed. Use manual code below.';
+          shakeStatus.className = 'status';
+        }
+      });
+
+      simulateShakeBtn.addEventListener('click', () => {
+        if (detector.onShake) {
+          detector.onShake({ timestamp: Date.now(), peakStrength: 20 });
+        }
+      });
+
+      joinBtn.addEventListener('click', () => {
+        const code = normalizeRoomCode(roomInput.value);
+        if (code) joinRoom(code);
+      });
+
+      roomInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const code = normalizeRoomCode(roomInput.value);
+          if (code) joinRoom(code);
+        }
+      });
+
+      function joinRoom(roomCode) {
+        shakeScreen.style.display = 'none';
+        appScreen.style.display = 'flex';
+        
+        roomCodeDisplay.textContent = `Room: ${formatRoomCode(roomCode)}`;
+        connectionStatus.textContent = 'Connected';
+        connectionStatus.className = 'status connected';
+
+        transport = new SimpleBroadcastTransport(roomCode);
+        
+        transport.onMessage = (msg) => {
+          if (msg.type === 'item-add') {
+            items.set(msg.payload.id, msg.payload);
+            renderItems();
+          } else if (msg.type === 'item-toggle') {
+            const item = items.get(msg.payload.id);
+            if (item) {
+              item.checked = msg.payload.checked;
+              renderItems();
+            }
+          } else if (msg.type === 'item-delete') {
+            items.delete(msg.payload.id);
+            renderItems();
+          } else if (msg.type === 'sync-request') {
+            // Send all items to new peer
+            items.forEach(item => {
+              transport.send('item-add', item);
+            });
+          }
+        };
+
+        // Request sync from peers
+        transport.send('sync-request', {});
+
+        addForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const text = itemInput.value.trim();
+          if (!text) return;
+          
+          const item = {
+            id: randomId(),
+            text,
+            checked: false,
+            addedBy: transport.peerId,
+          };
+          
+          items.set(item.id, item);
+          transport.send('item-add', item);
+          renderItems();
+          itemInput.value = '';
+        });
+
+        leaveBtn.addEventListener('click', () => {
+          if (transport) transport.close();
+          location.href = location.pathname;
+        });
+      }
+
+      function renderItems() {
+        itemCount.textContent = items.size;
+        
+        if (items.size === 0) {
+          itemsList.innerHTML = '<p style="padding: 24px; text-align: center; color: var(--muted);">No items yet. Add something above!</p>';
+          return;
+        }
+
+        itemsList.innerHTML = '';
+        items.forEach((item, id) => {
+          const div = document.createElement('div');
+          div.className = `list-item ${item.checked ? 'checked' : ''}`;
+          
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = item.checked;
+          checkbox.addEventListener('change', () => {
+            item.checked = checkbox.checked;
+            transport.send('item-toggle', { id, checked: item.checked });
+            renderItems();
+          });
+          
+          const label = document.createElement('span');
+          label.textContent = item.text;
+          label.style.flex = '1';
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.className = 'btn-delete';
+          deleteBtn.addEventListener('click', () => {
+            items.delete(id);
+            transport.send('item-delete', { id });
+            renderItems();
+          });
+          
+          div.appendChild(checkbox);
+          div.appendChild(label);
+          div.appendChild(deleteBtn);
+          itemsList.appendChild(div);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

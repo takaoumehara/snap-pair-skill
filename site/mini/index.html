@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Shake Pairing Mini Apps - snap-pair</title>
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="mini-style.css">
+  <style>
+    body {
+      display: block;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: clamp(24px, 5vw, 48px);
+    }
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+      margin-bottom: 12px;
+    }
+    .header p {
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    .apps-grid {
+      display: grid;
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    @media (min-width: 640px) {
+      .apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (min-width: 768px) {
+      .apps-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .app-card {
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .app-card:hover {
+      border-color: var(--text);
+      transform: translateY(-2px);
+    }
+    .app-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    .app-card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .app-card p {
+      font-size: 0.9375rem;
+      color: var(--muted);
+      flex: 1;
+    }
+    .about {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+    }
+    .about h2 {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .about ul {
+      margin: 0 0 16px;
+      padding-left: 24px;
+      color: var(--muted);
+    }
+    .about li {
+      margin-bottom: 8px;
+    }
+    .back-link {
+      margin-top: 32px;
+    }
+    .back-link a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Shake Pairing Mini Apps</h1>
+      <p>Three browser-only prototypes demonstrating shake-based device pairing. Shake your phone to find a partner, or use a room code to join manually. Everything runs in your browser - no server-side state.</p>
+    </div>
+
+    <div class="apps-grid">
+      <a href="shopping/" class="app-card">
+        <div class="app-icon">🛒</div>
+        <h2>Shopping List</h2>
+        <p>Share a shopping list with someone. Add, check off, and delete items in real-time.</p>
+      </a>
+
+      <a href="janken/" class="app-card">
+        <div class="app-icon">✊✋✌️</div>
+        <h2>Janken</h2>
+        <p>Rock, paper, scissors with simultaneous reveal. Play rounds and track the score.</p>
+      </a>
+
+      <a href="draw/" class="app-card">
+        <div class="app-icon">🎨</div>
+        <h2>Co-Drawing</h2>
+        <p>Draw together on a shared canvas. Pick colors, stream strokes, and clear when you're done.</p>
+      </a>
+    </div>
+
+    <div class="about">
+      <h2>How It Works</h2>
+      <ul>
+        <li><strong>Shake Pairing:</strong> On iOS Safari, tap "enable shake" (required for DeviceMotionEvent permission). Shake your device. When two devices shake within ~1.5 seconds for the same app, they're automatically paired into a room.</li>
+        <li><strong>Matchmaking Lobby:</strong> Shake events are sent to a PartyKit shake lobby. The lobby pairs two shakes for the same app and returns a 6-character room code to both devices.</li>
+        <li><strong>Room Transport:</strong> Once paired, devices join a BroadcastChannel room (same-origin local pairing) or can use the room code to join manually from other browsers/devices.</li>
+        <li><strong>Fallback:</strong> Every page shows a room code input and QR code so you can join without shaking. Add <code>?debug=1</code> to enable a "simulate shake" button for desktop testing.</li>
+      </ul>
+
+      <h2>Technical Details</h2>
+      <ul>
+        <li><strong>Shake Detection:</strong> Monitors <code>accelerationIncludingGravity</code> for magnitude peaks above a threshold (~15g). Detects ~3 peaks within 1 second as a shake gesture.</li>
+        <li><strong>iPhone Safari:</strong> Requires <code>DeviceMotionEvent.requestPermission()</code> from a user tap. The permission UI is built into each app.</li>
+        <li><strong>No Unsupported APIs:</strong> Uses only standard Web APIs. WebRTC with STUN for P2P, relay fallback via PartyKit if DataChannel fails.</li>
+        <li><strong>Monochrome Style:</strong> Follows the creativity-is-everywhere design system with a mobile-first, monochrome palette.</li>
+      </ul>
+
+      <div class="back-link">
+        <a href="/">← Back to snap-pair docs</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
