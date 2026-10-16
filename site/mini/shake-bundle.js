@@ -181,8 +181,87 @@
       });
     }
 
-    close() {
+      close() {
       this.channel.close();
+    }
+  }
+
+  // ===== PartyKit WebSocket Transport =====
+
+  class PartyKitTransport {
+    constructor(roomCode, options = {}) {
+      this.roomCode = roomCode;
+      this.host = options.host || 'localhost:1999';
+      this.partyName = options.partyName || 'main';
+      this.peerId = randomId();
+      this.onMessage = null;
+      this.connected = false;
+      this.messageQueue = [];
+      
+      this.connect();
+    }
+
+    connect() {
+      const protocol = this.host.startsWith('localhost') ? 'ws' : 'wss';
+      const wsUrl = `${protocol}://${this.host}/parties/${this.partyName}/${encodeURIComponent(this.roomCode)}?_pk=${this.peerId}`;
+      
+      this.ws = new WebSocket(wsUrl);
+      
+      this.ws.addEventListener('open', () => {
+        this.connected = true;
+        while (this.messageQueue.length > 0) {
+          const msg = this.messageQueue.shift();
+          this.ws.send(msg);
+        }
+      });
+
+      this.ws.addEventListener('message', (event) => {
+        try {
+          const frame = JSON.parse(event.data);
+          if (frame.v === 1 && frame.from !== this.peerId && this.onMessage) {
+            this.onMessage({
+              type: frame.t,
+              payload: frame.payload,
+              from: frame.from,
+              timestamp: frame.timestamp || Date.now()
+            });
+          }
+        } catch (e) {
+          console.error('PartyKit message parse error:', e);
+        }
+      });
+
+      this.ws.addEventListener('close', () => {
+        this.connected = false;
+      });
+
+      this.ws.addEventListener('error', (error) => {
+        console.error('PartyKit WebSocket error:', error);
+      });
+    }
+
+    send(type, payload) {
+      const frame = JSON.stringify({
+        v: 1,
+        room: this.roomCode,
+        from: this.peerId,
+        t: type,
+        payload,
+        timestamp: Date.now()
+      });
+
+      if (this.connected && this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(frame);
+      } else {
+        this.messageQueue.push(frame);
+      }
+    }
+
+    close() {
+      if (this.ws) {
+        this.ws.close();
+        this.ws = null;
+      }
     }
   }
 
@@ -212,6 +291,7 @@
     ShakeDetector,
     ShakeLobby,
     SimpleBroadcastTransport,
+    PartyKitTransport,
     normalizeRoomCode,
     formatRoomCode,
     generateQR,

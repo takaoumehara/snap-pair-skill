@@ -8,7 +8,27 @@
   <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
   <link rel="stylesheet" href="../tokens.css">
   <link rel="stylesheet" href="../mini-style.css">
+  <script src="../theme.js"></script>
   <style>
+    .theme-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
     .game-area {
       flex: 1;
       display: flex;
@@ -104,6 +124,8 @@
   </style>
 </head>
 <body>
+  <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">🌙</button>
+  
   <div id="shake-screen" class="shake-prompt">
     <div class="shake-icon">✊✋✌️</div>
     <h1>Janken (Rock Paper Scissors)</h1>
@@ -277,7 +299,11 @@
         connectionStatus.textContent = 'Connected';
         connectionStatus.className = 'status connected';
 
-        transport = new SimpleBroadcastTransport(roomCode);
+        const pkHost = new URLSearchParams(location.search).get('pkhost') || 'localhost:1999';
+        transport = new window.ShakePairing.PartyKitTransport(roomCode, {
+          host: pkHost,
+          partyName: 'main'
+        });
         
         transport.onMessage = (msg) => {
           if (msg.type === 'choice') {

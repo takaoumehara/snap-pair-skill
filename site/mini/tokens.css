@@ -1,10 +1,14 @@
 /**
  * Design tokens for snap-pair mini apps
  * Colorful but calm palette, shared across all three apps
+ * 
+ * Theme switching: explicit light/dark modes via [data-theme] attribute
+ * Default: light theme (no auto prefers-color-scheme detection)
  */
 
-:root {
-  /* ===== Color Palette ===== */
+:root,
+[data-theme="light"] {
+  /* ===== Color Palette - Light Theme ===== */
   
   /* Primary colors - calm blues */
   --color-primary: #4f86f7;
@@ -54,7 +58,6 @@
   --color-draw-orange: #f97316;
   --color-draw-purple: #a855f7;
   
-  /* Dark mode support */
   color-scheme: light;
   
   /* ===== Typography ===== */
@@ -119,27 +122,58 @@
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #111827;
-    --color-surface: #1f2937;
-    --color-surface-secondary: #374151;
-    --color-border: #374151;
-    --color-border-strong: #4b5563;
-    
-    --color-text: #f9fafb;
-    --color-text-secondary: #d1d5db;
-    --color-text-tertiary: #9ca3af;
-    
-    --color-primary-light: #1e3a8a;
-    --color-accent-light: #4c1d95;
-    --color-success-light: #064e3b;
-    --color-danger-light: #7f1d1d;
-    --color-warning-light: #78350f;
-    --color-info-light: #1e3a8a;
-    
-    color-scheme: dark;
-  }
+[data-theme="dark"] {
+  /* ===== Color Palette - Dark Theme ===== */
+  
+  /* Primary colors - brighter for dark background */
+  --color-primary: #5b93ff;
+  --color-primary-hover: #4d85f7;
+  --color-primary-light: #1e3a8a;
+  
+  /* Accent - brighter purple */
+  --color-accent: #b197fc;
+  --color-accent-hover: #a385ec;
+  --color-accent-light: #4c1d95;
+  
+  /* Surface colors */
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-secondary: #334155;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  
+  /* Text colors */
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  
+  /* Semantic colors - adjusted for dark backgrounds */
+  --color-success: #34d399;
+  --color-success-light: #064e3b;
+  --color-danger: #f87171;
+  --color-danger-light: #7f1d1d;
+  --color-warning: #fbbf24;
+  --color-warning-light: #78350f;
+  --color-info: #60a5fa;
+  --color-info-light: #1e3a8a;
+  
+  /* Per-player colors - same across themes */
+  --color-player-1: #5b93ff;
+  --color-player-2: #f472b6;
+  --color-player-3: #34d399;
+  --color-player-4: #fbbf24;
+  --color-player-5: #a78bfa;
+  --color-player-6: #2dd4bf;
+  
+  /* Drawing colors - adjusted for dark canvas */
+  --color-draw-black: #f1f5f9;
+  --color-draw-red: #f87171;
+  --color-draw-blue: #60a5fa;
+  --color-draw-green: #34d399;
+  --color-draw-orange: #fb923c;
+  --color-draw-purple: #c084fc;
+  
+  color-scheme: dark;
 }
 
 /* ===== Base Styles ===== */

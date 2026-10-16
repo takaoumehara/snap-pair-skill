@@ -122,12 +122,59 @@ Consistent 4px-based spacing system:
 - **Border radius**: 8px default, 12px for cards
 - **Shadows**: Subtle elevation with 4 levels (sm, base, md, lg)
 
-## Dark Mode
+## Theme Switching (Light/Dark Mode)
 
-All colors have dark mode equivalents that maintain the same calm, colorful feeling:
-- Dark backgrounds with good contrast
-- Adjusted light colors for readability
-- Same color relationships maintained
+The design system supports **explicit theme switching** between light and dark modes:
+
+### Implementation
+- **Default**: Light theme (no auto prefers-color-scheme detection)
+- **Mechanism**: `[data-theme]` attribute on `<html>` element
+- **Values**: `"light"` or `"dark"`
+- **Persistence**: Theme choice saved in `localStorage` as `snap-pair-theme`
+- **Toggle**: Shared `theme.js` script provides toggle button (🌙/☀️ icons)
+
+### Theme Definitions
+
+Both themes defined in `tokens.css` and `tokens.json`:
+
+#### Light Theme (`:root`, `[data-theme="light"]`)
+- Backgrounds: Off-white to pure white
+- Text: Near-black to medium gray
+- Bright, saturated accent colors
+- Subtle shadows and borders
+
+#### Dark Theme (`[data-theme="dark"]`)
+- Backgrounds: Deep slate to dark slate
+- Text: Off-white to light gray
+- Slightly brighter accent colors for contrast
+- Same color relationships as light theme
+- Drawing colors inverted (e.g., black → off-white on dark canvas)
+
+### Usage
+
+All apps include theme switcher:
+```html
+<script src="../theme.js"></script>
+<button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">🌙</button>
+```
+
+Access theme programmatically:
+```javascript
+// Get current theme
+const theme = window.SnapPairTheme.current; // "light" or "dark"
+
+// Toggle theme
+window.SnapPairTheme.toggle();
+
+// Set theme explicitly
+window.SnapPairTheme.set('dark');
+```
+
+### Visual Consistency
+- All semantic colors maintained across themes
+- Player and drawing colors adjusted for optimal contrast
+- Same spacing, typography, and component styles
+- Smooth transitions between theme switches
 
 ## App-Specific Styling
 

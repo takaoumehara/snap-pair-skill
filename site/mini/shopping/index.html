@@ -8,7 +8,27 @@
   <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
   <link rel="stylesheet" href="../tokens.css">
   <link rel="stylesheet" href="../mini-style.css">
+  <script src="../theme.js"></script>
   <style>
+    .theme-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
     .add-form {
       display: flex;
       gap: 8px;
@@ -20,6 +40,8 @@
   </style>
 </head>
 <body>
+  <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">🌙</button>
+  
   <div id="shake-screen" class="shake-prompt">
     <div class="shake-icon">📱</div>
     <h1>Shopping List</h1>
@@ -69,7 +91,7 @@
   <script src="../shake-bundle.js"></script>
   <script>
     (function() {
-      const { ShakeDetector, ShakeLobby, SimpleBroadcastTransport, requestMotionPermission, 
+      const { ShakeDetector, ShakeLobby, SimpleBroadcastTransport, PartyKitTransport, requestMotionPermission, 
               formatRoomCode, normalizeRoomCode, getUrlParam, buildJoinUrl, randomId } = window.ShakePairing;
       
       const APP_ID = 'shopping-list';
@@ -185,7 +207,11 @@
         connectionStatus.textContent = 'Connected';
         connectionStatus.className = 'status connected';
 
-        transport = new SimpleBroadcastTransport(roomCode);
+        const pkHost = getUrlParam('pkhost') || 'localhost:1999';
+        transport = new PartyKitTransport(roomCode, {
+          host: pkHost,
+          partyName: 'main'
+        });
         
         transport.onMessage = (msg) => {
           if (msg.type === 'item-add') {
