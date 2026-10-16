@@ -706,6 +706,16 @@ Still to do:
 - [ ] **i18n:** more locales; transport errors and template UI strings in
       Japanese
 
+## Show your Snap Pair site
+
+Built something with snap-pair? Share it with the community!
+
+1. **Build** a multi-screen experience with `snap-pair-core` and deploy it publicly over HTTPS.
+2. **Submit** via [our gallery submission form](https://github.com/takaoumehara/snap-pair-skill/issues/new?template=gallery-submission.yml). Our automated system will check that your site loads and uses Snap Pair.
+3. **Share** your work in the [community gallery](https://snappair.creativityiseverywhere.com/gallery/)!
+
+We look for evidence of Snap Pair usage in your site's code, scripts, network requests, or (if you provide a public repo) in your `package.json`. Sites that bundle or minify heavily may hide these traces; if your submission is incorrectly rejected, a maintainer can manually approve it with the `gallery-approve` label.
+
 ## Development
 
 ```bash

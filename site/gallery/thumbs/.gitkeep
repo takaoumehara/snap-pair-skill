@@ -1,0 +1,5 @@
+# Gallery Thumbnails
+
+This directory stores automatically generated thumbnails (1280x800 WebP screenshots) for gallery submissions.
+
+Thumbnails are captured by the GitHub Actions workflow when a site is submitted and accepted.

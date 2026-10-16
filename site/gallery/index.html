@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Community Gallery - snap-pair</title>
+  <meta name="description" content="Discover multi-screen experiences built with snap-pair. See how developers are using QR pairing, realtime transports, and phone controllers.">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://snappair.creativityiseverywhere.com/gallery/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .gallery-hero {
+      padding: 80px 0 40px;
+      text-align: center;
+    }
+
+    .gallery-hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .gallery-hero .lead {
+      max-width: 720px;
+      margin: 0 auto 2rem;
+    }
+
+    .gallery-submit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .gallery-submit-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+    }
+
+    .gallery-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-card-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      background: var(--bg-secondary);
+      display: block;
+    }
+
+    .gallery-card-content {
+      padding: 20px;
+    }
+
+    .gallery-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+      color: var(--text);
+    }
+
+    .gallery-card-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .gallery-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .gallery-card-evidence {
+      display: inline-block;
+      padding: 4px 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .gallery-card-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .gallery-card-link {
+      flex: 1;
+      text-align: center;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .gallery-card-link:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent);
+    }
+
+    .gallery-empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-secondary);
+    }
+
+    .gallery-empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+      .gallery-hero h1 {
+        font-size: 2rem;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="container">
+      <a class="brand" href="../" aria-label="snap-pair home">
+        <img src="../assets/favicon.svg" alt="" width="22" height="22">
+        <span>snap-pair</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../#quick-start">Quick start</a></li>
+        <li><a href="../#connect">Connect</a></li>
+        <li><a href="../#transports">Transports</a></li>
+        <li><a href="../#presets">Presets</a></li>
+        <li><a href="../#cli">CLI</a></li>
+        <li><a href="../#api">API</a></li>
+      </ul>
+      <div class="nav-tools">
+        <a class="icon-btn nav-demo" href="../demo.html">Live demo</a>
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"></button>
+        <a class="icon-btn" href="https://github.com/takaoumehara/snap-pair-skill" aria-label="GitHub repository" title="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="gallery-hero">
+      <div class="container">
+        <span class="eyebrow">Community Gallery</span>
+        <h1>Built with Snap Pair</h1>
+        <p class="lead">Discover multi-screen experiences created by the community. See how developers are pairing phones and screens with QR codes, PINs, and realtime transports.</p>
+        <a class="gallery-submit-btn" href="https://github.com/takaoumehara/snap-pair-skill/issues/new?template=gallery-submission.yml">
+          <span>Submit your site</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div id="gallery-container">
+          <div class="gallery-empty">
+            <div class="gallery-empty-icon">📱</div>
+            <p>Loading gallery...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 60px 0;">
+      <div class="container">
+        <h2 style="margin-bottom: 1.5rem;">How to submit</h2>
+        <ol class="steps" style="max-width: 800px;">
+          <li>Build a multi-screen experience with <code>snap-pair-core</code> and deploy it publicly over HTTPS.</li>
+          <li>Click <b>"Submit your site"</b> above and fill out the form with your site URL, title, and description.</li>
+          <li>Our automated system will check that your site loads and uses Snap Pair.</li>
+          <li>If accepted, your site will appear here in the gallery!</li>
+        </ol>
+        <p class="muted small" style="max-width: 800px; margin-top: 1.5rem;">
+          We look for evidence of Snap Pair usage in your site's code, scripts, or network requests. If you have a public GitHub repository, we'll also check <code>package.json</code> for <code>snap-pair-core</code>. Sites that bundle or minify heavily may hide these traces; if your submission is incorrectly rejected, a maintainer can manually approve it with the <code>gallery-approve</code> label.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="foot-word" aria-hidden="true">snap-pair</div>
+      <div class="foot-row">
+        <span>© <span id="year">2026</span> snap-pair · MIT License</span>
+        <span class="foot-links">
+          <a href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a>
+          <a href="https://www.npmjs.com/package/snap-pair-core">npm</a>
+          <a href="../demo.html">Live demo</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Set current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Load gallery data
+    async function loadGallery() {
+      const container = document.getElementById('gallery-container');
+      
+      try {
+        const response = await fetch('gallery.json');
+        const data = await response.json();
+        
+        if (!data.entries || data.entries.length === 0) {
+          container.innerHTML = `
+            <div class="gallery-empty">
+              <div class="gallery-empty-icon">🚀</div>
+              <h3>Be the first!</h3>
+              <p>The gallery is waiting for its first submission. Will it be yours?</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Sort by submission date, newest first
+        const entries = [...data.entries].sort((a, b) => 
+          new Date(b.submittedAt) - new Date(a.submittedAt)
+        );
+        
+        container.innerHTML = `<div class="gallery-grid">${entries.map(entry => `
+          <article class="gallery-card">
+            <img 
+              class="gallery-card-thumb" 
+              src="${entry.thumbnail || '../assets/img/hero.svg'}" 
+              alt="${escapeHtml(entry.title)}"
+              loading="lazy"
+            >
+            <div class="gallery-card-content">
+              <h3 class="gallery-card-title">${escapeHtml(entry.title)}</h3>
+              ${entry.description ? `<p class="gallery-card-desc">${escapeHtml(entry.description)}</p>` : ''}
+              <div class="gallery-card-meta">
+                ${entry.evidence && entry.evidence.length > 0 ? 
+                  `<span class="gallery-card-evidence" title="${escapeHtml(entry.evidence.join(', '))}">${escapeHtml(entry.evidence[0])}</span>` 
+                  : ''}
+              </div>
+              <div class="gallery-card-links">
+                <a class="gallery-card-link" href="${escapeHtml(entry.url)}" target="_blank" rel="noopener noreferrer">
+                  Visit site →
+                </a>
+                ${entry.repoUrl ? 
+                  `<a class="gallery-card-link" href="${escapeHtml(entry.repoUrl)}" target="_blank" rel="noopener noreferrer">
+                    View code
+                  </a>` 
+                  : ''}
+              </div>
+            </div>
+          </article>
+        `).join('')}</div>`;
+        
+      } catch (error) {
+        console.error('Failed to load gallery:', error);
+        container.innerHTML = `
+          <div class="gallery-empty">
+            <div class="gallery-empty-icon">⚠️</div>
+            <p>Failed to load gallery. Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    loadGallery();
+  </script>
+  
+  <script src="../assets/app.js"></script>
+</body>
+</html>
