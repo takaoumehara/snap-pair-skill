@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Shake Janken - snap-pair</title>
+  <meta name="theme-color" content="#fafbfc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../mini-style.css">
+  <script src="../theme.js"></script>
+  <style>
+    .theme-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+    .game-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      min-height: 300px;
+    }
+    .choices {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .choice-btn {
+      width: 80px;
+      height: 80px;
+      font-size: 2.5rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      background: var(--bg-soft);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .choice-btn:hover {
+      border-color: var(--text);
+      transform: scale(1.05);
+    }
+    .choice-btn.selected {
+      border-width: 3px;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .result-display {
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 24px;
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .result-display.win {
+      background: #d4edda;
+      color: #155724;
+    }
+    .result-display.lose {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .result-display.draw {
+      background: #fff3cd;
+      color: #856404;
+    }
+    @media (prefers-color-scheme: dark) {
+      .result-display.win {
+        background: #1a4d2e;
+        color: #abebc6;
+      }
+      .result-display.lose {
+        background: #641e16;
+        color: #f5b7b1;
+      }
+      .result-display.draw {
+        background: #7d6608;
+        color: #f9e79f;
+      }
+    }
+    .score-board {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 1.25rem;
+    }
+    .score-item {
+      text-align: center;
+    }
+    .score-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .score-value {
+      font-size: 2rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">🌙</button>
+  
+  <div id="shake-screen" class="shake-prompt">
+    <div class="shake-icon">✊✋✌️</div>
+    <h1>Janken (Rock Paper Scissors)</h1>
+    <p>Shake to pair with an opponent!</p>
+    <button id="enable-shake-btn" class="btn btn-secondary">Tap to enable shake</button>
+    <p id="shake-status" class="status waiting">Waiting for shake...</p>
+    
+    <div class="fallback-section">
+      <h2>Or join with code</h2>
+      <div class="btn-group">
+        <input type="text" id="room-input" class="input" placeholder="ABC 234" maxlength="7" style="max-width: 200px;">
+        <button id="join-btn" class="btn btn-primary">Join</button>
+      </div>
+      <button id="simulate-shake-btn" class="btn btn-ghost" style="display:none; margin-top:12px;">Simulate Shake (Debug)</button>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app-container" style="display:none;">
+    <div class="section">
+      <h1>✊✋✌️ Janken</h1>
+      <p id="room-code-display"></p>
+      <p id="connection-status" class="status">Connecting...</p>
+    </div>
+
+    <div class="score-board section">
+      <div class="score-item">
+        <div class="score-label">You</div>
+        <div class="score-value" id="your-score">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Draws</div>
+        <div class="score-value" id="draw-score">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Opponent</div>
+        <div class="score-value" id="opponent-score">0</div>
+      </div>
+    </div>
+
+    <div class="game-area">
+      <div id="result-display" class="result-display">
+        Make your choice!
+      </div>
+
+      <div class="choices" id="choices">
+        <button class="choice-btn" data-choice="rock" title="Rock">✊</button>
+        <button class="choice-btn" data-choice="paper" title="Paper">✋</button>
+        <button class="choice-btn" data-choice="scissors" title="Scissors">✌️</button>
+      </div>
+
+      <div class="btn-group">
+        <button id="reset-btn" class="btn btn-ghost">Reset Score</button>
+        <button id="leave-btn" class="btn btn-ghost">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shake-bundle.js"></script>
+  <script>
+    (function() {
+      const { ShakeDetector, ShakeLobby, SimpleBroadcastTransport, requestMotionPermission, 
+              formatRoomCode, normalizeRoomCode, getUrlParam } = window.ShakePairing;
+      
+      const APP_ID = 'janken';
+      const DEBUG = getUrlParam('debug') === '1';
+      
+      const CHOICES = { rock: '✊', paper: '✋', scissors: '✌️' };
+      const BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
+      
+      let transport = null;
+      let myChoice = null;
+      let opponentChoice = null;
+      let scores = { you: 0, opponent: 0, draws: 0 };
+      
+      // UI elements
+      const shakeScreen = document.getElementById('shake-screen');
+      const appScreen = document.getElementById('app-screen');
+      const enableShakeBtn = document.getElementById('enable-shake-btn');
+      const shakeStatus = document.getElementById('shake-status');
+      const simulateShakeBtn = document.getElementById('simulate-shake-btn');
+      const roomInput = document.getElementById('room-input');
+      const joinBtn = document.getElementById('join-btn');
+      const roomCodeDisplay = document.getElementById('room-code-display');
+      const connectionStatus = document.getElementById('connection-status');
+      const resultDisplay = document.getElementById('result-display');
+      const choices = document.getElementById('choices');
+      const yourScore = document.getElementById('your-score');
+      const opponentScore = document.getElementById('opponent-score');
+      const drawScore = document.getElementById('draw-score');
+      const resetBtn = document.getElementById('reset-btn');
+      const leaveBtn = document.getElementById('leave-btn');
+
+      if (DEBUG) {
+        simulateShakeBtn.style.display = 'inline-flex';
+      }
+
+      // Check if joining with a room code
+      const joinCode = getUrlParam('room');
+      if (joinCode) {
+        joinRoom(normalizeRoomCode(joinCode));
+        return;
+      }
+
+      // Setup shake pairing
+      const detector = new ShakeDetector();
+      const lobby = new ShakeLobby({ appId: APP_ID });
+      let shaking = false;
+
+      enableShakeBtn.addEventListener('click', async () => {
+        const permission = await requestMotionPermission();
+        
+        if (permission === 'denied') {
+          shakeStatus.textContent = 'Motion permission denied. Use manual code below.';
+          shakeStatus.className = 'status';
+          return;
+        }
+
+        enableShakeBtn.style.display = 'none';
+        shakeStatus.textContent = 'Shake your device now!';
+        shakeStatus.className = 'status waiting';
+        
+        try {
+          await lobby.connect();
+          
+          lobby.onPaired = (roomCode) => {
+            detector.stop();
+            lobby.disconnect();
+            joinRoom(normalizeRoomCode(roomCode));
+          };
+
+          lobby.onWaiting = () => {
+            shakeStatus.textContent = 'Shake detected! Waiting for opponent...';
+          };
+
+          lobby.onAmbiguous = () => {
+            shakeStatus.textContent = 'Too many shakes! Try again.';
+            shaking = false;
+          };
+
+          detector.onShake = (event) => {
+            if (shaking) return;
+            shaking = true;
+            shakeStatus.textContent = 'Shake detected! Looking for opponent...';
+            lobby.sendShake(event);
+            setTimeout(() => { shaking = false; }, 2000);
+          };
+
+          detector.start();
+        } catch (e) {
+          shakeStatus.textContent = 'Connection failed. Use manual code below.';
+          shakeStatus.className = 'status';
+        }
+      });
+
+      simulateShakeBtn.addEventListener('click', () => {
+        if (detector.onShake) {
+          detector.onShake({ timestamp: Date.now(), peakStrength: 20 });
+        }
+      });
+
+      joinBtn.addEventListener('click', () => {
+        const code = normalizeRoomCode(roomInput.value);
+        if (code) joinRoom(code);
+      });
+
+      function joinRoom(roomCode) {
+        shakeScreen.style.display = 'none';
+        appScreen.style.display = 'flex';
+        
+        roomCodeDisplay.textContent = `Room: ${formatRoomCode(roomCode)}`;
+        connectionStatus.textContent = 'Connected';
+        connectionStatus.className = 'status connected';
+
+        const pkHost = new URLSearchParams(location.search).get('pkhost') || 'localhost:1999';
+        transport = new window.ShakePairing.PartyKitTransport(roomCode, {
+          host: pkHost,
+          partyName: 'main'
+        });
+        
+        transport.onMessage = (msg) => {
+          if (msg.type === 'choice') {
+            opponentChoice = msg.payload.choice;
+            checkResult();
+          } else if (msg.type === 'reset') {
+            scores = { you: 0, opponent: 0, draws: 0 };
+            updateScores();
+            resetRound();
+          }
+        };
+
+        // Setup choice buttons
+        choices.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-choice]');
+          if (!btn || myChoice) return;
+          
+          myChoice = btn.dataset.choice;
+          btn.classList.add('selected');
+          transport.send('choice', { choice: myChoice });
+          resultDisplay.textContent = 'Waiting for opponent...';
+          resultDisplay.className = 'result-display';
+          checkResult();
+        });
+
+        resetBtn.addEventListener('click', () => {
+          scores = { you: 0, opponent: 0, draws: 0 };
+          updateScores();
+          transport.send('reset', {});
+          resetRound();
+        });
+
+        leaveBtn.addEventListener('click', () => {
+          if (transport) transport.close();
+          location.href = location.pathname;
+        });
+      }
+
+      function checkResult() {
+        if (!myChoice || !opponentChoice) return;
+
+        const myEmoji = CHOICES[myChoice];
+        const oppEmoji = CHOICES[opponentChoice];
+        
+        if (myChoice === opponentChoice) {
+          resultDisplay.textContent = `${myEmoji} vs ${oppEmoji} - Draw!`;
+          resultDisplay.className = 'result-display draw';
+          scores.draws++;
+        } else if (BEATS[myChoice] === opponentChoice) {
+          resultDisplay.textContent = `${myEmoji} beats ${oppEmoji} - You Win!`;
+          resultDisplay.className = 'result-display win';
+          scores.you++;
+        } else {
+          resultDisplay.textContent = `${oppEmoji} beats ${myEmoji} - You Lose!`;
+          resultDisplay.className = 'result-display lose';
+          scores.opponent++;
+        }
+
+        updateScores();
+        setTimeout(resetRound, 2000);
+      }
+
+      function resetRound() {
+        myChoice = null;
+        opponentChoice = null;
+        resultDisplay.textContent = 'Make your choice!';
+        resultDisplay.className = 'result-display';
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+          btn.classList.remove('selected');
+        });
+      }
+
+      function updateScores() {
+        yourScore.textContent = scores.you;
+        opponentScore.textContent = scores.opponent;
+        drawScore.textContent = scores.draws;
+      }
+    })();
+  </script>
+</body>
+</html>
