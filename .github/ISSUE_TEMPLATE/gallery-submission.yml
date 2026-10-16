@@ -1,0 +1,68 @@
+name: Gallery Submission
+description: Submit your Snap Pair site to our community gallery
+title: "[Gallery] "
+labels: ["gallery-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Submit your Snap Pair site to the gallery
+        
+        Share your multi-screen experience with the community! We'll review your submission and add it to our gallery if it uses Snap Pair.
+        
+  - type: input
+    id: site-url
+    attributes:
+      label: Site URL
+      description: The public HTTPS URL where your Snap Pair site is hosted
+      placeholder: https://example.com
+    validations:
+      required: true
+      
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: A short, descriptive name for your project
+      placeholder: My Interactive Quiz Game
+    validations:
+      required: true
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of your project (optional, 1-3 sentences)
+      placeholder: A live quiz experience where audience members join by scanning a QR code and answer questions on their phones.
+    validations:
+      required: false
+      
+  - type: input
+    id: repo-url
+    attributes:
+      label: Repository URL (optional)
+      description: Link to your public GitHub repository, if available
+      placeholder: https://github.com/username/project
+    validations:
+      required: false
+      
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot (optional)
+      description: Upload a screenshot or drag and drop an image here. If not provided, we'll capture one automatically.
+    validations:
+      required: false
+      
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      description: Please confirm the following
+      options:
+        - label: This site was built with Snap Pair (snap-pair-core)
+          required: true
+        - label: The site URL is publicly accessible over HTTPS
+          required: true
+        - label: I have the right to submit this site to the gallery
+          required: true
