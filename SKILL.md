@@ -5,11 +5,21 @@ description: Use when building React or Next.js apps that pair nearby devices (p
 
 # snap-pair
 
-Implement ad hoc multi-device pairing for React/Next.js with the `snap-pair-core` package. Pick the experience (one of seven presets) and the transport first; then follow the transport's rules below. For Firebase, the safe default is a server-assisted design: clients use Firebase Auth, Cloud Functions create and join rooms atomically, and Realtime Database handles scoped room subscriptions, presence, and lightweight shared state.
+Implement ad hoc multi-device pairing for React/Next.js with the `snap-pair-core` package. Start by asking the developer what they are building (see **Ask first** below), then pick the experience (one of seven presets) and the transport together with them; then follow the transport's rules below. For Firebase, the safe default is a server-assisted design: clients use Firebase Auth, Cloud Functions create and join rooms atomically, and Realtime Database handles scoped room subscriptions, presence, and lightweight shared state.
 
 ## Core Principle
 
 Treat a short code as a rendezvous handle, not as authorization. The server must validate the code, enforce capacity, add the participant, and then the client may subscribe to the room. Relay transports (PartyKit, WebRTC, BroadcastChannel) have no server-side admission: the host browser is authoritative, so gate sensitive rooms with the `admit` option or use Firebase.
+
+## Ask first, show options, then recommend
+
+Never choose a transport silently. Follow this flow every time:
+
+1. **Ask what they are building.** Before recommending any transport, ask the developer what they are building and what the goal is: who uses it, how many devices, same room or anywhere on the internet, how fast input must feel, and whether anything must be stored or access-controlled.
+2. **Show several options with explanations.** After hearing the purpose, present at least two or three transports that could fit, not just one. For each, say plainly what it is good for and what it costs or gives up (latency, room size, server to deploy, price, offline). Use the trade-off table below. Let the developer choose.
+3. **Then recommend.** Once the developer picks, or asks you to choose, give your top suggestion with the reasoning, tied to what they told you.
+
+Low-latency note: shooting games, action games and other fast twitch play fall under the WebRTC "games and motion" guidance (lowest-latency input, small rooms of ≈2–16).
 
 ## Choose preset, transport, and pairing first
 
@@ -58,7 +68,7 @@ npx snap-pair presets --json                         # the preset registry
 npx snap-pair recommend "スマホを傾けて遊ぶレースゲーム"  # en/ja keyword recommender (offline, free)
 ```
 
-Flags: `--path ux|architecture|stack|consult`, `--preset <id|none>`, `--transport`, `--pairing`, `--architecture same-device|realtime|p2p|managed`, `--stack firebase|cloudflare|none`, `--describe`, `--out`, `--partykit-host`, `--max-players`, `--no-scaffold`, `--force`, `--yes`, `--json`, `--lang en|ja`. AI agents should prefer `--yes --json` and read `config`, `files`, and `nextSteps` from the result.
+Flags: `--path ux|architecture|stack|consult`, `--preset <id|none>`, `--transport`, `--pairing`, `--architecture same-device|realtime|p2p|managed`, `--stack firebase|cloudflare|none`, `--describe`, `--out`, `--partykit-host`, `--max-players`, `--no-scaffold`, `--force`, `--yes`, `--json`, `--lang en|ja`. After the developer has chosen (steps 1–3 above), AI agents should prefer `--yes --json` and read `config`, `files`, and `nextSteps` from the result.
 
 The CLI writes `snap-pair.config.json` (JSON Schema: `snap-pair-core/config.schema.json`; validator: `validateConfig` in `src/cli/config.ts`):
 
