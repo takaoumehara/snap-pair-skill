@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <title>Shake Co-Draw - snap-pair</title>
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#fafbfc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../tokens.css">
   <link rel="stylesheet" href="../mini-style.css">
 </head>
 <body>
@@ -13,7 +14,7 @@
     <div class="shake-icon">🎨</div>
     <h1>Co-Drawing Canvas</h1>
     <p>Shake to pair and draw together!</p>
-    <button id="enable-shake-btn" class="btn btn-accent">Tap to enable shake</button>
+    <button id="enable-shake-btn" class="btn btn-secondary">Tap to enable shake</button>
     <p id="shake-status" class="status waiting">Waiting for shake...</p>
     
     <div class="fallback-section">
@@ -35,12 +36,12 @@
 
     <div class="controls">
       <div class="color-picker">
-        <button class="color-btn active" data-color="#0a0a0a" style="background: #0a0a0a;"></button>
-        <button class="color-btn" data-color="#c62828" style="background: #c62828;"></button>
-        <button class="color-btn" data-color="#0062cc" style="background: #0062cc;"></button>
-        <button class="color-btn" data-color="#1a7f37" style="background: #1a7f37;"></button>
-        <button class="color-btn" data-color="#b45309" style="background: #b45309;"></button>
-        <button class="color-btn" data-color="#6b21a8" style="background: #6b21a8;"></button>
+        <button class="color-btn active" data-color="#1f2937" style="background: #1f2937;" title="Black"></button>
+        <button class="color-btn" data-color="#ef4444" style="background: #ef4444;" title="Red"></button>
+        <button class="color-btn" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></button>
+        <button class="color-btn" data-color="#10b981" style="background: #10b981;" title="Green"></button>
+        <button class="color-btn" data-color="#f97316" style="background: #f97316;" title="Orange"></button>
+        <button class="color-btn" data-color="#a855f7" style="background: #a855f7;" title="Purple"></button>
       </div>
       <button id="clear-btn" class="btn btn-ghost" style="margin-left: auto;">Clear</button>
     </div>
@@ -64,7 +65,7 @@
       const DEBUG = getUrlParam('debug') === '1';
       
       let transport = null;
-      let currentColor = '#0a0a0a';
+      let currentColor = '#1f2937';
       let isDrawing = false;
       let lastX = 0;
       let lastY = 0;
