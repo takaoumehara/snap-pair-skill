@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" width="400" height="220" role="img" aria-labelledby="title desc">
+  <title id="title">Several screens on one computer</title>
+  <desc id="desc">Three monitors connected to one laptop, synced in the browser.</desc>
+  <style>
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.hair{stroke:#e5e5e5}.strong{stroke:#cfcfcf}.strong-f{fill:#cfcfcf}
+    .ink{fill:#0a0a0a}.acc-s{stroke:#0062cc}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#141414}.surface{fill:#111111}.hair{stroke:#262626}.strong{stroke:#3a3a3a}.strong-f{fill:#3a3a3a}
+      .ink{fill:#f2f2f2}.acc-s{stroke:#3b9cff}
+    }
+  </style>
+  <rect class="bg" width="400" height="220"/>
+  <g transform="translate(48 36)">
+    <rect class="surface strong" x="0" y="24" width="72" height="48" rx="4" stroke-width="1.5"/>
+    <rect class="hair" x="6" y="30" width="60" height="36" rx="2" stroke-width="1" fill="none"/>
+    <rect class="surface strong" x="88" y="8" width="88" height="56" rx="4" stroke-width="1.5"/>
+    <rect class="hair" x="94" y="14" width="76" height="44" rx="2" stroke-width="1" fill="none"/>
+    <rect class="surface strong" x="192" y="24" width="72" height="48" rx="4" stroke-width="1.5"/>
+    <rect class="hair" x="198" y="30" width="60" height="36" rx="2" stroke-width="1" fill="none"/>
+    <path class="acc-s" d="M72 72 L120 88 L192 72" fill="none" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+    <rect class="surface strong" x="96" y="96" width="112" height="64" rx="6" stroke-width="1.5"/>
+    <rect class="hair" x="102" y="104" width="100" height="44" rx="2" stroke-width="1" fill="none"/>
+    <path class="strong-f" d="M148 160 L158 172 L168 160 Z"/>
+    <path class="acc-s" d="M120 88 L152 96" fill="none" stroke-width="1.25"/>
+    <path class="acc-s" d="M184 88 L152 96" fill="none" stroke-width="1.25"/>
+  </g>
+</svg>

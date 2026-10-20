@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" width="400" height="220" role="img" aria-labelledby="title desc">
+  <title id="title">Many phones, one screen</title>
+  <desc id="desc">Many small phones send input to one large shared display.</desc>
+  <style>
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.hair{stroke:#e5e5e5}.strong{stroke:#cfcfcf}.strong-f{fill:#cfcfcf}
+    .ink{fill:#0a0a0a}.muted{fill:#666666}.acc{fill:#0062cc}.acc-s{stroke:#0062cc}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#141414}.surface{fill:#111111}.hair{stroke:#262626}.strong{stroke:#3a3a3a}.strong-f{fill:#3a3a3a}
+      .ink{fill:#f2f2f2}.muted{fill:#a3a3a3}.acc{fill:#3b9cff}.acc-s{stroke:#3b9cff}
+    }
+  </style>
+  <rect class="bg" width="400" height="220"/>
+  <g class="acc-s" fill="none" stroke-width="0.75" opacity=".35">
+    <path d="M28 44 L248 88"/><path d="M44 56 L248 92"/><path d="M20 68 L248 96"/><path d="M52 80 L248 100"/>
+    <path d="M36 92 L248 104"/><path d="M60 104 L248 108"/><path d="M24 116 L248 112"/><path d="M48 128 L248 116"/>
+    <path d="M56 140 L248 120"/><path d="M32 152 L248 124"/><path d="M64 164 L248 128"/><path d="M40 176 L248 132"/>
+  </g>
+  <g>
+    <rect class="surface strong" x="248" y="52" width="120" height="96" rx="5" stroke-width="1.5"/>
+    <rect class="hair" x="256" y="60" width="104" height="72" rx="2" stroke-width="1" fill="none"/>
+    <rect class="acc" x="268" y="72" width="36" height="8" rx="2" opacity=".3"/>
+    <rect class="muted" x="268" y="86" width="56" height="4" rx="1"/>
+    <rect class="muted" x="268" y="96" width="48" height="4" rx="1"/>
+    <path class="strong-f" d="M298 148 L308 158 L318 148 Z"/>
+  </g>
+  <g class="ink">
+    <g transform="translate(16 32)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(40 40)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(24 56)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(52 48)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(68 36)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(12 72)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(36 80)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(60 68)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(80 56)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(20 96)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(44 104)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(68 92)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(92 76)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(28 120)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(52 128)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(76 116)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(100 100)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(16 144)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(40 152)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(64 140)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(88 128)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(108 112)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(32 168)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(56 176)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+    <g transform="translate(80 164)"><rect class="surface strong" x="0" y="0" width="10" height="16" rx="2" stroke-width=".8" fill="#fff"/><rect class="hair" x="1" y="3" width="8" height="10" rx="1" stroke-width=".5" fill="none"/></g>
+  </g>
+</svg>

@@ -97,7 +97,7 @@
           <p class="sec-label"><span class="sec-num">01</span><span class="eyebrow" data-i18n="scenarios.eyebrow">What connects to what</span></p>
           <div>
             <h2 class="wide" data-i18n="scenarios.title">One session, many devices, one big screen</h2>
-            <p class="lead" data-i18n="scenarios.lead">snap-pair is for the moment when the audience already has phones in their pockets and the room already has a display. You pick who is the host screen and who joins as controllers—over Wi‑Fi or the internet, depending on how you build it.</p>
+            <p class="lead" data-i18n="scenarios.lead">snap-pair fits the moment when everyone already has a phone and the room already has a screen. One device shows the main experience; the rest join as remotes over the room Wi‑Fi or the internet.</p>
           </div>
         </div>
         <ul class="scenario-grid" data-reveal>
@@ -122,25 +122,25 @@
             <p data-i18n="scenarios.projectorBody">Run the host view through a projector while a tablet (or phone) steers slides, cues, or live visuals.</p>
           </li>
           <li class="scenario-card">
-            <img class="diagram" src="assets/img/presets/room-quiz-poll.svg" width="360" height="220" loading="lazy" alt="Room quiz: many phones answering one question on a shared screen." data-i18n-attr="alt:scenarios.quizAlt">
+            <img class="diagram" src="assets/img/scenarios/many-phones-one-screen.svg" width="400" height="220" loading="lazy" alt="Many small phones sending input to one large shared screen." data-i18n-attr="alt:scenarios.quizAlt">
             <h3 data-i18n="scenarios.classTitle">Many phones → one screen</h3>
             <p data-i18n="scenarios.classBody">Classrooms, town halls, and watch parties: everyone joins the same room to answer, react, or draw together.</p>
           </li>
           <li class="scenario-card">
-            <img class="diagram" src="assets/img/presets/local-multi-display.svg" width="360" height="220" loading="lazy" alt="Several displays on one computer synced together." data-i18n-attr="alt:scenarios.localAlt">
+            <img class="diagram" src="assets/img/scenarios/multi-display-one-pc.svg" width="400" height="220" loading="lazy" alt="Three monitors driven from one laptop in the browser." data-i18n-attr="alt:scenarios.localAlt">
             <h3 data-i18n="scenarios.localTitle">Several screens, one machine</h3>
-            <p data-i18n="scenarios.localBody">Multiple monitors or browser windows on a single PC—useful for installations and control rooms (same browser only).</p>
+            <p data-i18n="scenarios.localBody">Several monitors or browser windows on one computer—handy for installations and control desks. Works between tabs in the same browser on that machine.</p>
           </li>
         </ul>
         <div class="crowd-block" data-reveal>
-          <div class="crowd-visual" aria-hidden="true">
-            <div data-crowd-dots></div>
-            <div class="crowd-screen"></div>
+          <div class="crowd-visual" role="img" aria-label="Hundreds of phones connecting to one large screen" data-i18n-attr="aria-label:scenarios.crowdVisualAlt">
+            <p class="crowd-banner" data-i18n="scenarios.crowdBanner">Hundreds of phones, one screen</p>
+            <svg class="crowd-svg" data-crowd-svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
           </div>
           <div>
             <h3 data-i18n="scenarios.crowdTitle">Built for crowds, not just pairs</h3>
-            <p data-i18n="scenarios.crowdBody">Templates such as live polls are designed for dozens to hundreds of phones in one room when you use a relay transport (PartyKit) with <code>maxPlayers</code> up to 300. Firebase secure rooms also target up to 300 participants with server-checked joins. Smaller groups (about 2–16) suit peer-to-peer WebRTC for the lowest latency.</p>
-            <p class="note" data-i18n="scenarios.crowdNote">Load at “hundreds” depends on your network, relay, and host device—we document limits in code and presets; load-test before a large event.</p>
+            <p data-i18n="scenarios.crowdBody">Live polls and audience games can welcome dozens—or up to about 300 people in one room when your setup is sized for it. Smaller groups (roughly 2–16) can feel snappier for fast action. See the developer section for limits and tuning.</p>
+            <p class="note" data-i18n="scenarios.crowdNote">Very large rooms depend on Wi‑Fi, the host device, and how your app is built. Try a dress rehearsal before the real event.</p>
           </div>
         </div>
       </div>
@@ -152,8 +152,8 @@
         <div class="section-head" data-reveal>
           <p class="sec-label"><span class="sec-num">02</span><span class="eyebrow" data-i18n="channels.eyebrow">How they connect</span></p>
           <div>
-            <h2 class="wide" data-i18n="channels.title">Ways to join a room (all implemented in snap-pair)</h2>
-            <p class="lead" data-i18n="channels.lead">The host opens your web app and creates a session. Guests use one of these pairing channels—only the ones your chosen transport supports (see the developer section for details).</p>
+            <h2 class="wide" data-i18n="channels.title">Ways to join</h2>
+            <p class="lead" data-i18n="channels.lead">The host opens your page and starts a session. Guests join in one of these ways—pick what fits the room (technical options are in the developer section).</p>
           </div>
         </div>
         <ul class="channel-grid" data-reveal>
@@ -161,7 +161,7 @@
             <img src="assets/img/channels/qr.svg" width="72" height="72" alt="">
             <div>
               <h3 data-i18n="channels.qrTitle">QR code</h3>
-              <p class="one-liner" data-i18n="channels.qrLine">Scan with the phone camera; the link includes <code>?room=</code> or <code>?pin=</code>.</p>
+              <p class="one-liner" data-i18n="channels.qrLine">Point the phone camera at the code on the big screen—it opens the join page automatically.</p>
               <p class="when" data-i18n="channels.qrWhen">Best for: events, classrooms, any room where people can see the screen.</p>
             </div>
           </li>
@@ -170,15 +170,15 @@
             <div>
               <h3 data-i18n="channels.pinTitle">6-digit PIN</h3>
               <p class="one-liner" data-i18n="channels.pinLine">Type six numbers; spaces and full-width digits are accepted.</p>
-              <p class="when" data-i18n="channels.pinWhen">Best for: reading a code aloud, radio/TV, or when cameras are awkward. PartyKit, WebRTC, and BroadcastChannel.</p>
+              <p class="when" data-i18n="channels.pinWhen">Best for: reading a code aloud, on radio or TV, or when cameras are awkward.</p>
             </div>
           </li>
           <li class="channel-card">
             <img src="assets/img/channels/code.svg" width="72" height="72" alt="">
             <div>
               <h3 data-i18n="channels.codeTitle">Room code</h3>
-              <p class="one-liner" data-i18n="channels.codeLine">Six letters and numbers without look-alike characters (e.g. <code>ABC 234</code>).</p>
-              <p class="when" data-i18n="channels.codeWhen">Best for: Firebase-backed apps and typed entry on a keyboard. All transports.</p>
+              <p class="one-liner" data-i18n="channels.codeLine">Type a short code shown on the host screen—letters and numbers that are easy to tell apart.</p>
+              <p class="when" data-i18n="channels.codeWhen">Best for: typing on a laptop keyboard or when you want a code instead of six digits.</p>
             </div>
           </li>
           <li class="channel-card">
@@ -186,23 +186,23 @@
             <div>
               <h3 data-i18n="channels.linkTitle">Share link</h3>
               <p class="one-liner" data-i18n="channels.linkLine">Same URL as the QR—copy from the host screen and paste in chat or email.</p>
-              <p class="when" data-i18n="channels.linkWhen">Best for: remote audiences and social invites. Requires a join URL on the host.</p>
+              <p class="when" data-i18n="channels.linkWhen">Best for: people joining from home, chat groups, or email invites.</p>
             </div>
           </li>
           <li class="channel-card">
             <img src="assets/img/channels/broadcast.svg" width="72" height="72" alt="">
             <div>
               <h3 data-i18n="channels.bcTitle">Open another tab</h3>
-              <p class="one-liner" data-i18n="channels.bcLine">BroadcastChannel pairing between tabs on the same computer and browser.</p>
-              <p class="when" data-i18n="channels.bcWhen">Best for: quick demos, multi-monitor setups, offline prototypes. Not for separate phones.</p>
+              <p class="one-liner" data-i18n="channels.bcLine">Works between two tabs or windows in the same browser on one computer—no phones required.</p>
+              <p class="when" data-i18n="channels.bcWhen">Best for: quick try-outs, multiple monitors on one desk, or working offline. Not for separate phones.</p>
             </div>
           </li>
           <li class="channel-card">
             <img src="assets/img/channels/sound.svg" width="72" height="72" alt="">
             <div>
               <h3 data-i18n="channels.soundTitle">Proximity sound <span class="tag-exp" data-i18n="channels.experimental">Experimental</span></h3>
-              <p class="one-liner" data-i18n="channels.soundLine">Host plays a quiet ~18–20&nbsp;kHz tone; a nearby phone listens on the microphone.</p>
-              <p class="when" data-i18n="channels.soundWhen">PartyKit, WebRTC, BroadcastChannel only. Noisy rooms and some browsers struggle—keep QR/PIN primary.</p>
+              <p class="one-liner" data-i18n="channels.soundLine">The host plays a short, high sound; a nearby phone listens through its microphone to join.</p>
+              <p class="when" data-i18n="channels.soundWhen">Best when people are standing close to the speaker. Loud rooms and some phones may not hear it—QR or PIN are more reliable.</p>
             </div>
           </li>
         </ul>

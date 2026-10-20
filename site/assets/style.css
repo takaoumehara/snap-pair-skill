@@ -595,32 +595,56 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 .crowd-block .note { color: var(--muted); font-size: .8125rem; margin-top: 12px; }
 
 .crowd-visual {
-  position: relative; aspect-ratio: 16 / 10; min-height: 160px;
+  position: relative; aspect-ratio: 16 / 10; min-height: 220px;
   border-radius: var(--radius); border: 1px solid var(--border);
   background: var(--surface); overflow: hidden;
 }
-.crowd-screen {
-  position: absolute; right: 8%; top: 18%; width: 38%; height: 52%;
-  border: 1.5px solid var(--border-strong); border-radius: 6px;
-  background: var(--bg); box-shadow: 0 0 0 1px var(--bg-soft);
+.crowd-banner {
+  position: absolute; z-index: 2; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0; padding: 10px 16px; max-width: 92%; text-align: center;
+  font-size: clamp(1rem, 2.5vw, 1.35rem); font-weight: 500; letter-spacing: -0.02em;
+  line-height: 1.25; color: var(--text);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  pointer-events: none;
 }
-.crowd-screen::after {
-  content: ""; position: absolute; left: 50%; bottom: -14px; width: 40%; height: 8px;
-  transform: translateX(-50%); background: var(--border-strong); border-radius: 2px;
+.crowd-svg { width: 100%; height: 100%; display: block; }
+.crowd-screen-svg rect,
+.crowd-screen-svg path {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.25;
 }
-.crowd-dot {
-  position: absolute; width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent); opacity: .85;
-  --tx: 0; --ty: 0;
-  animation: crowd-in 4.5s var(--ease) infinite;
+.crowd-screen-svg rect:first-child { fill: var(--bg); }
+.crowd-screen-svg path { fill: var(--border-strong); stroke: none; }
+.crowd-line {
+  stroke: var(--accent);
+  stroke-width: 0.65;
+  stroke-linecap: round;
+  opacity: 0.2;
+  animation: crowd-flow 2.6s ease-in-out infinite;
   animation-delay: var(--d, 0s);
 }
-@keyframes crowd-in {
-  0%, 12% { transform: translate(0, 0) scale(1); opacity: .35; }
-  55%, 100% { transform: translate(var(--tx), var(--ty)) scale(.65); opacity: .95; }
+.crowd-phone {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 0.6;
+  animation: crowd-phone 2.6s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes crowd-flow {
+  0%, 100% { opacity: 0.12; stroke-dasharray: 2 6; stroke-dashoffset: 0; }
+  45% { opacity: 0.55; stroke-dasharray: 2 4; stroke-dashoffset: -8; }
+}
+@keyframes crowd-phone {
+  0%, 100% { opacity: 0.55; }
+  45% { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .crowd-dot { animation: none; opacity: .7; transform: translate(var(--tx), var(--ty)) scale(.75); }
+  .crowd-line, .crowd-phone { animation: none; }
+  .crowd-line { opacity: 0.35; stroke-dasharray: none; }
+  .crowd-phone { opacity: 0.85; }
 }
 
 .channel-grid {
