@@ -300,6 +300,31 @@
     }
   }
 
+  /* ---------- Crowd convergence visual (respects reduced motion via CSS) ---------- */
+  function initCrowdVisual() {
+    var host = document.querySelector('[data-crowd-dots]');
+    if (!host) return;
+    var count = 72;
+    var screenX = 72;
+    var screenY = 38;
+    for (var i = 0; i < count; i++) {
+      var dot = document.createElement('span');
+      dot.className = 'crowd-dot';
+      var col = i % 9;
+      var row = Math.floor(i / 9);
+      var left = 4 + col * 7 + (row % 2) * 2;
+      var top = 8 + row * 9;
+      dot.style.left = left + '%';
+      dot.style.top = top + '%';
+      var tx = screenX - left;
+      var ty = screenY - top;
+      dot.style.setProperty('--tx', tx + 'vw');
+      dot.style.setProperty('--ty', ty + 'vh');
+      dot.style.setProperty('--d', (i * 0.04) + 's');
+      host.appendChild(dot);
+    }
+  }
+
   /* ---------- Quiet motion: nav hairline on scroll, section reveal ---------- */
   function initMotion() {
     var nav = document.querySelector('.nav');
@@ -343,6 +368,7 @@
     initCopy();
     initNav();
     initPresetCards();
+    initCrowdVisual();
     initMotion();
     document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
       btn.addEventListener('click', function () {

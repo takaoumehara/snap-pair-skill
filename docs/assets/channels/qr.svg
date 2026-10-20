@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="QR code">
+  <style>
+    .bg{fill:#f5f5f5}.ink{fill:#0a0a0a}.hair{stroke:#e5e5e5}
+    @media (prefers-color-scheme: dark){.bg{fill:#141414}.ink{fill:#f2f2f2}.hair{stroke:#262626}}
+  </style>
+  <rect class="bg" width="120" height="120" rx="8"/>
+  <rect class="hair" x="24" y="24" width="72" height="72" rx="4" fill="none" stroke-width="1"/>
+  <g class="ink">
+    <rect x="32" y="32" width="16" height="16"/><rect x="56" y="32" width="8" height="8"/><rect x="72" y="32" width="16" height="16"/>
+    <rect x="32" y="48" width="8" height="8"/><rect x="48" y="48" width="16" height="8"/><rect x="72" y="48" width="8" height="16"/>
+    <rect x="32" y="64" width="16" height="8"/><rect x="56" y="64" width="8" height="16"/><rect x="72" y="72" width="16" height="16"/>
+    <rect x="48" y="80" width="8" height="8"/><rect x="64" y="80" width="16" height="8"/>
+  </g>
+</svg>

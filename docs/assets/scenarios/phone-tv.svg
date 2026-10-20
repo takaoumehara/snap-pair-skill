@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" width="400" height="220" role="img" aria-labelledby="title desc">
+  <title id="title">Phone controls a TV screen</title>
+  <desc id="desc">Line illustration: a phone sends input to a large TV showing a shopping or app interface.</desc>
+  <style>
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.hair{stroke:#e5e5e5}.strong{stroke:#cfcfcf}.strong-f{fill:#cfcfcf}
+    .ink{fill:#0a0a0a}.ink2{fill:#3d3d3d}.muted{fill:#666666}.faint{fill:#999999}
+    .acc{fill:#0062cc}.acc-s{stroke:#0062cc}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#141414}.surface{fill:#111111}.hair{stroke:#262626}.strong{stroke:#3a3a3a}.strong-f{fill:#3a3a3a}
+      .ink{fill:#f2f2f2}.ink2{fill:#d4d4d4}.muted{fill:#a3a3a3}.faint{fill:#6b6b6b}
+      .acc{fill:#3b9cff}.acc-s{stroke:#3b9cff}
+    }
+  </style>
+  <rect class="bg" width="400" height="220"/>
+  <g transform="translate(28 44)">
+    <rect class="surface strong" x="0" y="0" width="72" height="132" rx="10" stroke-width="1.5"/>
+    <rect class="hair" x="6" y="18" width="60" height="96" rx="4" stroke-width="1" fill="none"/>
+    <circle class="acc" cx="22" cy="108" r="5"/><circle class="acc" cx="36" cy="108" r="5"/><circle class="acc" cx="50" cy="108" r="5"/>
+    <rect class="acc" x="18" y="78" width="36" height="8" rx="2"/>
+  </g>
+  <path class="acc-s" d="M118 98 C 160 88, 200 88, 248 100" fill="none" stroke-width="1.25" stroke-dasharray="4 5"/>
+  <g transform="translate(248 32)">
+    <rect class="surface strong" x="0" y="0" width="124" height="156" rx="6" stroke-width="1.5"/>
+    <rect class="hair" x="8" y="12" width="108" height="108" rx="2" stroke-width="1" fill="none"/>
+    <rect class="ink2" x="16" y="24" width="48" height="6" rx="1"/>
+    <rect class="muted" x="16" y="38" width="72" height="4" rx="1"/>
+    <rect class="muted" x="16" y="48" width="64" height="4" rx="1"/>
+    <rect class="acc" x="16" y="68" width="40" height="28" rx="3" opacity=".25"/>
+    <path class="strong-f" d="M52 156 L62 168 L72 156 Z"/>
+  </g>
+</svg>
