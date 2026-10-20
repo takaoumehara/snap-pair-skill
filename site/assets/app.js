@@ -300,6 +300,75 @@
     }
   }
 
+  /* ---------- Crowd convergence visual (respects reduced motion via CSS) ---------- */
+  function initCrowdVisual() {
+    var svg = document.querySelector('[data-crowd-svg]');
+    if (!svg) return;
+    var ns = 'http://www.w3.org/2000/svg';
+    var count = 220;
+    var cols = 22;
+    var screenX = 318;
+    var screenY = 118;
+    var screenW = 68;
+    var screenH = 88;
+
+    var screen = document.createElementNS(ns, 'g');
+    screen.setAttribute('class', 'crowd-screen-svg');
+    var sRect = document.createElementNS(ns, 'rect');
+    sRect.setAttribute('x', String(screenX));
+    sRect.setAttribute('y', String(screenY - screenH / 2));
+    sRect.setAttribute('width', String(screenW));
+    sRect.setAttribute('height', String(screenH));
+    sRect.setAttribute('rx', '5');
+    var sInner = document.createElementNS(ns, 'rect');
+    sInner.setAttribute('x', String(screenX + 6));
+    sInner.setAttribute('y', String(screenY - screenH / 2 + 8));
+    sInner.setAttribute('width', String(screenW - 12));
+    sInner.setAttribute('height', String(screenH - 20));
+    sInner.setAttribute('rx', '2');
+    var stand = document.createElementNS(ns, 'path');
+    stand.setAttribute('d', 'M' + (screenX + screenW / 2 - 14) + ' ' + (screenY + screenH / 2) +
+      ' L' + (screenX + screenW / 2) + ' ' + (screenY + screenH / 2 + 14) +
+      ' L' + (screenX + screenW / 2 + 14) + ' ' + (screenY + screenH / 2));
+    screen.appendChild(sRect);
+    screen.appendChild(sInner);
+    screen.appendChild(stand);
+
+    for (var i = 0; i < count; i++) {
+      var col = i % cols;
+      var row = Math.floor(i / cols);
+      var jitter = ((i * 17) % 7) - 3;
+      var px = 6 + col * 12 + (row % 2) * 3 + jitter * 0.4;
+      var py = 10 + row * 11 + ((i * 13) % 5);
+      if (px > screenX - 24) px = screenX - 28 - (i % 8);
+      var targetX = screenX + screenW * 0.35 + ((row % 5) - 2) * 4;
+      var targetY = screenY - screenH / 2 + 12 + (row % 6) * (screenH / 7);
+
+      var g = document.createElementNS(ns, 'g');
+      g.setAttribute('class', 'crowd-unit');
+      g.style.setProperty('--d', (i * 0.018) + 's');
+
+      var line = document.createElementNS(ns, 'line');
+      line.setAttribute('class', 'crowd-line');
+      line.setAttribute('x1', String(px + 3));
+      line.setAttribute('y1', String(py + 5));
+      line.setAttribute('x2', String(targetX));
+      line.setAttribute('y2', String(targetY));
+
+      var phone = document.createElementNS(ns, 'rect');
+      phone.setAttribute('class', 'crowd-phone');
+      phone.setAttribute('x', String(px));
+      phone.setAttribute('y', String(py));
+      phone.setAttribute('width', '6');
+      phone.setAttribute('height', '10');
+      phone.setAttribute('rx', '1.5');
+
+      g.appendChild(line);
+      g.appendChild(phone);
+      svg.appendChild(g);
+    }
+  }
+
   /* ---------- Quiet motion: nav hairline on scroll, section reveal ---------- */
   function initMotion() {
     var nav = document.querySelector('.nav');
@@ -343,6 +412,7 @@
     initCopy();
     initNav();
     initPresetCards();
+    initCrowdVisual();
     initMotion();
     document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
       btn.addEventListener('click', function () {

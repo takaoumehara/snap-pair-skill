@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Join link">
+  <style>
+    .bg{fill:#f5f5f5}.s{stroke:#0a0a0a;fill:none;stroke-width:2.5;stroke-linecap:round}
+    @media (prefers-color-scheme: dark){.bg{fill:#141414}.s{stroke:#f2f2f2}}
+  </style>
+  <rect class="bg" width="120" height="120" rx="8"/>
+  <path class="s" d="M44 76 C44 62, 58 48, 72 48 C86 48, 92 58, 92 68"/>
+  <path class="s" d="M76 44 C90 44, 96 54, 96 64 C96 78, 82 92, 68 92 C54 92, 48 82, 48 72"/>
+</svg>

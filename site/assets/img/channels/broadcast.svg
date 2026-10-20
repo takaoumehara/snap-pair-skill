@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Two browser tabs">
+  <style>
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.hair{stroke:#e5e5e5}.ink{fill:#0a0a0a}
+    @media (prefers-color-scheme: dark){.bg{fill:#141414}.surface{fill:#111111}.hair{stroke:#262626}.ink{fill:#f2f2f2}}
+  </style>
+  <rect class="bg" width="120" height="120" rx="8"/>
+  <rect class="surface hair" x="18" y="28" width="52" height="40" rx="4" stroke-width="1"/>
+  <rect class="surface hair" x="50" y="52" width="52" height="40" rx="4" stroke-width="1"/>
+  <rect class="ink" x="26" y="36" width="20" height="3" rx="1" opacity=".4"/>
+  <rect class="ink" x="58" y="60" width="20" height="3" rx="1" opacity=".4"/>
+</svg>

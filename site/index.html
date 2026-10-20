@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>snap-pair: phone as controller, big screen as host</title>
-  <meta name="description" data-i18n-key="meta.description" content="snap-pair is an open-source DevTool for multi-screen interactive web experiences. Pair phones and screens with QR, 6-digit PIN, broadcast, or experimental ultrasonic sound, then stream realtime input over Firebase, PartyKit, WebRTC or BroadcastChannel.">
+  <meta name="description" data-i18n-key="meta.description" content="snap-pair helps you connect phones, tablets, and big screens in the browser—no app install. Scan a QR code, type a short code, or try other pairing options, then share live input for events, classrooms, games, and second-screen experiences.">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
@@ -36,12 +36,10 @@
         <span>snap-pair</span>
       </a>
       <ul class="nav-links">
-        <li><a href="#quick-start" data-i18n="nav.start">Quick start</a></li>
-        <li><a href="#connect" data-i18n="nav.connect">Connect</a></li>
-        <li><a href="#transports" data-i18n="nav.transports">Transports</a></li>
-        <li><a href="#presets" data-i18n="nav.presets">Presets</a></li>
-        <li><a href="#cli">CLI</a></li>
-        <li><a href="#api">API</a></li>
+        <li><a href="#scenarios" data-i18n="nav.scenarios">What connects</a></li>
+        <li><a href="#channels" data-i18n="nav.channels">How to join</a></li>
+        <li><a href="#story" data-i18n="nav.story">Overview</a></li>
+        <li><a href="#developers" data-i18n="nav.developers">Developers</a></li>
         <li><a href="#faq">FAQ</a></li>
       </ul>
       <div class="nav-tools">
@@ -58,13 +56,10 @@
     </div>
   </header>
   <nav class="mobile-menu" id="mobile-menu" aria-label="Sections">
-    <a href="#quick-start" data-i18n="nav.start">Quick start</a>
-    <a href="#connect" data-i18n="nav.connect">Connect</a>
-    <a href="#transports" data-i18n="nav.transports">Transports</a>
-    <a href="#presets" data-i18n="nav.presets">Presets</a>
-    <a href="#cli">CLI</a>
-    <a href="#api">API</a>
-    <a href="#everyone" data-i18n="nav.everyone">For everyone</a>
+    <a href="#scenarios" data-i18n="nav.scenarios">What connects</a>
+    <a href="#channels" data-i18n="nav.channels">How to join</a>
+    <a href="#story" data-i18n="nav.story">Overview</a>
+    <a href="#developers" data-i18n="nav.developers">Developers</a>
     <a href="#faq">FAQ</a>
     <a href="demo.html" data-i18n="nav.demo">Live demo</a>
   </nav>
@@ -74,25 +69,18 @@
     <section class="hero">
       <div class="container">
         <div class="hero-meta">
-          <span class="eyebrow" data-i18n="hero.eyebrow">Open-source DevTool · MIT</span>
-          <span>v2.0.0 · snap-pair-core</span>
+          <span class="eyebrow" data-i18n="hero.eyebrow">Open source · works in the browser</span>
+          <span data-i18n="hero.metaRight">No app store · nothing to install</span>
         </div>
         <h1>snap-pair</h1>
         <div class="hero-grid">
-          <p class="tagline" data-i18n="hero.tagline">Phone as controller. Big screen as host.</p>
+          <p class="tagline" data-i18n="hero.tagline">Your phone becomes the remote. Any screen becomes the host.</p>
           <div>
-            <p class="lead" data-i18n="hero.lead">Build multi-screen interactive web experiences. People pair by scanning a QR code, typing a 6-digit PIN, or (experimentally) hearing an ultrasonic chirp in the browser they already have, and every device in the room shares live input and state. Nothing to install.</p>
-            <ul class="meta-list" aria-label="Transports">
-              <li>Firebase RTDB</li><li>PartyKit</li><li>WebRTC</li><li>BroadcastChannel</li>
-            </ul>
+            <p class="lead" data-i18n="hero.lead">Connect phones, tablets, and displays for live quizzes, drawing walls, games, and showroom demos. Guests join with the browser they already have—scan a code, type a short PIN, or open a link—then tap, draw, or vote in real time.</p>
             <div class="cta">
-              <a class="btn btn-primary" href="#quick-start"><span data-i18n="hero.ctaStart">Get started</span><span class="arr" aria-hidden="true">→</span></a>
-              <a class="btn btn-ghost" href="demo.html" data-i18n="hero.ctaDemo">Try the two-tab demo</a>
-              <a class="btn btn-link" href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a>
-            </div>
-            <div class="install-line">
-              <span class="prompt">$</span><span id="hero-cmd">npx snap-pair init</span>
-              <span data-copy="hero-cmd" style="flex:0"></span>
+              <a class="btn btn-primary" href="#scenarios"><span data-i18n="hero.ctaExamples">See what connects</span><span class="arr" aria-hidden="true">→</span></a>
+              <a class="btn btn-ghost" href="demo.html" data-i18n="hero.ctaDemo">Try the live demo</a>
+              <a class="btn btn-link" href="#story" data-i18n="hero.ctaStory">How it works</a>
             </div>
           </div>
         </div>
@@ -102,45 +90,186 @@
       </div>
     </section>
 
-    <!-- ================= WHAT ================= -->
-    <section id="what">
+    <!-- ================= SCENARIOS: what connects to what ================= -->
+    <section id="scenarios">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">01</span><span class="eyebrow" data-i18n="what.eyebrow">What it is</span></p>
+          <p class="sec-label"><span class="sec-num">01</span><span class="eyebrow" data-i18n="scenarios.eyebrow">What connects to what</span></p>
           <div>
-            <h2 data-i18n="what.title">Three layers, one small API</h2>
-            <p class="lead" data-i18n="what.lead">You bring the product: a quiz, a drawing wall, a game, a light show, a showroom. snap-pair handles pairing, the realtime transport and the phone-side details that are easy to get wrong.</p>
+            <h2 class="wide" data-i18n="scenarios.title">One session, many devices, one big screen</h2>
+            <p class="lead" data-i18n="scenarios.lead">snap-pair fits the moment when everyone already has a phone and the room already has a screen. One device shows the main experience; the rest join as remotes over the room Wi‑Fi or the internet.</p>
           </div>
         </div>
-        <div class="cols cols-3" data-reveal>
-          <article class="col">
-            <span class="col-k">Layer 1</span>
-            <h3 data-i18n="what.pairTitle">Pairing</h3>
-            <p data-i18n="what.pairBody">How a device finds the room: a QR code that carries the join URL, a 6-digit PIN, a look-alike-free room code, local broadcast between tabs, or experimental ultrasonic sound (Proximity).</p>
-          </article>
-          <article class="col">
-            <span class="col-k">Layer 2</span>
-            <h3 data-i18n="what.trTitle">Transport</h3>
-            <p data-i18n="what.trBody">One <code>Transport</code> API with four backends: Firebase Realtime Database, PartyKit, WebRTC DataChannel and BroadcastChannel. Switch with one line.</p>
-          </article>
-          <article class="col">
-            <span class="col-k">Layer 3</span>
-            <h3 data-i18n="what.clTitle">Client utilities</h3>
-            <p data-i18n="what.clBody">Make phones good controllers: screen wake lock, device orientation and motion (including the iOS permission prompt) and screen orientation lock.</p>
-          </article>
+        <ul class="scenario-grid" data-reveal>
+          <li class="scenario-card">
+            <img class="diagram" src="assets/img/scenarios/phone-tv.svg" width="400" height="220" loading="lazy" alt="Phone sending buttons to a TV-sized screen, like a Fire TV shopping app controlled from a phone." data-i18n-attr="alt:scenarios.tvAlt">
+            <h3 data-i18n="scenarios.tvTitle">Phone → TV or set-top box</h3>
+            <p data-i18n="scenarios.tvBody">Use the phone as a remote for an experience running on a living-room TV, kiosk browser, or smart display—browse, vote, or play without a physical remote.</p>
+          </li>
+          <li class="scenario-card">
+            <img class="diagram" src="assets/img/scenarios/phone-laptop.svg" width="400" height="220" loading="lazy" alt="Phone paired with a laptop for a presentation or co-play." data-i18n-attr="alt:scenarios.laptopAlt">
+            <h3 data-i18n="scenarios.laptopTitle">Phone → laptop</h3>
+            <p data-i18n="scenarios.laptopBody">Present from a laptop while guests interact from their phones—workshops, tabletop games, or a second screen on the desk.</p>
+          </li>
+          <li class="scenario-card">
+            <img class="diagram" src="assets/img/scenarios/phone-kiosk.svg" width="400" height="220" loading="lazy" alt="Phone input driving a tall kiosk or event screen." data-i18n-attr="alt:scenarios.kioskAlt">
+            <h3 data-i18n="scenarios.kioskTitle">Phone → kiosk or venue screen</h3>
+            <p data-i18n="scenarios.kioskBody">Trade-show booths, museum walls, and conference stages: the big screen stays readable; phones handle private input.</p>
+          </li>
+          <li class="scenario-card">
+            <img class="diagram" src="assets/img/scenarios/tablet-projector.svg" width="400" height="220" loading="lazy" alt="Tablet controlling content on a projected wall." data-i18n-attr="alt:scenarios.projectorAlt">
+            <h3 data-i18n="scenarios.projectorTitle">Tablet → projector</h3>
+            <p data-i18n="scenarios.projectorBody">Run the host view through a projector while a tablet (or phone) steers slides, cues, or live visuals.</p>
+          </li>
+          <li class="scenario-card">
+            <img class="diagram" src="assets/img/scenarios/many-phones-one-screen.svg" width="400" height="220" loading="lazy" alt="Many small phones sending input to one large shared screen." data-i18n-attr="alt:scenarios.quizAlt">
+            <h3 data-i18n="scenarios.classTitle">Many phones → one screen</h3>
+            <p data-i18n="scenarios.classBody">Classrooms, town halls, and watch parties: everyone joins the same room to answer, react, or draw together.</p>
+          </li>
+          <li class="scenario-card">
+            <img class="diagram" src="assets/img/scenarios/multi-display-one-pc.svg" width="400" height="220" loading="lazy" alt="Three monitors driven from one laptop in the browser." data-i18n-attr="alt:scenarios.localAlt">
+            <h3 data-i18n="scenarios.localTitle">Several screens, one machine</h3>
+            <p data-i18n="scenarios.localBody">Several monitors or browser windows on one computer—handy for installations and control desks. Works between tabs in the same browser on that machine.</p>
+          </li>
+        </ul>
+        <div class="crowd-block" data-reveal>
+          <div class="crowd-visual" role="img" aria-label="Hundreds of phones connecting to one large screen" data-i18n-attr="aria-label:scenarios.crowdVisualAlt">
+            <p class="crowd-banner" data-i18n="scenarios.crowdBanner">Hundreds of phones, one screen</p>
+            <svg class="crowd-svg" data-crowd-svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+          </div>
+          <div>
+            <h3 data-i18n="scenarios.crowdTitle">Built for crowds, not just pairs</h3>
+            <p data-i18n="scenarios.crowdBody">Live polls and audience games can welcome dozens—or up to about 300 people in one room when your setup is sized for it. Smaller groups (roughly 2–16) can feel snappier for fast action. See the developer section for limits and tuning.</p>
+            <p class="note" data-i18n="scenarios.crowdNote">Very large rooms depend on Wi‑Fi, the host device, and how your app is built. Try a dress rehearsal before the real event.</p>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= CHANNELS: how they connect ================= -->
+    <section id="channels">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">02</span><span class="eyebrow" data-i18n="channels.eyebrow">How they connect</span></p>
+          <div>
+            <h2 class="wide" data-i18n="channels.title">Ways to join</h2>
+            <p class="lead" data-i18n="channels.lead">The host opens your page and starts a session. Guests join in one of these ways—pick what fits the room (technical options are in the developer section).</p>
+          </div>
+        </div>
+        <ul class="channel-grid" data-reveal>
+          <li class="channel-card">
+            <img src="assets/img/channels/qr.svg" width="72" height="72" alt="">
+            <div>
+              <h3 data-i18n="channels.qrTitle">QR code</h3>
+              <p class="one-liner" data-i18n="channels.qrLine">Point the phone camera at the code on the big screen—it opens the join page automatically.</p>
+              <p class="when" data-i18n="channels.qrWhen">Best for: events, classrooms, any room where people can see the screen.</p>
+            </div>
+          </li>
+          <li class="channel-card">
+            <img src="assets/img/channels/pin.svg" width="72" height="72" alt="">
+            <div>
+              <h3 data-i18n="channels.pinTitle">6-digit PIN</h3>
+              <p class="one-liner" data-i18n="channels.pinLine">Type six numbers; spaces and full-width digits are accepted.</p>
+              <p class="when" data-i18n="channels.pinWhen">Best for: reading a code aloud, on radio or TV, or when cameras are awkward.</p>
+            </div>
+          </li>
+          <li class="channel-card">
+            <img src="assets/img/channels/code.svg" width="72" height="72" alt="">
+            <div>
+              <h3 data-i18n="channels.codeTitle">Room code</h3>
+              <p class="one-liner" data-i18n="channels.codeLine">Type a short code shown on the host screen—letters and numbers that are easy to tell apart.</p>
+              <p class="when" data-i18n="channels.codeWhen">Best for: typing on a laptop keyboard or when you want a code instead of six digits.</p>
+            </div>
+          </li>
+          <li class="channel-card">
+            <img src="assets/img/channels/link.svg" width="72" height="72" alt="">
+            <div>
+              <h3 data-i18n="channels.linkTitle">Share link</h3>
+              <p class="one-liner" data-i18n="channels.linkLine">Same URL as the QR—copy from the host screen and paste in chat or email.</p>
+              <p class="when" data-i18n="channels.linkWhen">Best for: people joining from home, chat groups, or email invites.</p>
+            </div>
+          </li>
+          <li class="channel-card">
+            <img src="assets/img/channels/broadcast.svg" width="72" height="72" alt="">
+            <div>
+              <h3 data-i18n="channels.bcTitle">Open another tab</h3>
+              <p class="one-liner" data-i18n="channels.bcLine">Works between two tabs or windows in the same browser on one computer—no phones required.</p>
+              <p class="when" data-i18n="channels.bcWhen">Best for: quick try-outs, multiple monitors on one desk, or working offline. Not for separate phones.</p>
+            </div>
+          </li>
+          <li class="channel-card">
+            <img src="assets/img/channels/sound.svg" width="72" height="72" alt="">
+            <div>
+              <h3 data-i18n="channels.soundTitle">Proximity sound <span class="tag-exp" data-i18n="channels.experimental">Experimental</span></h3>
+              <p class="one-liner" data-i18n="channels.soundLine">The host plays a short, high sound; a nearby phone listens through its microphone to join.</p>
+              <p class="when" data-i18n="channels.soundWhen">Best when people are standing close to the speaker. Loud rooms and some phones may not hear it—QR or PIN are more reliable.</p>
+            </div>
+          </li>
+        </ul>
         <figure class="figure" data-reveal>
-          <img class="diagram" src="assets/img/architecture.svg" width="1000" height="560" loading="lazy" alt="Architecture: your app on top of presets and components, built on Pairing, Transport and Client utility layers." data-i18n-attr="alt:what.archAlt">
-          <figcaption><span class="fig-no">Fig. 1</span><span>Architecture</span></figcaption>
+          <img class="diagram" src="assets/img/pairing-flow.svg" width="1000" height="580" loading="lazy" alt="Host creates a room, guest scans or enters a code, then live messages flow." data-i18n-attr="alt:channels.flowAlt">
+          <figcaption><span class="fig-no">Fig. 1</span><span data-i18n="channels.flowCap">From pairing to live session</span></figcaption>
         </figure>
       </div>
     </section>
+
+    <!-- ================= STORY: why, how, skill, use cases, links ================= -->
+    <section id="story">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <p class="sec-label"><span class="sec-num">03</span><span class="eyebrow" data-i18n="story.eyebrow">Overview</span></p>
+          <div>
+            <h2 class="wide" data-i18n="story.title">Why snap-pair exists</h2>
+            <p class="lead" data-i18n="story.lead">Multi-screen experiences used to mean native apps, custom Bluetooth remotes, or fragile Wi‑Fi hacks. snap-pair is an open-source toolkit (and AI skill) so web builders can ship “scan to join” flows with sensible defaults.</p>
+          </div>
+        </div>
+        <div class="grid grid-2" data-reveal>
+          <div class="prose-article">
+            <h3 data-i18n="story.whyTitle">The problem it solves</h3>
+            <p data-i18n="story.whyBody">You want a quiz on a projector, phones as gamepads, or a collaborative wall—but pairing, realtime sync, and phone quirks (sleep, orientation, iOS motion permission) eat weeks. snap-pair packages those patterns for React and Next.js apps.</p>
+            <h3 data-i18n="story.howTitle">Under the hood (plain language)</h3>
+            <p data-i18n="story.howBody">Three layers work together: <strong>pairing</strong> (how guests find the room), <strong>transport</strong> (how messages move—relay, peer-to-peer, Firebase, or same-browser), and <strong>phone helpers</strong> (wake lock, motion, UI components). You choose a preset (quiz, drawing, gamepad, …) or wire the hooks yourself.</p>
+            <figure class="figure" style="margin-top:24px">
+              <img class="diagram" src="assets/img/architecture.svg" width="1000" height="560" loading="lazy" alt="Architecture diagram: app, presets, pairing, transport, client utilities." data-i18n-attr="alt:story.archAlt">
+            </figure>
+          </div>
+          <div class="prose-article">
+            <h3 data-i18n="story.skillTitle">Install the skill (for AI coding tools)</h3>
+            <p data-i18n="story.skillBody">Point Cursor, Claude Code, or similar at the repo’s <a href="https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md">SKILL.md</a> so the agent follows transport rules, Firebase setup, and preset limits. Or scaffold locally:</p>
+            <div class="code"><span class="lang">bash</span><pre><code>npx snap-pair init
+npx snap-pair recommend "audience votes on a stage screen"</code></pre></div>
+            <h3 data-i18n="story.usesTitle">Use cases</h3>
+            <ul>
+              <li data-i18n="story.use1">Live audience polls and Q&amp;A walls</li>
+              <li data-i18n="story.use2">Phones as gamepads or tilt controllers</li>
+              <li data-i18n="story.use3">Collaborative drawing and reaction effects on a big screen</li>
+              <li data-i18n="story.use4">Multi-monitor installations on one computer</li>
+              <li data-i18n="story.use5">Turn-based or shared-state apps with Firebase room limits</li>
+            </ul>
+            <h3 data-i18n="story.linksTitle">Links</h3>
+            <div class="link-row">
+              <a href="https://takaoumehara.com/projects/snap-pair">Project page (takaoumehara.com)</a>
+              <a href="https://github.com/takaoumehara/snap-pair-skill">GitHub repository</a>
+              <a href="demo.html">Live two-tab demo</a>
+              <a href="https://www.npmjs.com/package/snap-pair-core">npm: snap-pair-core</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="dev-divider" id="developers">
+      <div class="container" data-reveal>
+        <h2 data-i18n="dev.title">For developers</h2>
+        <p data-i18n="dev.lead">API reference, transports, CLI flags, and copy-paste examples live below. Non-engineers can stop after the overview—or try the <a href="demo.html">demo</a> and the paths in <a href="#everyone">For everyone</a>.</p>
+      </div>
+    </div>
 
     <!-- ================= QUICK START ================= -->
     <section id="quick-start">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">02</span><span class="eyebrow" data-i18n="start.eyebrow">Quick start</span></p>
+          <p class="sec-label"><span class="sec-num">04</span><span class="eyebrow" data-i18n="start.eyebrow">Quick start</span></p>
           <div>
             <h2 data-i18n="start.title">Up and running in a minute</h2>
             <p class="lead" data-i18n="start.lead">Scaffold a new app with the wizard, or add the library to an existing React app.</p>
@@ -206,66 +335,11 @@ await ctrl.broadcast('stroke', { x: 0.42, y: 0.17 });</code></pre></div>
       </div>
     </section>
 
-    <!-- ================= CONNECT ================= -->
-    <section id="connect">
-      <div class="container">
-        <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">03</span><span class="eyebrow" data-i18n="connect.eyebrow">How devices connect</span></p>
-          <div>
-            <h2 data-i18n="connect.title">Scan, type, or just open a tab</h2>
-            <p class="lead" data-i18n="connect.lead">The host creates a room and shows how to join. Guests use the camera or a keyboard. Then messages flow both ways in realtime.</p>
-          </div>
-        </div>
-        <div class="cols cols-4 connect-modes" data-reveal>
-          <article class="col">
-            <span class="col-k">01</span>
-            <h3 data-i18n="connect.qr">QR code</h3>
-            <p data-i18n="connect.qrBody">The URL carries <code>?room=</code> or <code>?pin=</code>. Works with every transport.</p>
-            <p class="apis"><code>useQrRenderer</code><code>parseJoinUrl</code></p>
-          </article>
-          <article class="col">
-            <span class="col-k">02</span>
-            <h3 data-i18n="connect.pin">6-digit PIN</h3>
-            <p data-i18n="connect.pinBody">Easy to read aloud. Full-width digits and dashes are normalized. PartyKit, WebRTC, BroadcastChannel.</p>
-            <p class="apis"><code>generatePin</code><code>verifyPin</code></p>
-          </article>
-          <article class="col">
-            <span class="col-k">03</span>
-            <h3 data-i18n="connect.code">Room code</h3>
-            <p data-i18n="connect.codeBody">Six characters like <code>ABC 234</code>, with no look-alike characters. Firebase's default.</p>
-            <p class="apis"><code>generateRoomCode</code></p>
-          </article>
-          <article class="col">
-            <span class="col-k">04</span>
-            <h3 data-i18n="connect.bc">Broadcast</h3>
-            <p data-i18n="connect.bcBody">Open another tab or window on the same machine. No network involved.</p>
-            <p class="apis"><code>BroadcastChannelTransport</code></p>
-          </article>
-          <article class="col">
-            <span class="col-k">05</span>
-            <h3 data-i18n="connect.sound">Proximity sound</h3>
-            <p data-i18n="connect.soundBody">Experimental. The host emits an inaudible ~18–20&nbsp;kHz tone; a nearby phone listens on the mic and joins. Needs mic permission; noisy rooms and some browsers are unreliable. QR and PIN stay primary.</p>
-            <p class="apis"><code>useSoundPairing</code><code>encodeSoundToken</code></p>
-          </article>
-        </div>
-        <p class="muted small note" data-i18n="connect.soundNote" data-reveal>Sound pairing limitations: ambient noise, microphone permission, and uneven browser support (Chrome/Edge best). The tone is not a secret — use <code>admit</code> for gated rooms.</p>
-        <figure class="figure" data-reveal>
-          <img class="diagram" src="assets/img/pairing-flow.svg" width="1000" height="580" loading="lazy" alt="Sequence: host creates room, shows QR and PIN, controller scans or enters PIN, joins, host admits, realtime messages flow both ways." data-i18n-attr="alt:connect.flowAlt">
-          <figcaption><span class="fig-no">Fig. 2</span><span>Pairing sequence</span></figcaption>
-        </figure>
-        <h3 class="sub-head" data-i18n="connect.hud">Show it all with one component</h3>
-        <div class="code"><span class="lang">tsx</span><pre><code>import { HostHUD, useQrRenderer } from 'snap-pair-core';
-
-const renderQr = useQrRenderer(); // undefined without `qrcode`: the HUD shows the code only
-&lt;HostHUD pairing={pairing} renderQr={renderQr} peerCount={peers.length} status={status} /&gt;</code></pre></div>
-      </div>
-    </section>
-
     <!-- ================= TRANSPORTS ================= -->
     <section id="transports">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">04</span><span class="eyebrow" data-i18n="tr.eyebrow">Transports</span></p>
+          <p class="sec-label"><span class="sec-num">05</span><span class="eyebrow" data-i18n="tr.eyebrow">Transports</span></p>
           <div>
             <h2 data-i18n="tr.title">Pick the transport that fits the room</h2>
             <p class="lead" data-i18n="tr.lead">All four implement the same <code>Transport</code> interface, so switching is a one-line change. Check <code>transport.capabilities</code> when your UI needs to degrade gracefully.</p>
@@ -386,7 +460,7 @@ if (isBroadcastChannelSupported()) {
     <section id="presets">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">05</span><span class="eyebrow" data-i18n="presets.eyebrow">Presets</span></p>
+          <p class="sec-label"><span class="sec-num">06</span><span class="eyebrow" data-i18n="presets.eyebrow">Presets</span></p>
           <div>
             <h2 data-i18n="presets.title">Seven UX patterns, ready to scaffold</h2>
             <p class="lead" data-i18n="presets.lead">Each preset ships as a runnable template with a recommended transport, message shapes and a rate limit (all in <code>PRESETS</code>). None runs on Firebase, which has no ephemeral messaging. Select a preset to see the core of its message flow.</p>
@@ -515,7 +589,7 @@ t.onMessage((m) =&gt; m.type === 'tick' &amp;&amp; renderSlice(m.payload, index)
     <section id="cli">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">06</span><span class="eyebrow">CLI</span></p>
+          <p class="sec-label"><span class="sec-num">07</span><span class="eyebrow">CLI</span></p>
           <div>
             <h2 data-i18n="cli.title"><code>npx snap-pair init</code>: four ways in</h2>
             <p class="lead" data-i18n="cli.lead">The wizard speaks English or Japanese (from <code>LANG</code> / <code>LC_ALL</code>, or <code>--lang en|ja</code>). Pick whichever path matches how you think about the project (<code>--path</code> skips the menu). Every path writes <code>snap-pair.config.json</code> and scaffolds a Vite + React template, plus a PartyKit relay when the transport needs one.</p>
@@ -598,7 +672,7 @@ npx snap-pair recommend "a tilt racing game for 4 friends"                      
     <section id="api">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">07</span><span class="eyebrow">API</span></p>
+          <p class="sec-label"><span class="sec-num">08</span><span class="eyebrow">API</span></p>
           <div>
             <h2 data-i18n="api.title">API overview</h2>
             <p class="lead" data-i18n="api.lead">Everything is exported from <code>snap-pair-core</code>. Transports, pairing helpers and client utilities are plain TypeScript; only the hooks and components need React.</p>
@@ -690,7 +764,7 @@ const { room, authReady, createRoom, joinRoom, updateState, updateOwnPlayer, upd
     <section id="everyone">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">08</span><span class="eyebrow" data-i18n="ev.eyebrow">For everyone</span></p>
+          <p class="sec-label"><span class="sec-num">09</span><span class="eyebrow" data-i18n="ev.eyebrow">For everyone</span></p>
           <div>
             <h2 data-i18n="ev.title">Not an engineer? Pick one path</h2>
             <p class="lead" data-i18n="ev.lead">For people who run events, venues, classes, streams, showrooms or exhibitions and want the audience to join with their own phones. These are separate paths, not steps.</p>
@@ -741,7 +815,7 @@ guests join by QR code and answer on their phones"].</code></pre></div>
     <section id="security">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">09</span><span class="eyebrow" data-i18n="sec.eyebrow">Security model</span></p>
+          <p class="sec-label"><span class="sec-num">10</span><span class="eyebrow" data-i18n="sec.eyebrow">Security model</span></p>
           <div>
             <h2 data-i18n="sec.title">A pairing code locates a room. It is not a password.</h2>
           </div>
@@ -770,7 +844,7 @@ guests join by QR code and answer on their phones"].</code></pre></div>
     <section id="faq">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">10</span><span class="eyebrow">FAQ</span></p>
+          <p class="sec-label"><span class="sec-num">11</span><span class="eyebrow">FAQ</span></p>
           <div>
             <h2 data-i18n="faq.title">Frequently asked questions</h2>
           </div>
@@ -791,7 +865,7 @@ guests join by QR code and answer on their phones"].</code></pre></div>
     <section id="roadmap">
       <div class="container">
         <div class="section-head" data-reveal>
-          <p class="sec-label"><span class="sec-num">11</span><span class="eyebrow" data-i18n="road.eyebrow">Roadmap</span></p>
+          <p class="sec-label"><span class="sec-num">12</span><span class="eyebrow" data-i18n="road.eyebrow">Roadmap</span></p>
           <div>
             <h2 data-i18n="road.title">Where snap-pair is going</h2>
           </div>
@@ -818,6 +892,7 @@ guests join by QR code and answer on their phones"].</code></pre></div>
           <a href="https://github.com/takaoumehara/snap-pair-skill">GitHub</a>
           <a href="https://www.npmjs.com/package/snap-pair-core">npm</a>
           <a href="https://raw.githubusercontent.com/takaoumehara/snap-pair-skill/main/SKILL.md">SKILL.md</a>
+          <a href="https://takaoumehara.com/projects/snap-pair">Project page</a>
           <a href="demo.html" data-i18n="nav.demo">Live demo</a>
         </span>
       </div>

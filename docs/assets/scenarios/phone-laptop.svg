@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" width="400" height="220" role="img" aria-labelledby="title desc">
+  <title id="title">Phone with laptop</title>
+  <desc id="desc">A phone pairs with a laptop screen for presentations or co-play.</desc>
+  <style>
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.hair{stroke:#e5e5e5}.strong{stroke:#cfcfcf}
+    .ink{fill:#0a0a0a}.ink2{fill:#3d3d3d}.muted{fill:#666666}.faint{fill:#999999}
+    .acc{fill:#0062cc}.acc-s{stroke:#0062cc}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#141414}.surface{fill:#111111}.hair{stroke:#262626}.strong{stroke:#3a3a3a}
+      .ink{fill:#f2f2f2}.ink2{fill:#d4d4d4}.muted{fill:#a3a3a3}.faint{fill:#6b6b6b}
+      .acc{fill:#3b9cff}.acc-s{stroke:#3b9cff}
+    }
+  </style>
+  <rect class="bg" width="400" height="220"/>
+  <g transform="translate(36 52)">
+    <rect class="surface strong" x="0" y="0" width="68" height="120" rx="10" stroke-width="1.5"/>
+    <rect class="hair" x="6" y="16" width="56" height="88" rx="4" stroke-width="1" fill="none"/>
+    <path class="acc-s" d="M20 72 L48 56 L48 88 Z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+  <path class="acc-s" d="M118 102 C 168 92, 218 92, 268 108" fill="none" stroke-width="1.25" stroke-dasharray="4 5"/>
+  <g transform="translate(268 48)">
+    <rect class="surface strong" x="0" y="0" width="96" height="64" rx="4" stroke-width="1.5"/>
+    <rect class="hair" x="6" y="8" width="84" height="48" rx="2" stroke-width="1" fill="none"/>
+    <path class="acc-s" d="M-8 64 L112 64 L104 76 L0 76 Z" fill="none" stroke-width="1.5"/>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" width="400" height="220" role="img" aria-labelledby="title desc">
+  <title id="title">Tablet with projector</title>
+  <desc id="desc">Tablet as controller while content plays on a projected wall.</desc>
+  <style>
+    .bg{fill:#f5f5f5}.surface{fill:#ffffff}.hair{stroke:#e5e5e5}.strong{stroke:#cfcfcf}
+    .ink{fill:#0a0a0a}.muted{fill:#666666}.acc{fill:#0062cc}.acc-s{stroke:#0062cc}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#141414}.surface{fill:#111111}.hair{stroke:#262626}.strong{stroke:#3a3a3a}
+      .ink{fill:#f2f2f2}.muted{fill:#a3a3a3}.acc{fill:#3b9cff}.acc-s{stroke:#3b9cff}
+    }
+  </style>
+  <rect class="bg" width="400" height="220"/>
+  <g transform="translate(28 72)">
+    <rect class="surface strong" x="0" y="0" width="100" height="72" rx="8" stroke-width="1.5"/>
+    <rect class="hair" x="8" y="10" width="84" height="52" rx="3" stroke-width="1" fill="none"/>
+  </g>
+  <path class="acc-s" d="M140 108 L200 88" fill="none" stroke-width="1.25" stroke-dasharray="4 5"/>
+  <path class="acc-s" d="M140 108 L200 128" fill="none" stroke-width="1.25" stroke-dasharray="4 5"/>
+  <g transform="translate(200 36)">
+    <rect class="hair" x="0" y="72" width="56" height="40" rx="2" stroke-width="1" fill="none"/>
+    <circle class="strong" cx="28" cy="72" r="6" fill="none" stroke-width="1.5"/>
+    <path class="acc-s" d="M28 78 L8 140 M28 78 L48 140" fill="none" stroke-width="1.25"/>
+    <rect class="surface strong" x="56" y="0" width="128" height="88" rx="4" stroke-width="1.5" transform="skewY(-8)"/>
+    <rect class="hair" x="64" y="10" width="112" height="68" rx="2" stroke-width="1" fill="none" transform="skewY(-8)"/>
+  </g>
+</svg>
