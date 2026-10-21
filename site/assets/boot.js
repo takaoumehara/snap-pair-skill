@@ -1,4 +1,5 @@
 /* snap-pair docs: runs in <head> before first paint. Theme, loader and reveal opt-ins. */
+/* pages-deploy: crowd-field.svg */
 (function () {
   'use strict';
   var root = document.documentElement;
