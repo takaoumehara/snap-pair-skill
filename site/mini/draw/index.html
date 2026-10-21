@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Shake Co-Draw - snap-pair</title>
+  <meta name="theme-color" content="#fafbfc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../mini-style.css">
+  <script src="../theme.js"></script>
+  <style>
+    .theme-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">🌙</button>
+  
+  <div id="shake-screen" class="shake-prompt">
+    <div class="shake-icon">🎨</div>
+    <h1>Co-Drawing Canvas</h1>
+    <p>Shake to pair and draw together!</p>
+    <button id="enable-shake-btn" class="btn btn-secondary">Tap to enable shake</button>
+    <p id="shake-status" class="status waiting">Waiting for shake...</p>
+    
+    <div class="fallback-section">
+      <h2>Or join with code</h2>
+      <div class="btn-group">
+        <input type="text" id="room-input" class="input" placeholder="ABC 234" maxlength="7" style="max-width: 200px;">
+        <button id="join-btn" class="btn btn-primary">Join</button>
+      </div>
+      <button id="simulate-shake-btn" class="btn btn-ghost" style="display:none; margin-top:12px;">Simulate Shake (Debug)</button>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app-container" style="display:none;">
+    <div class="section">
+      <h1>🎨 Co-Drawing</h1>
+      <p id="room-code-display"></p>
+      <p id="connection-status" class="status">Connecting...</p>
+    </div>
+
+    <div class="controls">
+      <div class="color-picker">
+        <button class="color-btn active" data-color="#1f2937" style="background: #1f2937;" title="Black"></button>
+        <button class="color-btn" data-color="#ef4444" style="background: #ef4444;" title="Red"></button>
+        <button class="color-btn" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></button>
+        <button class="color-btn" data-color="#10b981" style="background: #10b981;" title="Green"></button>
+        <button class="color-btn" data-color="#f97316" style="background: #f97316;" title="Orange"></button>
+        <button class="color-btn" data-color="#a855f7" style="background: #a855f7;" title="Purple"></button>
+      </div>
+      <button id="clear-btn" class="btn btn-ghost" style="margin-left: auto;">Clear</button>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="btn-group" style="margin-top: 16px;">
+      <button id="leave-btn" class="btn btn-ghost">Leave</button>
+    </div>
+  </div>
+
+  <script src="../shake-bundle.js"></script>
+  <script>
+    (function() {
+      const { ShakeDetector, ShakeLobby, SimpleBroadcastTransport, requestMotionPermission, 
+              formatRoomCode, normalizeRoomCode, getUrlParam } = window.ShakePairing;
+      
+      const APP_ID = 'co-draw';
+      const DEBUG = getUrlParam('debug') === '1';
+      
+      let transport = null;
+      let currentColor = '#1f2937';
+      let isDrawing = false;
+      let lastX = 0;
+      let lastY = 0;
+      let canvas, ctx;
+      let pendingPoints = [];
+      
+      // UI elements
+      const shakeScreen = document.getElementById('shake-screen');
+      const appScreen = document.getElementById('app-screen');
+      const enableShakeBtn = document.getElementById('enable-shake-btn');
+      const shakeStatus = document.getElementById('shake-status');
+      const simulateShakeBtn = document.getElementById('simulate-shake-btn');
+      const roomInput = document.getElementById('room-input');
+      const joinBtn = document.getElementById('join-btn');
+      const roomCodeDisplay = document.getElementById('room-code-display');
+      const connectionStatus = document.getElementById('connection-status');
+      const clearBtn = document.getElementById('clear-btn');
+      const leaveBtn = document.getElementById('leave-btn');
+
+      if (DEBUG) {
+        simulateShakeBtn.style.display = 'inline-flex';
+      }
+
+      // Check if joining with a room code
+      const joinCode = getUrlParam('room');
+      if (joinCode) {
+        joinRoom(normalizeRoomCode(joinCode));
+        return;
+      }
+
+      // Setup shake pairing
+      const detector = new ShakeDetector();
+      const lobby = new ShakeLobby({ appId: APP_ID });
+      let shaking = false;
+
+      enableShakeBtn.addEventListener('click', async () => {
+        const permission = await requestMotionPermission();
+        
+        if (permission === 'denied') {
+          shakeStatus.textContent = 'Motion permission denied. Use manual code below.';
+          shakeStatus.className = 'status';
+          return;
+        }
+
+        enableShakeBtn.style.display = 'none';
+        shakeStatus.textContent = 'Shake your device now!';
+        shakeStatus.className = 'status waiting';
+        
+        try {
+          await lobby.connect();
+          
+          lobby.onPaired = (roomCode) => {
+            detector.stop();
+            lobby.disconnect();
+            joinRoom(normalizeRoomCode(roomCode));
+          };
+
+          lobby.onWaiting = () => {
+            shakeStatus.textContent = 'Shake detected! Waiting for partner...';
+          };
+
+          lobby.onAmbiguous = () => {
+            shakeStatus.textContent = 'Too many shakes! Try again.';
+            shaking = false;
+          };
+
+          detector.onShake = (event) => {
+            if (shaking) return;
+            shaking = true;
+            shakeStatus.textContent = 'Shake detected! Looking for partner...';
+            lobby.sendShake(event);
+            setTimeout(() => { shaking = false; }, 2000);
+          };
+
+          detector.start();
+        } catch (e) {
+          shakeStatus.textContent = 'Connection failed. Use manual code below.';
+          shakeStatus.className = 'status';
+        }
+      });
+
+      simulateShakeBtn.addEventListener('click', () => {
+        if (detector.onShake) {
+          detector.onShake({ timestamp: Date.now(), peakStrength: 20 });
+        }
+      });
+
+      joinBtn.addEventListener('click', () => {
+        const code = normalizeRoomCode(roomInput.value);
+        if (code) joinRoom(code);
+      });
+
+      function joinRoom(roomCode) {
+        shakeScreen.style.display = 'none';
+        appScreen.style.display = 'flex';
+        
+        roomCodeDisplay.textContent = `Room: ${formatRoomCode(roomCode)}`;
+        connectionStatus.textContent = 'Connected';
+        connectionStatus.className = 'status connected';
+
+        // Setup canvas
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+          const container = canvas.parentElement;
+          const rect = container.getBoundingClientRect();
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = rect.width * dpr;
+          canvas.height = rect.height * dpr;
+          canvas.style.width = rect.width + 'px';
+          canvas.style.height = rect.height + 'px';
+          ctx.scale(dpr, dpr);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = 3;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const pkHost = new URLSearchParams(location.search).get('pkhost') || 'localhost:1999';
+        transport = new window.ShakePairing.PartyKitTransport(roomCode, {
+          host: pkHost,
+          partyName: 'main'
+        });
+        
+        transport.onMessage = (msg) => {
+          if (msg.type === 'stroke') {
+            drawStroke(msg.payload.points, msg.payload.color);
+          } else if (msg.type === 'clear') {
+            clearCanvas();
+          }
+        };
+
+        // Setup color picker
+        document.querySelectorAll('.color-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentColor = btn.dataset.color;
+          });
+        });
+
+        // Drawing events
+        canvas.addEventListener('pointerdown', startDrawing);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', stopDrawing);
+        canvas.addEventListener('pointercancel', stopDrawing);
+        canvas.addEventListener('pointerleave', stopDrawing);
+
+        clearBtn.addEventListener('click', () => {
+          clearCanvas();
+          transport.send('clear', {});
+        });
+
+        leaveBtn.addEventListener('click', () => {
+          if (transport) transport.close();
+          location.href = location.pathname;
+        });
+
+        // Batch and send points every 33ms (~30 fps)
+        setInterval(() => {
+          if (pendingPoints.length > 0) {
+            transport.send('stroke', {
+              points: pendingPoints.splice(0),
+              color: currentColor,
+            });
+          }
+        }, 33);
+      }
+
+      function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX - rect.left) / rect.width,
+          y: (e.clientY - rect.top) / rect.height,
+        };
+      }
+
+      function startDrawing(e) {
+        isDrawing = true;
+        const pos = getPointerPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        
+        const pos = getPointerPos(e);
+        
+        // Draw locally
+        const rect = canvas.getBoundingClientRect();
+        ctx.strokeStyle = currentColor;
+        ctx.beginPath();
+        ctx.moveTo(lastX * rect.width, lastY * rect.height);
+        ctx.lineTo(pos.x * rect.width, pos.y * rect.height);
+        ctx.stroke();
+        
+        // Add to pending points
+        pendingPoints.push({ x: pos.x, y: pos.y });
+        
+        lastX = pos.x;
+        lastY = pos.y;
+      }
+
+      function stopDrawing() {
+        isDrawing = false;
+        // Flush remaining points
+        if (pendingPoints.length > 0 && transport) {
+          transport.send('stroke', {
+            points: pendingPoints.splice(0),
+            color: currentColor,
+          });
+        }
+      }
+
+      function drawStroke(points, color) {
+        if (!points || points.length === 0) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        
+        if (points.length === 1) {
+          const p = points[0];
+          ctx.arc(p.x * rect.width, p.y * rect.height, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.moveTo(points[0].x * rect.width, points[0].y * rect.height);
+          for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x * rect.width, points[i].y * rect.height);
+          }
+          ctx.stroke();
+        }
+      }
+
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    })();
+  </script>
+</body>
+</html>
