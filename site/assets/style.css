@@ -595,56 +595,12 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 .crowd-block .note { color: var(--muted); font-size: .8125rem; margin-top: 12px; }
 
 .crowd-visual {
-  position: relative; aspect-ratio: 16 / 10; min-height: 220px;
   border-radius: var(--radius); border: 1px solid var(--border);
-  background: var(--surface); overflow: hidden;
+  background: var(--bg-soft); overflow: hidden;
 }
-.crowd-banner {
-  position: absolute; z-index: 2; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0; padding: 10px 16px; max-width: 92%; text-align: center;
-  font-size: clamp(1rem, 2.5vw, 1.35rem); font-weight: 500; letter-spacing: -0.02em;
-  line-height: 1.25; color: var(--text);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  pointer-events: none;
-}
-.crowd-svg { width: 100%; height: 100%; display: block; }
-.crowd-screen-svg rect,
-.crowd-screen-svg path {
-  fill: none;
-  stroke: var(--border-strong);
-  stroke-width: 1.25;
-}
-.crowd-screen-svg rect:first-child { fill: var(--bg); }
-.crowd-screen-svg path { fill: var(--border-strong); stroke: none; }
-.crowd-line {
-  stroke: var(--accent);
-  stroke-width: 0.65;
-  stroke-linecap: round;
-  opacity: 0.2;
-  animation: crowd-flow 2.6s ease-in-out infinite;
-  animation-delay: var(--d, 0s);
-}
-.crowd-phone {
-  fill: var(--surface);
-  stroke: var(--border-strong);
-  stroke-width: 0.6;
-  animation: crowd-phone 2.6s ease-in-out infinite;
-  animation-delay: var(--d, 0s);
-}
-@keyframes crowd-flow {
-  0%, 100% { opacity: 0.12; stroke-dasharray: 2 6; stroke-dashoffset: 0; }
-  45% { opacity: 0.55; stroke-dasharray: 2 4; stroke-dashoffset: -8; }
-}
-@keyframes crowd-phone {
-  0%, 100% { opacity: 0.55; }
-  45% { opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .crowd-line, .crowd-phone { animation: none; }
-  .crowd-line { opacity: 0.35; stroke-dasharray: none; }
-  .crowd-phone { opacity: 0.85; }
+.crowd-art {
+  width: 100%; height: auto; display: block;
+  border-radius: var(--radius);
 }
 
 .channel-grid {
