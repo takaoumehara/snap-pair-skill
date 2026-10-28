@@ -1,10 +1,10 @@
+import { getApps, initializeApp } from "firebase-admin/app";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getDatabase } from "firebase-admin/database";
-import * as admin from "firebase-admin";
 
 // Initialize Firebase Admin SDK if not already initialized
-if (admin.apps.length === 0) {
-  admin.initializeApp();
+if (getApps().length === 0) {
+  initializeApp();
 }
 
 export function buildStaleRoomDeletionUpdates(roomIds: string[]): Record<string, null> {
